@@ -22,7 +22,7 @@
     </div>
   </header>
 
-  <!-- ПОИСК (отдельный блок с отступом) -->
+  <!-- ПОИСК -->
   <section class="search-area">
     <div class="wrap search-wrap">
       <input id="search" type="search" inputmode="search" placeholder="Поиск по названию, bundleId, тегам…" />
@@ -39,11 +39,17 @@
 
   <!-- НИЖНЯЯ НАВИГАЦИЯ -->
   <nav class="tabbar" id="tabbar" role="tablist">
-    <div class="wrap tabs">
-      <button data-filter="all"  class="active">Все</button>
-      <button data-filter="games">Игры</button>
-      <button data-filter="tools">Утилиты</button>
-      <button data-filter="mod">Моды</button>
+    <div class="wrap tabs tabs-new">
+      <button data-tab="games" class="pill active">
+        🎮 <span data-i18n="nav_games">Игры</span>
+      </button>
+      <button data-tab="apps" class="pill">
+        📦 <span data-i18n="nav_apps">Приложения</span>
+      </button>
+      <button id="lang-btn" class="icon-btn" aria-label="Language">
+        🌐 <span id="lang-code">RU</span>
+      </button>
+      <button id="help-btn" class="icon-btn" aria-label="Help">❓</button>
     </div>
   </nav>
 
@@ -52,7 +58,6 @@
     <div class="backdrop" data-close></div>
     <article class="sheet" role="dialog" aria-modal="true" aria-labelledby="app-title">
       <button class="close" data-close aria-label="Закрыть">✕</button>
-
       <header class="sheet-header">
         <div class="app-head">
           <img id="app-icon" class="icon lg" src="" alt="">
@@ -63,22 +68,36 @@
           </div>
         </div>
       </header>
-
       <section class="sheet-body">
         <div id="app-tags" class="tags"></div>
         <div id="app-desc" class="section"></div>
       </section>
-
       <footer class="sheet-footer">
         <div id="dl-buttons" class="btns"></div>
       </footer>
     </article>
   </div>
 
-  <!-- JS (с кеш-бастингом) -->
-  <script src="assets/js/themes.js?v=4"></script>
-  <script src="assets/js/ios.js?v=4"></script>
-  <script src="assets/js/render.js?v=4"></script>
-  <script src="assets/js/app.js?v=4"></script>
+  <!-- HELP-ДИАЛОГ -->
+  <div id="help-modal" class="dialog" aria-hidden="true">
+    <div class="backdrop" data-close></div>
+    <section class="dialog-card">
+      <header class="dialog-head">
+        <strong data-i18n="help_title">Помощь</strong>
+        <button class="close" data-close aria-label="Закрыть">✕</button>
+      </header>
+      <div class="dialog-body" id="help-body">
+        <p data-i18n="help_p1">Это каталог IPA. Нажимай на карточку — внутри описание и кнопка загрузки.</p>
+        <p data-i18n="help_p2">Чтобы добавить приложение, отредактируй <code>data/ipas.json</code> и сделай commit.</p>
+        <p data-i18n="help_p3">Фильтр «Игры» показывает записи с тегом <code>games</code>, «Приложения» — всё остальное.</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- JS -->
+  <script src="assets/js/themes.js?v=5"></script>
+  <script src="assets/js/ios.js?v=5"></script>
+  <script src="assets/js/render.js?v=5"></script>
+  <script src="assets/js/app.js?v=5"></script>
 </body>
 </html>
