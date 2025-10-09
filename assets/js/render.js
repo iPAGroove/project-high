@@ -1,7 +1,8 @@
 (function () {
   function prettyBytes(num){
     if(!num) return "0 B";
-    const u=["B","KB","MB","GB","TB"]; const e=Math.min(Math.floor(Math.log(num)/Math.log(1024)),u.length-1);
+    const u=["B","KB","MB","GB","TB"];
+    const e=Math.min(Math.floor(Math.log(num)/Math.log(1024)),u.length-1);
     return `${(num/Math.pow(1024,e)).toFixed(e?1:0)} ${u[e]}`;
   }
 
@@ -32,52 +33,28 @@
 
   // ===== МОДАЛКА
   const modal = document.getElementById("modal");
-  const $ = (id)=>document.getElementById(id);
 
-  function escapeHTML(s){ return (s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[m])); }
-
-  function featuresFrom(app){
-    if (Array.isArray(app.features) && app.features.length) return app.features;
-    if (app.description) {
-      // попытка превратить свободный текст в пункты
-      return app.description
-        .split(/\r?\n/)
-        .map(s=>s.replace(/^[\s•\-–—]+/,"").trim())
-        .filter(Boolean);
-    }
-    return [];
+  function escapeHTML(s){
+    return (s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[m]));
   }
 
   function openModal(app){
-    $("app-icon").src = app.iconUrl;
-    $("app-title").textContent = app.name || "";
-    $("app-bundle").textContent = app.bundleId || "";
-    $("app-info").textContent = `v${app.version||""}${app.minIOS?` · iOS ≥ ${app.minIOS}`:""}${app.sizeBytes?` · ${prettyBytes(app.sizeBytes)}`:""}`;
-    $("app-tags").innerHTML = (app.tags||[]).map(t=>`<span class="tag">#${t}</span>`).join("");
+    document.getElementById("app-icon").src = app.iconUrl;
+    document.getElementById("app-title").textContent = app.name || "";
+    document.getElementById("app-bundle").textContent = app.bundleId || "";
+    document.getElementById("app-info").textContent =
+      `v${app.version||""}${app.minIOS?` · iOS ≥ ${app.minIOS}`:""}${app.sizeBytes?` · ${prettyBytes(app.sizeBytes)}`:""}`;
 
-    // Hack Features — списком
-    const feats = featuresFrom(app);
-    $("app-desc").innerHTML = feats.length
-      ? `<div class="meta" style="margin-bottom:6px">Hack Features</div><ul class="bullets">${feats.map(f=>`<li>${escapeHTML(f)}`).join("")}</ul>`
+    document.getElementById("app-tags").innerHTML =
+      (app.tags||[]).map(t=>`<span class="tag">#${t}</span>`).join("");
+
+    // Hack Features — чистым списком
+    const feats = Array.isArray(app.features) ? app.features
+      : (app.description ? app.description.split(/\r?\n/).map(s=>s.replace(/^[\s•\-–—]+/,"").trim()).filter(Boolean) : []);
+    document.getElementById("app-desc").innerHTML = feats.length
+      ? `<div class="meta" style="margin-bottom:6px">Hack Features</div>
+         <ul class="bullets">${feats.map(f=>`<li>${escapeHTML(f)}`).join("")}</ul>`
       : "";
-
-    // Скриншоты — фиксированный горизонтальный скролл
-    const wrap = document.getElementById("screens-wrap");
-    const sc = document.getElementById("app-screens");
-    sc.innerHTML = "";
-    if (app.screenshots && app.screenshots.length){
-      wrap.style.display = "";
-      app.screenshots.forEach(src=>{
-        const img = new Image();
-        img.className = "shot";
-        img.loading = "lazy";
-        img.referrerPolicy = "no-referrer";
-        img.src = src;
-        sc.appendChild(img);
-      });
-    } else {
-      wrap.style.display = "none";
-    }
 
     // 1 кнопка загрузки
     const dl = document.getElementById("dl-buttons");
