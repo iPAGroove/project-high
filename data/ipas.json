@@ -1,12 +1,12 @@
 [
   {
     "id": "subwaysurf_3.33.0",
-    "name": "Subway Surfers (Ursa Mod)",
+    "name": "Squad Alpha - Action Shooting",
     "bundleId": "com.kiloo.subwaysurf",
     "version": "3.33.0",
     "sizeBytes": 205000000,
     "minIOS": "13.0",
-    "iconUrl": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/22/44/00/224400ec-f1c6-3211-7f6d-46d6571b3171/AppIcon-0-1x_U007emarketing-0-85-220-0-7.png/512x512bb.jpg",
+    "iconUrl": "https://cold-na-phx-6.gofile.io/download/direct/1e0a2754-67db-44d6-affd-8583db8efed1/IMG_9434.jpeg",
     "tags": ["games", "mod"],
     "mirrors": [
       { "label": "Direct", "url": "https://cdn.ursa/subwaysurf.ipa" }
