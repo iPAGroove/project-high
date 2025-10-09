@@ -11,7 +11,6 @@ html,body{
   -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
 }
 *{box-sizing:border-box} img{display:block} a{color:var(--accent);text-decoration:none}
-
 .wrap{max-width:720px; margin:0 auto; padding:0 14px}
 
 /* Шапка */
@@ -24,11 +23,16 @@ html,body{
 }
 .brand{
   text-align:center; font-weight:900; letter-spacing:.5px;
-  color:var(--accent); font-size:18px;
+  color:var(--accent); font-size:18px; position:relative;
+}
+.brand::after{
+  content:""; position:absolute; left:50%; transform:translateX(-50%);
+  bottom:-8px; width:64px; height:3px; border-radius:3px;
+  background: color-mix(in oklab, var(--accent) 70%, #fff 30%); opacity:.9;
 }
 
-/* Поиск — отдельный блок с отступом вниз/вверх */
-.search-area{ padding:10px 0 6px; }
+/* Поиск — отдельный блок */
+.search-area{ padding:12px 0 6px; }
 .search-wrap{ display:grid; grid-template-columns:1fr auto; gap:10px; }
 #search{
   width:100%; appearance:none; outline:none;
@@ -41,13 +45,13 @@ html,body{
   padding:0 14px; border-radius:14px;
 }
 
-/* Сетка каталога — даём воздух сверху */
+/* Каталог */
 .catalog{
-  margin-top:8px;
+  margin-top:12px;
   display:grid; grid-template-columns:1fr; gap:var(--gap);
 }
 
-/* Карточка — без кнопок, с тенью и воздухом */
+/* Карточка */
 .card{
   cursor:pointer;
   background:var(--card);
@@ -66,7 +70,7 @@ h3{ margin:0 0 2px; font-size:16px; }
 .tags{ display:flex; flex-wrap:wrap; gap:6px; }
 .tag{ font-size:11px; padding:4px 8px; border-radius:999px; border:1px solid var(--border); background:var(--bg-elev); }
 
-/* Нижняя навигация — светлее, более “айосная” */
+/* Нижняя навигация */
 .tabbar{
   position:fixed; left:0; right:0; bottom:0; z-index:25;
   background:color-mix(in oklab,var(--bg) 88%, #000 12%);
@@ -80,13 +84,16 @@ h3{ margin:0 0 2px; font-size:16px; }
   background:var(--card); color:var(--text);
   padding:10px 12px; border-radius:14px; font-weight:700;
 }
-.tabbar button.active{ background:var(--bg-elev); box-shadow:0 4px 14px rgb(0 0 0 / .25); }
+.tabbar button.active{
+  background: color-mix(in oklab, var(--accent) 18%, var(--bg-elev) 82%);
+  border-color: color-mix(in oklab, var(--accent) 35%, var(--border) 65%);
+  box-shadow:0 4px 14px rgb(0 0 0 / .25);
+}
 
 /* Модалка */
 .modal{ position:fixed; inset:0; z-index:50; display:none; }
 .modal.open{ display:block; }
 .modal .backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.55); }
-
 .sheet{
   position:absolute; inset:auto 0 0 0; margin:0 auto; max-width:760px; min-height:52%;
   background:var(--bg); border-top:1px solid var(--border);
@@ -100,22 +107,12 @@ h3{ margin:0 0 2px; font-size:16px; }
 }
 .sheet-header{ padding:18px 16px 10px; border-bottom:1px solid var(--border); }
 .app-head{ display:grid; grid-template-columns:76px 1fr; gap:12px; align-items:center; }
-
-.sheet-body{ padding:14px 16px 16px; display:grid; gap:16px; overflow:auto; max-height:56vh; }
+.sheet-body{ padding:14px 16px 16px; display:grid; gap:16px; overflow:auto; max-height:58vh; }
 .section p{ margin:0; color:#cfe1ffbf; font-size:15px; }
-
 .bullets{ margin:8px 0 0; padding-left:22px; }
 .bullets li{ margin:6px 0; }
 
-#screens-wrap{ display:none; } /* по умолчанию скрыт, покажем если есть скрины */
-.screens{
-  display:flex; gap:10px; overflow-x:auto; padding:2px 2px 8px;
-  scrollbar-width:none;
-}
-.screens::-webkit-scrollbar{ display:none; }
-.snaps{ scroll-snap-type:x mandatory; }
-.snaps .shot{ flex:0 0 76%; max-width:76%; height:240px; border-radius:14px; border:1px solid var(--border); object-fit:cover; scroll-snap-align:center; }
-
+/* Подвал модалки */
 .sheet-footer{
   padding:12px 16px calc(env(safe-area-inset-bottom)+16px);
   border-top:1px solid var(--border); background:var(--bg);
