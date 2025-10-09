@@ -1,5 +1,28 @@
-// v5 — фильтр Игры/Приложения, язык RU/EN, help-диалог
+// v7 — фильтр Игры/Приложения, RU/EN, help, PNG-иконки в одном конфиге
 (function () {
+  // ====== ПОДСТАВЬ СВОИ ССЫЛКИ НА PNG ======
+  const ICONS = {
+    games: "https://YOUR.CDN/nav-games.png",        // ← замени
+    apps:  "https://YOUR.CDN/nav-apps.png",         // ← замени
+    help:  "https://YOUR.CDN/nav-help.png",         // ← замени
+    lang: {
+      ru: "https://YOUR.CDN/nav-lang-ru.png",       // ← замени (RU)
+      en: "https://YOUR.CDN/nav-lang-en.png"        // ← замени (EN)
+    }
+  };
+
+  function setIcons(lang){
+    const g = document.getElementById("navGamesIcon");
+    const a = document.getElementById("navAppsIcon");
+    const h = document.getElementById("navHelpIcon");
+    const l = document.getElementById("navLangIcon");
+    if (g) g.src = ICONS.games;
+    if (a) a.src = ICONS.apps;
+    if (h) h.src = ICONS.help;
+    if (l) l.src = (ICONS.lang?.[lang] || ICONS.lang?.ru || "");
+  }
+
+  // ====== i18n ======
   const I18N = {
     ru: {
       search_ph: "Поиск по названию, bundleId, тегам…",
@@ -18,12 +41,11 @@
       help_title: "Help",
       help_p1: "Tap a card to see details and the download button.",
       help_p2: "To add an app, edit data/ipas.json and commit.",
-      help_p3: "“Games” shows items with the games tag, “Apps” shows the rest.",
+      help_p3: "“Games” shows items with the games tag; “Apps” shows the rest.",
       download: "Download IPA"
     }
   };
 
-  // язык из localStorage или по браузеру
   let lang = (localStorage.getItem("ursa_lang") || (navigator.language||"ru").slice(0,2)).toLowerCase();
   if (!I18N[lang]) lang = "ru";
   window.__t = (k)=> (I18N[lang] && I18N[lang][k]) || k;
@@ -31,13 +53,12 @@
   const state = { all: [], q: "", tab: "games" };
 
   function setTexts() {
-    document.getElementById("search").placeholder = __t("search_ph");
-    document.querySelectorAll("[data-i18n]").forEach(el=>{
-      const key = el.getAttribute("data-i18n");
-      el.textContent = __t(key);
-    });
-    const code = lang.toUpperCase();
-    const lc = document.getElementById("lang-code"); if (lc) lc.textContent = code;
+    const $ = (sel)=>document.querySelectorAll(sel);
+    const s = document.getElementById("search");
+    if (s) s.placeholder = __t("search_ph");
+    $("[data-i18n]").forEach(el=>{ el.textContent = __t(el.getAttribute("data-i18n")); });
+    const lc = document.getElementById("lang-code");
+    if (lc) lc.textContent = lang.toUpperCase();
   }
 
   function emptyState(text) {
@@ -72,6 +93,8 @@
   }
 
   document.addEventListener("DOMContentLoaded", async ()=>{
+    // иконки + текст
+    setIcons(lang);
     setTexts();
 
     // загрузка данных (data/ipas.json -> fallback ipas.json)
@@ -83,14 +106,14 @@
     // поиск
     document.getElementById("search").addEventListener("input",(e)=>{ state.q = e.target.value; apply(); });
 
-    // таббар
+    // таббар (games/apps)
     const bar = document.getElementById("tabbar");
     bar.addEventListener("click",(e)=>{
-      const pill = e.target.closest("[data-tab]");
+      const pill = e.target.closest(".nav-btn[data-tab]");
       if (pill){
         state.tab = pill.dataset.tab; // games | apps
-        bar.querySelectorAll(".pill").forEach(b=>b.classList.remove("active"));
-        bar.querySelector(`[data-tab="${state.tab}"]`).classList.add("active");
+        bar.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+        pill.classList.add("active");
         apply();
         return;
       }
@@ -101,6 +124,7 @@
       lang = (lang === "ru") ? "en" : "ru";
       localStorage.setItem("ursa_lang", lang);
       setTexts();
+      setIcons(lang);
       apply();
     });
 
