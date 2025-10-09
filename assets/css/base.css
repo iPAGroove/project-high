@@ -2,7 +2,12 @@
   --bg:#0b0f14; --bg-elev:#121722; --card:#141a24; --border:#1e2633;
   --text:#fff; --muted:#9aa7bd; --accent:#00b3ff;
   --radius:16px; --gap:14px;
+
+  /* размеры нижних PNG-кнопок */
+  --nav-btn-h: 56px;   /* высота кнопки */
+  --nav-icon: 32px;    /* размер иконки внутри */
 }
+
 html,body{height:100%;background:var(--bg);color:var(--text);
   font:16px/1.42 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;}
@@ -45,11 +50,19 @@ h3{ margin:0 0 2px; font-size:16px; }
   backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
   padding:10px calc(env(safe-area-inset-right)+12px) calc(env(safe-area-inset-bottom)+12px) calc(env(safe-area-inset-left)+12px);}
 .nav4{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; align-items:center; }
-.nav4 .pill{ display:flex; align-items:center; justify-content:center; padding:0; height:48px;
-  border-radius:14px; border:1px solid var(--border); background:var(--card); }
-.nav4 .pill.active{ background: color-mix(in oklab, var(--accent) 16%, var(--bg-elev) 84%);
-  border-color: color-mix(in oklab, var(--accent) 35%, var(--border) 65%); }
-.nav4 .pill img{ width:24px; height:24px; object-fit:contain; filter:drop-shadow(0 1px 0 rgba(0,0,0,.25)); }
+.nav4 .pill{
+  display:flex; align-items:center; justify-content:center;
+  padding:0; height:var(--nav-btn-h);
+  border-radius:14px; border:1px solid var(--border); background:var(--card);
+}
+.nav4 .pill.active{
+  background: color-mix(in oklab, var(--accent) 16%, var(--bg-elev) 84%);
+  border-color: color-mix(in oklab, var(--accent) 35%, var(--border) 65%);
+}
+.nav4 .pill img{
+  width:var(--nav-icon); height:var(--nav-icon);
+  object-fit:contain; filter:drop-shadow(0 1px 0 rgba(0,0,0,.25));
+}
 .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
 
 /* Модалка */
