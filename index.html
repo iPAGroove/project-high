@@ -37,19 +37,18 @@
     </div>
   </main>
 
-  <!-- НИЖНЯЯ НАВИГАЦИЯ -->
+  <!-- НИЖНЯЯ НАВИГАЦИЯ (минималистичный segmented + круглые кнопки) -->
   <nav class="tabbar" id="tabbar" role="tablist">
-    <div class="wrap tabs tabs-new">
-      <button data-tab="games" class="pill active">
-        🎮 <span data-i18n="nav_games">Игры</span>
+    <div class="wrap segbar">
+      <div class="seg-group" role="tablist" aria-label="Категории">
+        <button class="seg active" data-tab="games" role="tab" data-i18n="nav_games">Игры</button>
+        <button class="seg" data-tab="apps" role="tab" data-i18n="nav_apps">Приложения</button>
+      </div>
+
+      <button id="lang-btn" class="circle" aria-label="Language">
+        <span id="lang-code">RU</span>
       </button>
-      <button data-tab="apps" class="pill">
-        📦 <span data-i18n="nav_apps">Приложения</span>
-      </button>
-      <button id="lang-btn" class="icon-btn" aria-label="Language">
-        🌐 <span id="lang-code">RU</span>
-      </button>
-      <button id="help-btn" class="icon-btn" aria-label="Help">❓</button>
+      <button id="help-btn" class="circle" aria-label="Help">?</button>
     </div>
   </nav>
 
