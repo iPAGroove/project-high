@@ -10,6 +10,9 @@
   <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="manifest.webmanifest">
 
+  <!-- Шрифт для шапки -->
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="assets/css/base.css" />
   <link rel="stylesheet" href="assets/css/ios.css" />
   <link id="theme-css" rel="stylesheet" href="assets/css/themes/neon.css" />
@@ -37,43 +40,39 @@
     </div>
   </main>
 
-  <!-- НИЖНЯЯ НАВИГАЦИЯ: цельная «док»-панель -->
-<nav class="tabbar" id="tabbar" role="tablist">
-  <div class="wrap">
-    <div class="dock">
-      <!-- Игры -->
-      <button class="nav-btn active" data-tab="games" role="tab" aria-label="Игры">
-        <img id="navGamesIcon" src="" alt="">
-        <span class="dot" aria-hidden="true"></span>
-        <span class="sr-only" data-i18n="nav_games">Игры</span>
-      </button>
-      <!-- Приложения -->
-      <button class="nav-btn" data-tab="apps" role="tab" aria-label="Приложения">
-        <img id="navAppsIcon" src="" alt="">
-        <span class="dot" aria-hidden="true"></span>
-        <span class="sr-only" data-i18n="nav_apps">Приложения</span>
-      </button>
-      <!-- Язык -->
-      <button class="nav-btn" id="lang-btn" aria-label="Language">
-        <img id="navLangIcon" src="" alt="">
-        <span class="dot" aria-hidden="true"></span>
-        <span id="lang-code" class="sr-only">RU</span>
-      </button>
-      <!-- Help -->
-      <button class="nav-btn" id="help-btn" aria-label="Help">
-        <img id="navHelpIcon" src="" alt="">
-        <span class="dot" aria-hidden="true"></span>
-        <span class="sr-only">Help</span>
-      </button>
+  <!-- НИЖНЯЯ НАВИГАЦИЯ -->
+  <nav class="tabbar" id="tabbar" role="tablist">
+    <div class="wrap">
+      <div class="dock">
+        <button class="nav-btn active" data-tab="games" role="tab" aria-label="Игры">
+          <img id="navGamesIcon" src="" alt="">
+          <span class="dot"></span>
+          <span class="sr-only">Игры</span>
+        </button>
+        <button class="nav-btn" data-tab="apps" role="tab" aria-label="Приложения">
+          <img id="navAppsIcon" src="" alt="">
+          <span class="dot"></span>
+          <span class="sr-only">Приложения</span>
+        </button>
+        <button class="nav-btn" id="lang-btn" aria-label="Language">
+          <img id="navLangIcon" src="" alt="">
+          <span class="dot"></span>
+          <span id="lang-code" class="sr-only">RU</span>
+        </button>
+        <button class="nav-btn" id="help-btn" aria-label="Help">
+          <img id="navHelpIcon" src="" alt="">
+          <span class="dot"></span>
+          <span class="sr-only">Help</span>
+        </button>
+      </div>
     </div>
-  </div>
-</nav>
+  </nav>
 
   <!-- МОДАЛКА ДЕТАЛЕЙ -->
-  <div id="modal" class="modal" aria-hidden="true">
+  <div id="modal" class="modal">
     <div class="backdrop" data-close></div>
-    <article class="sheet" role="dialog" aria-modal="true" aria-labelledby="app-title">
-      <button class="close" data-close aria-label="Закрыть">✕</button>
+    <article class="sheet">
+      <button class="close" data-close>✕</button>
       <header class="sheet-header">
         <div class="app-head">
           <img id="app-icon" class="icon lg" src="" alt="">
@@ -95,17 +94,17 @@
   </div>
 
   <!-- HELP-ДИАЛОГ -->
-  <div id="help-modal" class="dialog" aria-hidden="true">
+  <div id="help-modal" class="dialog">
     <div class="backdrop" data-close></div>
     <section class="dialog-card">
       <header class="dialog-head">
-        <strong data-i18n="help_title">Помощь</strong>
-        <button class="close" data-close aria-label="Закрыть">✕</button>
+        <strong>Помощь</strong>
+        <button class="close" data-close>✕</button>
       </header>
       <div class="dialog-body" id="help-body">
-        <p data-i18n="help_p1">Это каталог IPA. Нажимай на карточку — внутри описание и кнопка загрузки.</p>
-        <p data-i18n="help_p2">Чтобы добавить приложение, отредактируй <code>data/ipas.json</code> и сделай commit.</p>
-        <p data-i18n="help_p3">Фильтр «Игры» показывает записи с тегом <code>games</code>, «Приложения» — всё остальное.</p>
+        <p>Это каталог IPA. Нажимай на карточку — внутри описание и кнопка загрузки.</p>
+        <p>Чтобы добавить приложение, отредактируй <code>data/ipas.json</code> и сделай commit.</p>
+        <p>Фильтр «Игры» показывает записи с тегом <code>games</code>, «Приложения» — всё остальное.</p>
       </div>
     </section>
   </div>
