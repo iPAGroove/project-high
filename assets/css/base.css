@@ -17,13 +17,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);
 /* чтобы контент не уезжал под панель */
 main{ padding-bottom: calc(var(--nav-btn-h) + 44px + env(safe-area-inset-bottom)); }
 
-/* Шапка */
+/* ───────── Шапка ───────── */
 .topbar{position:sticky; top:0; z-index:20; background:color-mix(in oklab,var(--bg) 86%, #000 14%);
   backdrop-filter:saturate(120%) blur(10px); -webkit-backdrop-filter:saturate(120%) blur(10px);
   border-bottom:1px solid var(--border); padding:calc(env(safe-area-inset-top) + 10px) 0 10px;}
 .brand{text-align:center; font-weight:900; letter-spacing:.5px; color:var(--accent); font-size:18px; position:relative;}
 
-/* Поиск */
+/* ───────── Поиск ───────── */
 .search-area{ padding:12px 0 6px; }
 .search-wrap{ display:grid; grid-template-columns:1fr auto; gap:10px; }
 #search{ width:100%; appearance:none; outline:none; padding:12px 14px; border-radius:14px;
@@ -32,10 +32,10 @@ main{ padding-bottom: calc(var(--nav-btn-h) + 44px + env(safe-area-inset-bottom)
 #theme-toggle{ border:1px solid var(--border); background:var(--card); color:var(--text);
   padding:0 14px; border-radius:14px; }
 
-/* Каталог */
+/* ───────── Каталог ───────── */
 .catalog{ margin-top:12px; display:grid; grid-template-columns:1fr; gap:var(--gap); }
 
-/* Карточка */
+/* ───────── Карточка ───────── */
 .card{ cursor:pointer; background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
   padding:14px; display:grid; gap:10px; box-shadow:0 10px 28px rgb(0 0 0 / .28);}
 .card:active{ transform:scale(.996) }
@@ -47,7 +47,7 @@ h3{ margin:0 0 2px; font-size:16px; }
 .tags{ display:flex; flex-wrap:wrap; gap:6px; }
 .tag{ font-size:11px; padding:4px 8px; border-radius:999px; border:1px solid var(--border); background:var(--bg-elev); }
 
-/* ─────────────── НИЖНЯЯ НАВИГАЦИЯ: старая .nav4, full-width ─────────────── */
+/* ───────── НИЖНЯЯ НАВИГАЦИЯ: .nav4 full-width ───────── */
 .tabbar{
   position:fixed; left:0; right:0; bottom:0; z-index:25;
   background:color-mix(in oklab,var(--bg) 88%, #000 12%);
@@ -79,12 +79,13 @@ h3{ margin:0 0 2px; font-size:16px; }
 .nav4 .pill img{
   width:var(--nav-icon); height:var(--nav-icon); object-fit:contain;
   filter:drop-shadow(0 1px 0 rgba(0,0,0,.25));
+  pointer-events:none; /* клики ловит кнопка, не картинка */
 }
 
 /* скрытый текст для доступности */
 .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
 
-/* Модалка */
+/* ───────── Модалка ───────── */
 .modal{ position:fixed; inset:0; z-index:50; display:none; }
 .modal.open{ display:block; }
 .modal .backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.55); }
@@ -100,21 +101,21 @@ h3{ margin:0 0 2px; font-size:16px; }
 .bullets{ margin:8px 0 0; padding-left:22px; }
 .bullets li{ margin:6px 0; }
 
-/* Подвал модалки */
+/* ───────── Подвал модалки ───────── */
 .sheet-footer{ padding:12px 16px calc(env(safe-area-inset-bottom)+16px); border-top:1px solid var(--border); background:var(--bg); }
 .btns{ display:flex; flex-wrap:wrap; gap:10px; }
 .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 14px; border-radius:14px;
   background:var(--accent); color:#001018; font-weight:800; border:0; width:100%; }
 
-/* HELP-диалог */
+/* ───────── HELP-диалог ───────── */
 .dialog{ position:fixed; inset:0; z-index:60; display:none; }
 .dialog.open{ display:block; }
 .dialog .backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.55); }
-.dialog-card{ position:absolute; left:0; right:0; bottom:0; margin:0 авто; max-width:720px;
+.dialog-card{ position:absolute; left:0; right:0; bottom:0; margin:0 auto; max-width:720px;
   background:var(--bg); border:1px solid var(--border); border-radius:16px 16px 0 0; box-shadow:0 -12px 30px rgb(0 0 0 / .5); }
 .dialog-head{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid var(--border); }
 .dialog-body{ padding:12px 14px 16px; color:#cfe1ffbf; }
 .dialog .close{ appearance:none; border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:10px; padding:6px 10px; }
 
-/* 2 колонки на широких iPhone */
+/* ───────── 2 колонки на широких iPhone ───────── */
 @media (min-width:520px){ .catalog{ grid-template-columns:repeat(2,1fr); } }
