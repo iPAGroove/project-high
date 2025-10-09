@@ -1,128 +1,69 @@
-:root {
-  --bg: #0b0f14;
-  --bg-elev: #121722;
-  --card: #141a24;
-  --border: #1e2633;
-  --text: #ffffff;
-  --muted: #9aa7bd;
-  --accent: #00b3ff; /* переопределяется темами */
-  --radius: 14px;
-  --gap: 12px;
+:root{
+  --bg:#0b0f14; --bg-elev:#121722; --card:#141a24; --border:#1e2633;
+  --text:#fff; --muted:#9aa7bd; --accent:#00b3ff; --radius:14px; --gap:12px;
 }
+html,body{height:100%;background:var(--bg);color:var(--text);
+  font:16px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+*{box-sizing:border-box} a{color:var(--accent);text-decoration:none} img{display:block}
 
-/* базовая типографика под iOS */
-html, body {
-  height: 100%;
-  background: var(--bg);
-  color: var(--text);
-  font: 16px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-* { box-sizing: border-box; }
-a { color: var(--accent); text-decoration: none; }
-img { display: block; }
+/* top */
+.topbar{position:sticky;top:0;z-index:20;
+  padding:calc(env(safe-area-inset-top)+12px) 12px 12px 12px;
+  background:color-mix(in oklab,var(--bg) 85%,#000 15%);
+  backdrop-filter:saturate(120%) blur(10px); -webkit-backdrop-filter:saturate(120%) blur(10px);
+  border-bottom:1px solid var(--border);}
+.brand{font-weight:800;letter-spacing:.4px;color:var(--accent);margin-bottom:10px}
 
-/* верхняя панель */
-.topbar {
-  position: sticky; top: 0; z-index: 20;
-  padding: calc(env(safe-area-inset-top) + 12px) 12px 12px 12px;
-  background: color-mix(in oklab, var(--bg) 85%, #000 15%);
-  backdrop-filter: saturate(120%) blur(10px);
-  -webkit-backdrop-filter: saturate(120%) blur(10px);
-  border-bottom: 1px solid var(--border);
-}
-.brand {
-  font-weight: 800; letter-spacing: .4px; color: var(--accent); margin-bottom: 10px;
-}
+/* search */
+.search-wrap{display:grid;grid-template-columns:1fr auto;gap:8px}
+#search{width:100%;appearance:none;padding:12px 14px;background:var(--card);
+  border:1px solid var(--border);border-radius:12px;color:var(--text);outline:none}
+#search::placeholder{color:#99a3b8}
+#theme-toggle{border:1px solid var(--border);background:var(--card);color:var(--text);
+  padding:0 14px;border-radius:12px}
 
-/* iOS segmented control */
-.segmented {
-  display: grid;
-  grid-auto-flow: column;
-  gap: 6px;
-  background: var(--bg-elev);
-  padding: 6px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  margin-bottom: 10px;
-}
-.segmented > button {
-  appearance: none; border: 0; border-radius: 10px;
-  background: transparent; color: var(--text);
-  padding: 8px 10px; font-weight: 600;
-  -webkit-tap-highlight-color: transparent;
-}
-.segmented > button.active { background: var(--card); }
+/* grid */
+.catalog{padding:12px 12px calc(env(safe-area-inset-bottom)+84px) 12px;display:grid;
+  grid-template-columns:1fr;gap:var(--gap);max-width:680px;margin:0 auto}
 
-/* поиск + кнопка темы */
-.search-wrap {
-  display: grid; grid-template-columns: 1fr auto; gap: 8px;
-}
-#search {
-  width: 100%;
-  appearance: none;
-  padding: 12px 14px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  color: var(--text);
-  outline: none;
-}
-#search::placeholder { color: #99a3b8; }
-#theme-toggle {
-  border: 1px solid var(--border);
-  background: var(--card);
-  color: var(--text);
-  padding: 0 14px; border-radius: 12px;
-}
+/* cards */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:12px;display:grid;gap:10px;box-shadow:0 6px 20px rgb(0 0 0/.25);cursor:pointer}
+.card:active{transform:scale(.997)}
+.row{display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:center}
+.icon{width:56px;height:56px;border-radius:12px;border:1px solid var(--border);object-fit:cover}
+.icon.lg{width:72px;height:72px;border-radius:16px}
+h3{margin:0 0 2px;font-size:16px} .meta{font-size:12px;color:var(--muted)}
+.tags{display:flex;flex-wrap:wrap;gap:6px} .tag{font-size:11px;padding:4px 8px;border-radius:999px;border:1px solid var(--border);background:var(--bg-elev)}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 12px;border-radius:12px;background:var(--accent);color:#001018;font-weight:700;border:0;cursor:pointer}
+.btn.secondary{background:transparent;color:var(--text);border:1px solid var(--border)}
 
-/* сетка каталога */
-.catalog {
-  padding: 12px 12px calc(env(safe-area-inset-bottom) + 72px) 12px;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--gap);
-  max-width: 640px;
-  margin: 0 auto;
-}
+/* bottom tabbar */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:25;
+  padding:10px calc(env(safe-area-inset-right)+12px) calc(env(safe-area-inset-bottom)+12px) calc(env(safe-area-inset-left)+12px);
+  display:grid;grid-auto-flow:column;gap:8px;max-width:680px;margin:0 auto;
+  background:color-mix(in oklab,var(--bg) 90%,#000 10%);border-top:1px solid var(--border);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.tabbar button{appearance:none;border:1px solid var(--border);background:var(--card);
+  color:var(--text);padding:10px;border-radius:12px;font-weight:700}
+.tabbar button.active{background:var(--bg-elev)}
 
-/* карточки */
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 12px;
-  display: grid; gap: 10px;
-  box-shadow: 0 6px 20px rgb(0 0 0 / .25);
-}
-.row { display: grid; grid-template-columns: 56px 1fr; gap: 12px; align-items: center; }
-.icon { width: 56px; height: 56px; border-radius: 12px; border: 1px solid var(--border); object-fit: cover; }
-h3 { margin: 0 0 2px; font-size: 16px; }
-.meta { font-size: 12px; color: var(--muted); }
-.tags { display: flex; flex-wrap: wrap; gap: 6px; }
-.tag { font-size: 11px; padding: 4px 8px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg-elev); }
-.btns { display: flex; flex-wrap: wrap; gap: 8px; }
-.btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  gap: 8px; padding: 10px 12px; border-radius: 12px;
-  background: var(--accent); color: #001018; font-weight: 700;
-  border: 0; cursor: pointer; -webkit-tap-highlight-color: transparent;
-}
-.btn.secondary {
-  background: transparent; color: var(--text);
-  border: 1px solid var(--border);
-}
-
-/* футер с учётом safe-area */
-.safe-footer {
-  padding: 16px calc(env(safe-area-inset-right) + 16px) calc(env(safe-area-inset-bottom) + 20px) calc(env(safe-area-inset-left) + 16px);
-  text-align: center; color: var(--muted);
-  border-top: 1px solid var(--border);
-  background: var(--bg);
-}
-
-/* адаптив под iPhone Plus/Max (шире одна колонка не нужна) */
-@media (min-width: 520px) {
-  .catalog { grid-template-columns: repeat(2, 1fr); }
-}
+/* modal sheet */
+.modal{position:fixed;inset:0;z-index:50;display:none}
+.modal.open{display:block}
+.modal .backdrop{position:absolute;inset:0;background:rgba(0,0,0,.6)}
+.sheet{position:absolute;inset:auto 0 0 0;margin:0 auto;max-width:740px;min-height:50%;
+  background:var(--bg);border-top:1px solid var(--border);border-radius:18px 18px 0 0;
+  box-shadow:0 -10px 30px rgb(0 0 0/.45);display:flex;flex-direction:column}
+.sheet-header{padding:16px; border-bottom:1px solid var(--border)}
+.app-head{display:grid;grid-template-columns:72px 1fr auto;gap:12px;align-items:center}
+.close{appearance:none;border:1px solid var(--border);background:var(--card);color:var(--text);
+  border-radius:10px;padding:8px 10px}
+.sheet-body{padding:12px 16px 16px 16px;display:grid;gap:14px;overflow:auto;max-height:55vh}
+.section p{margin:0;color:#cfe1ffb0}
+.screens{display:flex;gap:10px;overflow:auto;padding-bottom:6px}
+.screens img{height:240px;border-radius:12px;border:1px solid var(--border);object-fit:cover}
+.sheet-footer{padding:12px 16px calc(env(safe-area-inset-bottom)+16px) 16px; border-top:1px solid var(--border);background:var(--bg)}
+@media (min-width:520px){ .catalog{grid-template-columns:repeat(2,1fr)} }
