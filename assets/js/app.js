@@ -2,12 +2,12 @@
 (function () {
   // ====== ПОДСТАВЬ СВОИ ССЫЛКИ НА PNG ======
   const ICONS = {
-    games: "https://store10.gofile.io/download/direct/0051d6d0-ef83-4c37-8f48-4a6ad6bf71a8/IMG_9585.PNG",        // ← замени
-    apps:  "https://store-eu-par-4.gofile.io/download/direct/bd0d4284-ac4f-49cf-96ea-2f9cdd706108/IMG_9587.PNG",         // ← замени
-    help:  "https://store-eu-par-4.gofile.io/download/direct/34d29f83-4ac0-4d82-9140-a4d588c94f2a/IMG_9596.PNG",         // ← замени
+    games: "https://store5.gofile.io/download/direct/0f478302-90dd-4cee-8d78-3ba48582beb5/IMG_9610.png",        // ← замени
+    apps:  "https://store5.gofile.io/download/direct/5a4f1b52-2705-4fc5-8bf4-6ed9b70ffdf8/IMG_9616.png",         // ← замени
+    help:  "https://store5.gofile.io/download/direct/685a39aa-260d-4b30-a1a6-5e22f74f4983/IMG_9615.png",         // ← замени
     lang: {
-      ru: "https://store4.gofile.io/download/direct/cbb2b745-f21d-477d-b5c4-0dfc9b79d71f/IMG_9590.PNG",       // ← замени (RU)
-      en: "https://store4.gofile.io/download/direct/cbb2b745-f21d-477d-b5c4-0dfc9b79d71f/IMG_9590.PNG"        // ← замени (EN)
+      ru: "https://store5.gofile.io/download/direct/4dba02e0-4e51-4eb4-b99b-139946f857cb/IMG_9613.png",       // ← замени (RU)
+      en: "https://store5.gofile.io/download/direct/4dba02e0-4e51-4eb4-b99b-139946f857cb/IMG_9613.png"        // ← замени (EN)
     }
   };
 
