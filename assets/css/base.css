@@ -25,11 +25,6 @@ html,body{
   text-align:center; font-weight:900; letter-spacing:.5px;
   color:var(--accent); font-size:18px; position:relative;
 }
-.brand::after{
-  content:""; position:absolute; left:50%; transform:translateX(-50%);
-  bottom:-8px; width:64px; height:3px; border-radius:3px;
-  background: color-mix(in oklab, var(--accent) 70%, #fff 30%); opacity:.9;
-}
 
 /* Поиск — отдельный блок */
 .search-area{ padding:12px 0 6px; }
