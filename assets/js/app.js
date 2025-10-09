@@ -2,12 +2,12 @@
 (function () {
   // ====== ПОДСТАВЬ СВОИ ССЫЛКИ НА PNG ======
   const ICONS = {
-    games: "https://YOUR.CDN/nav-games.png",        // ← замени
-    apps:  "https://YOUR.CDN/nav-apps.png",         // ← замени
-    help:  "https://YOUR.CDN/nav-help.png",         // ← замени
+    games: "https://store10.gofile.io/download/direct/0051d6d0-ef83-4c37-8f48-4a6ad6bf71a8/IMG_9585.PNG",        // ← замени
+    apps:  "https://store-eu-par-4.gofile.io/download/direct/bd0d4284-ac4f-49cf-96ea-2f9cdd706108/IMG_9587.PNG",         // ← замени
+    help:  "https://store-eu-par-4.gofile.io/download/direct/34d29f83-4ac0-4d82-9140-a4d588c94f2a/IMG_9596.PNG",         // ← замени
     lang: {
-      ru: "https://YOUR.CDN/nav-lang-ru.png",       // ← замени (RU)
-      en: "https://YOUR.CDN/nav-lang-en.png"        // ← замени (EN)
+      ru: "https://store4.gofile.io/download/direct/cbb2b745-f21d-477d-b5c4-0dfc9b79d71f/IMG_9590.PNG",       // ← замени (RU)
+      en: "https://store4.gofile.io/download/direct/cbb2b745-f21d-477d-b5c4-0dfc9b79d71f/IMG_9590.PNG"        // ← замени (EN)
     }
   };
 
