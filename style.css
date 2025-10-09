@@ -8,19 +8,53 @@ body {
 header {
   position: sticky;
   top: 0;
-  background: #000000cc;
-  padding: 1rem;
+  z-index: 50;
+  background: color-mix(in oklab, var(--bg) 85%, #000 15%);
+  backdrop-filter: saturate(150%) blur(10px);
+  -webkit-backdrop-filter: saturate(150%) blur(10px);
+  padding: 0.8rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 4px 14px rgba(0,0,0,.4);
+}
+
+header .logo {
+  font-weight: 900;
+  font-size: 20px;
+  letter-spacing: .5px;
+  color: var(--accent);
+  text-shadow: 0 0 8px color-mix(in oklab, var(--accent) 70%, transparent);
+}
+
+header nav {
   display: flex;
   gap: 1rem;
-  border-bottom: 1px solid #222;
+}
+
+header nav a {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text);
+  opacity: .85;
+  transition: opacity .2s, color .2s;
+}
+header nav a:hover {
+  color: var(--accent);
+  opacity: 1;
 }
 
 #search {
   flex: 1;
-  padding: 0.5rem;
-  border-radius: 6px;
-  border: none;
-  outline: none;
+  padding: 0.6rem 0.8rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+}
+#search::placeholder {
+  color: #9aa7bd;
 }
 
 .card {
