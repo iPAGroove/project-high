@@ -80,42 +80,46 @@ h3{ margin:0 0 2px; font-size:16px; }
   -webkit-backdrop-filter:blur(10px);
   padding:10px calc(env(safe-area-inset-right)+12px) calc(env(safe-area-inset-bottom)+12px) calc(env(safe-area-inset-left)+12px);
 }
+
+/* старая сетка .tabs можно оставить — она используется в других местах */
 .tabs{ display:grid; grid-auto-flow:column; gap:10px; }
 
-/* новая аккуратная сетка: 2 «пилюли» + 2 икон-кнопки */
-.tabs-new{
+/* новая минималистичная раскладка: segmented + круглые кнопки */
+.segbar{
   display:grid;
-  grid-template-columns: 1fr 1fr auto auto;
+  grid-template-columns: 1fr auto auto;
+  align-items:center;
   gap:10px;
 }
 
-.pill{
-  appearance:none;
-  border:1px solid var(--border);
+/* segmented control */
+.seg-group{
+  display:grid; grid-template-columns:1fr 1fr;
   background:var(--card);
-  color:var(--text);
-  padding:10px 14px;
+  border:1px solid var(--border);
   border-radius:14px;
-  font-weight:800;
-  text-align:center;
-  box-shadow:0 4px 12px rgb(0 0 0 / .18);
+  padding:2px;
 }
-.pill.active{
-  background: color-mix(in oklab, var(--accent) 18%, var(--bg-elev) 82%);
-  border-color: color-mix(in oklab, var(--accent) 35%, var(--border) 65%);
+.seg{
+  appearance:none; border:0; background:transparent; color:var(--text);
+  padding:10px 12px; border-radius:12px; font-weight:800;
+}
+.seg.active{
+  background: color-mix(in oklab, var(--accent) 20%, var(--bg-elev) 80%);
+  color:#e9f6ff;
 }
 
-.icon-btn{
-  appearance:none;
+/* круглые кнопки справа */
+.circle{
+  appearance:none; background:transparent; color:var(--text);
   border:1px solid var(--border);
-  background:var(--card);
-  color:var(--text);
-  padding:10px 12px;
-  border-radius:14px;
-  font-weight:800;
-  min-width:64px;
-  display:flex; align-items:center; justify-content:center; gap:6px;
+  width:44px; height:44px; border-radius:50%;
+  display:grid; place-items:center; font-weight:800;
 }
+#lang-code{ font-variant-numeric: tabular-nums; font-weight:900; }
+
+/* на всякий: скрыть старые “пилюли”, если они ещё в DOM */
+.pill, .icon-btn { display:none !important; }
 
 .tabbar button{
   appearance:none; border:1px solid var(--border);
