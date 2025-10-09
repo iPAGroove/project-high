@@ -69,10 +69,10 @@
   </nav>
 
   <!-- МОДАЛКА ДЕТАЛЕЙ -->
-  <div id="modal" class="modal">
+  <div id="modal" class="modal" aria-hidden="true">
     <div class="backdrop" data-close></div>
-    <article class="sheet">
-      <button class="close" data-close>✕</button>
+    <article class="sheet" role="dialog" aria-modal="true" aria-labelledby="app-title">
+      <button class="close" data-close aria-label="Закрыть">✕</button>
       <header class="sheet-header">
         <div class="app-head">
           <img id="app-icon" class="icon lg" src="" alt="">
@@ -94,12 +94,12 @@
   </div>
 
   <!-- HELP-ДИАЛОГ -->
-  <div id="help-modal" class="dialog">
+  <div id="help-modal" class="dialog" aria-hidden="true">
     <div class="backdrop" data-close></div>
     <section class="dialog-card">
       <header class="dialog-head">
         <strong>Помощь</strong>
-        <button class="close" data-close>✕</button>
+        <button class="close" data-close aria-label="Закрыть">✕</button>
       </header>
       <div class="dialog-body" id="help-body">
         <p>Это каталог IPA. Нажимай на карточку — внутри описание и кнопка загрузки.</p>
