@@ -14,6 +14,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);
 *{box-sizing:border-box} img{display:block} a{color:var(--accent);text-decoration:none}
 .wrap{max-width:720px; margin:0 auto; padding:0 14px}
 
+/* чтобы контент не уезжал под панель */
+main{ padding-bottom: calc(var(--nav-btn-h) + 44px + env(safe-area-inset-bottom)); }
+
 /* Шапка */
 .topbar{position:sticky; top:0; z-index:20; background:color-mix(in oklab,var(--bg) 86%, #000 14%);
   backdrop-filter:saturate(120%) blur(10px); -webkit-backdrop-filter:saturate(120%) blur(10px);
@@ -44,59 +47,39 @@ h3{ margin:0 0 2px; font-size:16px; }
 .tags{ display:flex; flex-wrap:wrap; gap:6px; }
 .tag{ font-size:11px; padding:4px 8px; border-radius:999px; border:1px solid var(--border); background:var(--bg-elev); }
 
-/* ───────────────────── НИЖНЯЯ НАВИГАЦИЯ: цельная панель-док ───────────────────── */
+/* ─────────────── НИЖНЯЯ НАВИГАЦИЯ: старая .nav4, full-width ─────────────── */
 .tabbar{
   position:fixed; left:0; right:0; bottom:0; z-index:25;
   background:color-mix(in oklab,var(--bg) 88%, #000 12%);
   border-top:1px solid var(--border);
   backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
-  padding:12px calc(env(safe-area-inset-right)+12px)
-          calc(env(safe-area-inset-bottom)+12px)
-          calc(env(safe-area-inset-left)+12px);
+  padding:10px 0 calc(env(safe-area-inset-bottom)+12px); /* по краям без паддинга */
+}
+/* снимаем ограничение 720px именно внутри таббара */
+.tabbar > .wrap{ max-width:none; padding:0; }
+
+/* панель на всю ширину, 4 равные колонки */
+.nav4{
+  display:grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap:12px; align-items:center;
+  padding:0 calc(env(safe-area-inset-right)+12px) 0 calc(env(safe-area-inset-left)+12px);
 }
 
-/* единый капсул-контейнер */
-.dock{
-  display:grid; grid-template-columns:repeat(4,1fr);
-  gap:0; align-items:center;
-  background: color-mix(in oklab, var(--bg-elev) 92%, #000 8%);
-  border:1px solid var(--border);
-  border-radius:20px;
-  padding:8px;
-  box-shadow: 0 10px 26px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.03);
+/* кнопки */
+.nav4 .pill{
+  display:flex; align-items:center; justify-content:center; width:100%;
+  padding:0; height:var(--nav-btn-h);
+  border-radius:14px; border:1px solid var(--border); background:var(--card);
 }
-
-/* кнопки внутри дока */
-.dock .nav-btn{
-  appearance:none; border:0; background:transparent;
-  position:relative; height:var(--nav-btn-h);
-  border-radius:14px; display:flex; align-items:center; justify-content:center;
-  -webkit-tap-highlight-color: transparent;
+.nav4 .pill.active{
+  background: color-mix(in oklab, var(--accent) 16%, var(--bg-elev) 84%);
+  border-color: color-mix(in oklab, var(--accent) 35%, var(--border) 65%);
 }
-
-/* иконка */
-.dock .nav-btn img{
-  width:var(--nav-icon); height:var(--nav-icon);
-  object-fit:contain;
-  transition: transform .18s ease, filter .18s ease, opacity .18s ease;
-  opacity:.95; filter: drop-shadow(0 1px 0 rgba(0,0,0,.25));
+.nav4 .pill img{
+  width:var(--nav-icon); height:var(--nav-icon); object-fit:contain;
+  filter:drop-shadow(0 1px 0 rgba(0,0,0,.25));
 }
-
-/* активное состояние */
-.dock .nav-btn.active img{
-  transform: translateY(-1px) scale(1.06);
-  filter: drop-shadow(0 0 10px color-mix(in oklab, var(--accent) 60%, transparent));
-  opacity:1;
-}
-
-/* индикатор-полоска под активной */
-.dock .nav-btn .dot{
-  display:none; position:absolute; left:50%; bottom:6px; transform:translateX(-50%);
-  width:24px; height:4px; border-radius:999px;
-  background: color-mix(in oklab, var(--accent) 85%, #fff 15%);
-  opacity:.7; box-shadow: 0 0 8px color-mix(in oklab, var(--accent) 60%, transparent);
-}
-.dock .nav-btn.active .dot{ display:block; }
 
 /* скрытый текст для доступности */
 .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
@@ -127,7 +110,7 @@ h3{ margin:0 0 2px; font-size:16px; }
 .dialog{ position:fixed; inset:0; z-index:60; display:none; }
 .dialog.open{ display:block; }
 .dialog .backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.55); }
-.dialog-card{ position:absolute; left:0; right:0; bottom:0; margin:0 auto; max-width:720px;
+.dialog-card{ position:absolute; left:0; right:0; bottom:0; margin:0 авто; max-width:720px;
   background:var(--bg); border:1px solid var(--border); border-radius:16px 16px 0 0; box-shadow:0 -12px 30px rgb(0 0 0 / .5); }
 .dialog-head{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid var(--border); }
 .dialog-body{ padding:12px 14px 16px; color:#cfe1ffbf; }
