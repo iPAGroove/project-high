@@ -37,18 +37,29 @@
     </div>
   </main>
 
-  <!-- НИЖНЯЯ НАВИГАЦИЯ (минималистичный segmented + круглые кнопки) -->
+  <!-- НИЖНЯЯ НАВИГАЦИЯ (4 равные PNG-кнопки) -->
   <nav class="tabbar" id="tabbar" role="tablist">
-    <div class="wrap segbar">
-      <div class="seg-group" role="tablist" aria-label="Категории">
-        <button class="seg active" data-tab="games" role="tab" data-i18n="nav_games">Игры</button>
-        <button class="seg" data-tab="apps" role="tab" data-i18n="nav_apps">Приложения</button>
-      </div>
-
-      <button id="lang-btn" class="circle" aria-label="Language">
-        <span id="lang-code">RU</span>
+    <div class="wrap nav4">
+      <!-- Игры -->
+      <button class="pill nav-btn active" data-tab="games" role="tab" aria-label="Игры">
+        <img src="assets/ui/nav-games.png" alt="">
+        <span class="sr-only" data-i18n="nav_games">Игры</span>
       </button>
-      <button id="help-btn" class="circle" aria-label="Help">?</button>
+      <!-- Приложения -->
+      <button class="pill nav-btn" data-tab="apps" role="tab" aria-label="Приложения">
+        <img src="assets/ui/nav-apps.png" alt="">
+        <span class="sr-only" data-i18n="nav_apps">Приложения</span>
+      </button>
+      <!-- Язык -->
+      <button class="pill nav-btn" id="lang-btn" aria-label="Language">
+        <img id="lang-icon" src="assets/ui/nav-lang.png" alt="Language">
+        <span id="lang-code" class="sr-only">RU</span>
+      </button>
+      <!-- Help -->
+      <button class="pill nav-btn" id="help-btn" aria-label="Help">
+        <img src="assets/ui/nav-help.png" alt="Help">
+        <span class="sr-only">Help</span>
+      </button>
     </div>
   </nav>
 
@@ -94,9 +105,9 @@
   </div>
 
   <!-- JS -->
-  <script src="assets/js/themes.js?v=5"></script>
-  <script src="assets/js/ios.js?v=5"></script>
-  <script src="assets/js/render.js?v=5"></script>
-  <script src="assets/js/app.js?v=5"></script>
+  <script src="assets/js/themes.js?v=6"></script>
+  <script src="assets/js/ios.js?v=6"></script>
+  <script src="assets/js/render.js?v=6"></script>
+  <script src="assets/js/app.js?v=6"></script>
 </body>
 </html>
