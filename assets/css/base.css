@@ -21,48 +21,51 @@ a{color:var(--accent);text-decoration:none}
   position: sticky;
   top: 0;
   z-index: 50;
-  background: transparent; /* убрали чёрный фон */
+  background: transparent;  /* убрали черный фон */
   border: none;
-  padding: calc(env(safe-area-inset-top) + 20px) 0 20px;
+  padding: calc(env(safe-area-inset-top) + 8px) 0 8px; /* маленькие отступы */
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* эффект ручки */
+/* Заголовок */
 .brand {
-  font-family: 'Pacifico', cursive;
-  font-size: 32px;
-  font-weight: 400;
+  font-family: 'Orbitron', sans-serif; /* аккуратный техно-шрифт */
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--accent);
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* Анимация обводки ручкой */
+.brand span {
+  display: inline-block;
   color: transparent;
   -webkit-text-stroke: 1px var(--accent);
   position: relative;
-  display: inline-block;
-  white-space: nowrap;
-  overflow: hidden;
 }
 
-.brand::after {
-  content: "URSA IPA REPO";
+.brand span::before {
+  content: attr(data-text);
   position: absolute;
   left: 0;
   top: 0;
-  width: 0;
-  white-space: nowrap;
   color: var(--accent);
   -webkit-text-stroke: 0;
+  width: 0;
+  white-space: nowrap;
   overflow: hidden;
   border-right: 2px solid var(--accent);
-  animation: handwriting 4s steps(20, end) forwards, blink .8s step-end infinite;
+  animation: draw 2.5s linear forwards;
 }
 
-@keyframes handwriting {
+@keyframes draw {
   from { width: 0 }
   to { width: 100% }
-}
-
-@keyframes blink {
-  50% { border-color: transparent }
 }
 
 /* Поиск */
