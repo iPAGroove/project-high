@@ -1,18 +1,44 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="no-js">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8" />
   <title>URSA IPA Repo</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="apple-touch-icon" href="assets/icons/ursa-touch.png" />
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml" />
+  <!-- CSS -->
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/ios.css" />
+  <!-- Тема по умолчанию -->
+  <link id="theme-css" rel="stylesheet" href="assets/css/themes/neon.css" />
 </head>
 <body>
-  <header>
-    <h1>URSA IPA Repo</h1>
-    <input id="search" type="text" placeholder="Поиск приложений...">
+  <header class="topbar">
+    <div class="brand">URSA IPA REPO</div>
+
+    <div class="segmented" id="segmented">
+      <button data-filter="all" class="active">Все</button>
+      <button data-filter="games">Игры</button>
+      <button data-filter="tools">Утилиты</button>
+      <button data-filter="mod">Моды</button>
+    </div>
+
+    <div class="search-wrap">
+      <input id="search" type="search" inputmode="search" placeholder="Поиск по названию, bundleId, тегам…" />
+      <button id="theme-toggle" aria-label="Сменить тему">🎨</button>
+    </div>
   </header>
 
-  <main id="catalog"></main>
+  <main id="catalog" class="catalog" role="list"></main>
 
-  <script src="app.js"></script>
+  <footer class="safe-footer">© URSA</footer>
+
+  <!-- JS -->
+  <script src="assets/js/themes.js"></script>
+  <script src="assets/js/ios.js"></script>
+  <script src="assets/js/render.js"></script>
+  <script src="assets/js/app.js"></script>
 </body>
 </html>
