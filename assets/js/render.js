@@ -6,7 +6,7 @@
     return `${(num/Math.pow(1024,e)).toFixed(e?1:0)} ${u[e]}`;
   }
 
-  // ===== КАТАЛОГ: карточка без кнопок, по тапу — модалка
+  // карточки
   window.renderCatalog = function(apps){
     const root = document.getElementById("catalog");
     root.innerHTML = "";
@@ -31,7 +31,7 @@
     });
   };
 
-  // ===== МОДАЛКА
+  // модалка
   const modal = document.getElementById("modal");
 
   function escapeHTML(s){
@@ -48,7 +48,6 @@
     document.getElementById("app-tags").innerHTML =
       (app.tags||[]).map(t=>`<span class="tag">#${t}</span>`).join("");
 
-    // Hack Features — чистым списком
     const feats = Array.isArray(app.features) ? app.features
       : (app.description ? app.description.split(/\r?\n/).map(s=>s.replace(/^[\s•\-–—]+/,"").trim()).filter(Boolean) : []);
     document.getElementById("app-desc").innerHTML = feats.length
@@ -56,7 +55,6 @@
          <ul class="bullets">${feats.map(f=>`<li>${escapeHTML(f)}`).join("")}</ul>`
       : "";
 
-    // 1 кнопка загрузки
     const dl = document.getElementById("dl-buttons");
     dl.innerHTML = "";
     const url = app?.mirrors?.[0]?.url;
@@ -64,7 +62,7 @@
       const a = document.createElement("a");
       a.className = "btn";
       a.href = url; a.target = "_blank"; a.rel = "noopener";
-      a.textContent = "Загрузить IPA";
+      a.textContent = (window.__t ? window.__t("download") : "Загрузить IPA");
       dl.appendChild(a);
     }
 
