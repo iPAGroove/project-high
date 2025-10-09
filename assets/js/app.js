@@ -2,7 +2,7 @@
 (function () {
   // ====== ПОДСТАВЬ СВОИ ССЫЛКИ НА PNG ======
   const ICONS = {
-    games: "https://store5.gofile.io/download/direct/0f478302-90dd-4cee-8d78-3ba48582beb5/IMG_9610.png",        // ← замени
+    games: "https://store10.gofile.io/download/direct/3335936d-a58c-48bd-8686-21988ca6a23d/IMG_9617.png",        // ← замени
     apps:  "https://store5.gofile.io/download/direct/5a4f1b52-2705-4fc5-8bf4-6ed9b70ffdf8/IMG_9616.png",         // ← замени
     help:  "https://store5.gofile.io/download/direct/685a39aa-260d-4b30-a1a6-5e22f74f4983/IMG_9615.png",         // ← замени
     lang: {
