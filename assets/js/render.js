@@ -4,82 +4,91 @@
     const u=["B","KB","MB","GB","TB"]; const e=Math.min(Math.floor(Math.log(num)/Math.log(1024)),u.length-1);
     return `${(num/Math.pow(1024,e)).toFixed(e?1:0)} ${u[e]}`;
   }
-  function deeplinks(url){
-    const enc = encodeURIComponent(url);
-    return [
-      { label:"Scarlet", url:`scarlet://install?url=${enc}` },
-      { label:"GBox",    url:`gbox://install?url=${enc}` },
-      { label:"eSign",   url:`esign://install?url=${enc}` }
-    ];
-  }
 
-  // ==== КАТАЛОГ (карточки без кнопки) ====
+  // ===== КАТАЛОГ: карточка без кнопок, по тапу — модалка
   window.renderCatalog = function(apps){
-    const root=document.getElementById("catalog"); root.innerHTML="";
+    const root = document.getElementById("catalog");
+    root.innerHTML = "";
     apps.forEach(app=>{
-      const el=document.createElement("article");
-      el.className="card"; el.setAttribute("role","listitem"); el.tabIndex=0;
-      el.innerHTML=`
+      const el = document.createElement("article");
+      el.className = "card"; el.setAttribute("role","listitem"); el.tabIndex = 0;
+      el.innerHTML = `
         <div class="row">
           <img class="icon" src="${app.iconUrl}" alt="" loading="lazy" referrerpolicy="no-referrer">
           <div>
             <h3>${app.name}</h3>
-            <div class="meta">${app.bundleId}</div>
-            <div class="meta">v${app.version}${app.minIOS?` · iOS ≥ ${app.minIOS}`:""}${app.sizeBytes?` · ${prettyBytes(app.sizeBytes)}`:""}</div>
+            <div class="meta">${app.bundleId||""}</div>
+            <div class="meta">v${app.version||""}${app.minIOS?` · iOS ≥ ${app.minIOS}`:""}${app.sizeBytes?` · ${prettyBytes(app.sizeBytes)}`:""}</div>
           </div>
         </div>
         <div class="tags">${(app.tags||[]).map(t=>`<span class="tag">#${t}</span>`).join("")}</div>
       `;
-      el.addEventListener("click",()=>openModal(app));
-      el.addEventListener("keypress",(e)=>{ if(e.key==="Enter") openModal(app); });
+      const open = ()=>openModal(app);
+      el.addEventListener("click", open);
+      el.addEventListener("keypress",(e)=>{ if(e.key==="Enter") open(); });
       root.appendChild(el);
     });
   };
 
-  // ==== МОДАЛКА ====
+  // ===== МОДАЛКА
   const modal = document.getElementById("modal");
   const $ = (id)=>document.getElementById(id);
 
-  function fillIf(el, html){ el.innerHTML = html || ""; el.style.display = html ? "" : "none"; }
+  function escapeHTML(s){ return (s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[m])); }
+
+  function featuresFrom(app){
+    if (Array.isArray(app.features) && app.features.length) return app.features;
+    if (app.description) {
+      // попытка превратить свободный текст в пункты
+      return app.description
+        .split(/\r?\n/)
+        .map(s=>s.replace(/^[\s•\-–—]+/,"").trim())
+        .filter(Boolean);
+    }
+    return [];
+  }
 
   function openModal(app){
-    // header
     $("app-icon").src = app.iconUrl;
-    $("app-title").textContent = app.name;
+    $("app-title").textContent = app.name || "";
     $("app-bundle").textContent = app.bundleId || "";
-    $("app-info").textContent = `v${app.version}${app.minIOS?` · iOS ≥ ${app.minIOS}`:""}${app.sizeBytes?` · ${prettyBytes(app.sizeBytes)}`:""}`;
-
-    // tags
+    $("app-info").textContent = `v${app.version||""}${app.minIOS?` · iOS ≥ ${app.minIOS}`:""}${app.sizeBytes?` · ${prettyBytes(app.sizeBytes)}`:""}`;
     $("app-tags").innerHTML = (app.tags||[]).map(t=>`<span class="tag">#${t}</span>`).join("");
 
-    // description
-    fillIf($("app-desc"), app.description ? `<div class="meta" style="margin-bottom:6px">Описание</div><p>${escapeHTML(app.description)}</p>` : "");
+    // Hack Features — списком
+    const feats = featuresFrom(app);
+    $("app-desc").innerHTML = feats.length
+      ? `<div class="meta" style="margin-bottom:6px">Hack Features</div><ul class="bullets">${feats.map(f=>`<li>${escapeHTML(f)}`).join("")}</ul>`
+      : "";
 
-    // changelog
-    fillIf($("app-changelog"),
-      (app.changelog && app.changelog.length)
-        ? `<div class="meta" style="margin-bottom:6px">Что нового</div><ul>${app.changelog.map(c=>`<li>${escapeHTML(c)}</li>`).join("")}</ul>`
-        : ""
-    );
-
-    // screenshots
-    const sc = $("app-screens");
+    // Скриншоты — фиксированный горизонтальный скролл
+    const wrap = document.getElementById("screens-wrap");
+    const sc = document.getElementById("app-screens");
     sc.innerHTML = "";
-    (app.screenshots||[]).forEach(src=>{
-      const img = new Image();
-      img.src = src; img.loading="lazy"; img.referrerPolicy="no-referrer";
-      sc.appendChild(img);
-    });
-    sc.style.display = (app.screenshots && app.screenshots.length) ? "" : "none";
-
-    // buttons
-    const dl = $("dl-buttons"); dl.innerHTML="";
-    if (app.mirrors && app.mirrors.length){
-      const primary = app.mirrors[0];
-      dl.innerHTML += `<a class="btn" href="${primary.url}" target="_blank" rel="noopener">Скачать Direct</a>`;
-      deeplinks(primary.url).forEach(d=>{
-        dl.innerHTML += `<a class="btn secondary" href="${d.url}">${d.label}</a>`;
+    if (app.screenshots && app.screenshots.length){
+      wrap.style.display = "";
+      app.screenshots.forEach(src=>{
+        const img = new Image();
+        img.className = "shot";
+        img.loading = "lazy";
+        img.referrerPolicy = "no-referrer";
+        img.src = src;
+        sc.appendChild(img);
       });
+    } else {
+      wrap.style.display = "none";
+    }
+
+    // 1 кнопка загрузки
+    const dl = document.getElementById("dl-buttons");
+    dl.innerHTML = "";
+    const url = app?.mirrors?.[0]?.url;
+    if (url){
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = url; a.target = "_blank"; a.rel = "noopener";
+      a.textContent = "Загрузить IPA";
+      dl.appendChild(a);
     }
 
     modal.classList.add("open");
@@ -97,6 +106,4 @@
     if (e.target.hasAttribute("data-close") || e.target === modal) closeModal();
   });
   document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") closeModal(); });
-
-  function escapeHTML(s){ return (s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[m])); }
 })();
