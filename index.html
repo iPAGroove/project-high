@@ -9,7 +9,7 @@
   <link rel="apple-touch-icon" href="assets/icons/ursa-touch.png" />
   <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="manifest.webmanifest">
-  <!-- CSS -->
+
   <link rel="stylesheet" href="assets/css/base.css" />
   <link rel="stylesheet" href="assets/css/ios.css" />
   <link id="theme-css" rel="stylesheet" href="assets/css/themes/neon.css" />
@@ -17,28 +17,42 @@
 <body>
   <!-- ШАПКА -->
   <header class="topbar">
-    <div class="brand">URSA IPA REPO</div>
-    <div class="search-wrap">
-      <input id="search" type="search" inputmode="search" placeholder="Поиск по названию, bundleId, тегам…" />
-      <button id="theme-toggle" aria-label="Сменить тему">🎨</button>
+    <div class="wrap">
+      <div class="brand">URSA IPA REPO</div>
     </div>
   </header>
 
+  <!-- ПОИСК (отдельный блок с отступом) -->
+  <section class="search-area">
+    <div class="wrap search-wrap">
+      <input id="search" type="search" inputmode="search" placeholder="Поиск по названию, bundleId, тегам…" />
+      <button id="theme-toggle" aria-label="Сменить тему">🎨</button>
+    </div>
+  </section>
+
   <!-- КАТАЛОГ -->
-  <main id="catalog" class="catalog" role="list"></main>
+  <main>
+    <div class="wrap">
+      <div id="catalog" class="catalog" role="list"></div>
+    </div>
+  </main>
 
   <!-- НИЖНЯЯ НАВИГАЦИЯ -->
   <nav class="tabbar" id="tabbar" role="tablist">
-    <button data-filter="all"  class="active">Все</button>
-    <button data-filter="games">Игры</button>
-    <button data-filter="tools">Утилиты</button>
-    <button data-filter="mod">Моды</button>
+    <div class="wrap tabs">
+      <button data-filter="all"  class="active">Все</button>
+      <button data-filter="games">Игры</button>
+      <button data-filter="tools">Утилиты</button>
+      <button data-filter="mod">Моды</button>
+    </div>
   </nav>
 
   <!-- МОДАЛКА ДЕТАЛЕЙ -->
   <div id="modal" class="modal" aria-hidden="true">
     <div class="backdrop" data-close></div>
     <article class="sheet" role="dialog" aria-modal="true" aria-labelledby="app-title">
+      <button class="close" data-close aria-label="Закрыть">✕</button>
+
       <header class="sheet-header">
         <div class="app-head">
           <img id="app-icon" class="icon lg" src="" alt="">
@@ -47,7 +61,6 @@
             <div id="app-bundle" class="meta"></div>
             <div id="app-info" class="meta"></div>
           </div>
-          <button class="close" data-close>✕</button>
         </div>
       </header>
 
@@ -56,9 +69,10 @@
 
         <div id="app-desc" class="section"></div>
 
-        <div id="app-screens" class="screens"></div>
-
-        <div id="app-changelog" class="section"></div>
+        <div class="section" id="screens-wrap">
+          <div class="meta" style="margin-bottom:6px">Скриншоты</div>
+          <div id="app-screens" class="screens snaps"></div>
+        </div>
       </section>
 
       <footer class="sheet-footer">
@@ -67,16 +81,9 @@
     </article>
   </div>
 
-  <!-- JS -->
   <script src="assets/js/themes.js"></script>
   <script src="assets/js/ios.js"></script>
   <script src="assets/js/render.js"></script>
   <script src="assets/js/app.js"></script>
-
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", ()=> navigator.serviceWorker.register("/service-worker.js").catch(()=>{}));
-    }
-  </script>
 </body>
 </html>
