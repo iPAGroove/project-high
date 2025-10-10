@@ -66,8 +66,7 @@ function prettyBytes(num) {
   const u = ["B","KB","MB","GB"];
   const e = Math.min(Math.floor(Math.log(num)/Math.log(1024)), u.length-1);
   const val = num / Math.pow(1024, e);
-  const fixed = (val >= 10) ? val.toFixed(0) : val.toFixed(1); // до 10 — с десятыми, больше 10 — целое
-  return `${fixed} ${u[e]}`;
+  return `${val.toFixed(1)} ${u[e]}`;  // всегда одна десятичная
 }
 function escapeHTML(s){
   return (s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[m]));
