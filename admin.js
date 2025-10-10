@@ -82,7 +82,6 @@ function openModal(title, values = {}) {
   form.reset();
   editDocId = values.__docId || null;
 
-  // заполнение формы
   if (values["NAME"]) form.name.value = values["NAME"];
   if (values["Bundle ID"]) form.bundleId.value = values["Bundle ID"];
   if (values["Version"]) form.version.value = values["Version"];
@@ -95,9 +94,16 @@ function openModal(title, values = {}) {
   }
   if (values.DownloadUrl) form.downloadUrl.value = values.DownloadUrl;
   if (values.features) form.features.value = values.features;
+
+  // категории
+  document.querySelectorAll(".tag-btn").forEach(btn => btn.classList.remove("active"));
   if (Array.isArray(values.tags)) {
-    if (values.tags.includes("games")) form.tag.value = "games";
-    if (values.tags.includes("apps")) form.tag.value = "apps";
+    const tag = values.tags[0];
+    const btn = document.querySelector(`.tag-btn[data-tag="${tag}"]`);
+    if (btn) {
+      btn.classList.add("active");
+      form.tag.value = tag;
+    }
   }
 
   modal.classList.add("open");
@@ -120,6 +126,15 @@ iconInput.addEventListener("input", () => {
   } else {
     iconPreview.style.display = "none";
   }
+});
+
+// === Выбор тега ===
+document.querySelectorAll(".tag-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tag-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    form.tag.value = btn.dataset.tag;
+  });
 });
 
 // === Добавление / обновление ===
