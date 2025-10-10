@@ -1,25 +1,69 @@
-/* ===== ADMIN ===== */
-.admin-actions {
-  margin: 20px 0;
-  display: flex;
-  gap: 10px;
+:root {
+  --bg: #0b0f14;
+  --bg-elev: #121722;
+  --card: #141a24;
+  --border: #1e2633;
+  --text: #fff;
+  --muted: #9aa7bd;
+  --accent: #00b3ff;
+  --radius: 12px;
+  --gap: 14px;
 }
 
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ====== HEADER ====== */
+.topbar {
+  padding: 18px;
+  text-align: center;
+  background: transparent;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+/* ====== BUTTONS ====== */
 .btn {
   border: none;
-  border-radius: 8px;
-  padding: 8px 14px;
+  border-radius: var(--radius);
+  padding: 10px 16px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.2s;
+  transition: 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,.3);
 }
 .btn.blue { background: var(--accent); color: #001018; }
 .btn.green { background: #4caf50; color: #fff; }
 .btn.red { background: #e53935; color: #fff; }
-.btn.small { padding: 4px 8px; font-size: 12px; }
+.btn.small { padding: 6px 10px; font-size: 12px; }
 
-/* Таблица */
+.btn:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+
+.admin-actions {
+  margin: 20px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* ====== TABLE ====== */
 .admin-table {
   width: 100%;
   border-collapse: collapse;
@@ -38,34 +82,43 @@
   background: var(--bg-elev);
   font-weight: 700;
   color: var(--accent);
+  text-transform: uppercase;
+  font-size: 13px;
 }
 .admin-table tr:last-child td { border-bottom: none; }
+.admin-table td { color: var(--text); }
 
-/* Адаптив */
+/* ====== MOBILE CARDS ====== */
 @media (max-width: 768px) {
-  .admin-table, .admin-table thead, .admin-table tbody, .admin-table th, .admin-table td, .admin-table tr {
+  .admin-table,
+  .admin-table thead,
+  .admin-table tbody,
+  .admin-table th,
+  .admin-table td,
+  .admin-table tr {
     display: block;
     width: 100%;
   }
   .admin-table thead { display: none; }
   .admin-table tr {
-    margin-bottom: 12px;
+    margin-bottom: 14px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
     background: var(--card);
-    padding: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,.3);
+    padding: 12px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.4);
   }
   .admin-table td {
     border: none;
     padding: 6px 0;
     display: flex;
     justify-content: space-between;
+    font-size: 15px;
   }
   .admin-table td::before {
     content: attr(data-label);
     font-weight: 700;
     color: var(--muted);
-    margin-right: 10px;
+    margin-right: 12px;
   }
 }
