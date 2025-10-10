@@ -1,6 +1,9 @@
+// assets/js/render.js
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
+// ⚡️ Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDFj9gOYU49Df6ohUR5CnbRv3qdY2i_OmU",
   authDomain: "ipa-panel.firebaseapp.com",
@@ -13,40 +16,37 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// ====== HELPERS ======
 function prettyBytes(num) {
-  if (!num) return "0 B";
-  const u = ["B","KB","MB","GB","TB"];
+  if (!num) return "";
+  const u = ["B","KB","MB","GB"];
   const e = Math.min(Math.floor(Math.log(num)/Math.log(1024)), u.length-1);
   return `${(num/Math.pow(1024,e)).toFixed(e?1:0)} ${u[e]}`;
 }
-
-// === глобальное состояние ===
-const state = { all: [], tab: "games" };
-
-function isGame(app) {
-  return (app.tags || []).map(t => String(t).toLowerCase()).includes("games");
+function escapeHTML(s){
+  return (s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[m]));
 }
 
-// === РЕНДЕРИНГ КАРТОЧЕК ===
+// ====== РЕНДЕР КАРТОЧЕК ======
 function renderCatalog(apps) {
-  const root = document.getElementById("catalog");
-  root.innerHTML = "";
+  const catalog = document.getElementById("catalog");
+  catalog.innerHTML = "";
   apps.forEach(app => {
     const el = document.createElement("article");
-    el.className = "card"; 
-    el.setAttribute("role","listitem"); 
+    el.className = "card";
+    el.setAttribute("role","listitem");
     el.tabIndex = 0;
 
     el.innerHTML = `
       <div class="row">
-        <img class="icon" src="${app["iconUrl"]}" alt="" loading="lazy" referrerpolicy="no-referrer">
+        <img class="icon" src="${app.iconUrl}" alt="">
         <div>
-          <h3>${app["NAME"]}</h3>
-          <div class="meta">${app["Bundle ID"]||""}</div>
+          <h3>${app.NAME || app.name}</h3>
+          <div class="meta">${app["Bundle ID"] || app.bundleId || ""}</div>
           <div class="meta">
-            v${app["Version"]||""}
-            ${app["minimal iOS"] ? ` · iOS ≥ ${app["minimal iOS"]}` : ""}
-            ${app["sizeBytes"] ? ` · ${prettyBytes(app["sizeBytes"])}` : ""}
+            v${app.Version || app.version || ""}
+            ${app["minimal iOS"] || app.minIOS ? ` · iOS ≥ ${app["minimal iOS"] || app.minIOS}` : ""}
+            ${app.sizeBytes ? ` · ${prettyBytes(app.sizeBytes)}` : ""}
           </div>
         </div>
       </div>
@@ -55,25 +55,23 @@ function renderCatalog(apps) {
     const open = ()=>openModal(app);
     el.addEventListener("click", open);
     el.addEventListener("keypress",(e)=>{ if(e.key==="Enter") open(); });
-    root.appendChild(el);
+    catalog.appendChild(el);
   });
 }
 
-// === МОДАЛКА ===
+// ====== МОДАЛКА ======
 const modal = document.getElementById("modal");
 
-function escapeHTML(s){
-  return (s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[m]));
-}
-
 function openModal(app){
-  document.getElementById("app-icon").src = app["iconUrl"];
-  document.getElementById("app-title").textContent = app["NAME"] || "";
-  document.getElementById("app-bundle").textContent = app["Bundle ID"] || "";
+  document.getElementById("app-icon").src = app.iconUrl;
+  document.getElementById("app-title").textContent = app.NAME || app.name || "";
+  document.getElementById("app-bundle").textContent = app["Bundle ID"] || app.bundleId || "";
   document.getElementById("app-info").textContent =
-    `v${app["Version"]||""}${app["minimal iOS"]?` · iOS ≥ ${app["minimal iOS"]}`:""}${app["sizeBytes"]?` · ${prettyBytes(app["sizeBytes"])}`:""}`;
+    `v${app.Version || app.version || ""}`
+    + (app["minimal iOS"] || app.minIOS ? ` · iOS ≥ ${app["minimal iOS"] || app.minIOS}` : "")
+    + (app.sizeBytes ? ` · ${prettyBytes(app.sizeBytes)}` : "");
 
-  const feats = app["features"] ? app["features"].split(",").map(f=>f.trim()) : [];
+  const feats = app.features ? app.features.split(",").map(f=>f.trim()) : [];
   document.getElementById("app-desc").innerHTML = feats.length
     ? `<div class="meta" style="margin-bottom:6px">Hack Features</div>
        <ul class="bullets">${feats.map(f=>`<li>${escapeHTML(f)}`).join("")}</ul>`
@@ -81,10 +79,10 @@ function openModal(app){
 
   const dl = document.getElementById("dl-buttons");
   dl.innerHTML = "";
-  if (app["DownloadUrl"]){
+  if (app.DownloadUrl || app.downloadUrl){
     const a = document.createElement("a");
     a.className = "btn";
-    a.href = app["DownloadUrl"]; 
+    a.href = app.DownloadUrl || app.downloadUrl;
     a.target = "_blank"; 
     a.rel = "noopener";
     a.textContent = "Загрузить IPA";
@@ -95,44 +93,33 @@ function openModal(app){
   modal.setAttribute("aria-hidden","false");
   document.body.style.overflow="hidden";
 }
-
 function closeModal(){
   modal.classList.remove("open");
   modal.setAttribute("aria-hidden","true");
   document.body.style.overflow="";
 }
-
 modal.addEventListener("click",(e)=>{
   if (e.target.hasAttribute("data-close") || e.target === modal) closeModal();
 });
 document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") closeModal(); });
 
-// === ПРИМЕНЕНИЕ ФИЛЬТРА ===
-function apply() {
-  const list = state.all.filter(app => state.tab === "games" ? isGame(app) : !isGame(app));
-  renderCatalog(list);
-}
-
-// === ЗАГРУЗКА С Firestore ===
-async function loadCatalog(){
+// ====== ЗАГРУЗКА + ПОИСК ======
+async function loadCatalog() {
   const snap = await getDocs(collection(db, "ursa_ipas"));
-  state.all = [];
-  snap.forEach((docSnap)=> state.all.push(docSnap.data())); 
-  apply();
+  const data = snap.docs.map(d => d.data());
+
+  renderCatalog(data);
+
+  const search = document.getElementById("search");
+  search.addEventListener("input", () => {
+    const q = search.value.toLowerCase();
+    const filtered = data.filter(app =>
+      (app.NAME || app.name || "").toLowerCase().includes(q) ||
+      (app["Bundle ID"] || app.bundleId || "").toLowerCase().includes(q) ||
+      (app.features || "").toLowerCase().includes(q)
+    );
+    renderCatalog(filtered);
+  });
 }
 
-// === ТАББАР ===
-document.addEventListener("DOMContentLoaded", ()=>{
-  loadCatalog();
-
-  const bar = document.getElementById("tabbar");
-  bar.addEventListener("click",(e)=>{
-    const pill = e.target.closest(".nav-btn[data-tab]");
-    if (pill){
-      state.tab = pill.dataset.tab; // games | apps
-      bar.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
-      pill.classList.add("active");
-      apply();
-    }
-  });
-});
+document.addEventListener("DOMContentLoaded", loadCatalog);
