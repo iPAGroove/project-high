@@ -20,38 +20,31 @@ function prettyBytes(num) {
   return `${(num/Math.pow(1024,e)).toFixed(e?1:0)} ${u[e]}`;
 }
 
-// === нормализуем поля под фронт ===
-function normalizeApp(doc) {
-  return {
-    id: doc.ID,
-    name: doc.NAME,
-    bundleId: doc["Bundle ID"],
-    version: doc.Version,
-    minIOS: doc["minimal iOS"],
-    sizeBytes: doc.sizeBytes,
-    iconUrl: doc.iconUrl,
-    downloadUrl: doc.DownloadUrl,
-    features: doc.features
-  };
-}
-
 // === РЕНДЕРИНГ КАРТОЧЕК ===
 window.renderCatalog = function(apps) {
   const root = document.getElementById("catalog");
   root.innerHTML = "";
   apps.forEach(app => {
     const el = document.createElement("article");
-    el.className = "card"; el.setAttribute("role","listitem"); el.tabIndex = 0;
+    el.className = "card"; 
+    el.setAttribute("role","listitem"); 
+    el.tabIndex = 0;
+
     el.innerHTML = `
       <div class="row">
-        <img class="icon" src="${app.iconUrl}" alt="" loading="lazy" referrerpolicy="no-referrer">
+        <img class="icon" src="${app["iconUrl"]}" alt="" loading="lazy" referrerpolicy="no-referrer">
         <div>
-          <h3>${app.name}</h3>
-          <div class="meta">${app.bundleId||""}</div>
-          <div class="meta">v${app.version||""}${app.minIOS?` · iOS ≥ ${app.minIOS}`:""}${app.sizeBytes?` · ${prettyBytes(app.sizeBytes)}`:""}</div>
+          <h3>${app["NAME"]}</h3>
+          <div class="meta">${app["Bundle ID"]||""}</div>
+          <div class="meta">
+            v${app["Version"]||""}
+            ${app["minimal iOS"] ? ` · iOS ≥ ${app["minimal iOS"]}` : ""}
+            ${app["sizeBytes"] ? ` · ${prettyBytes(app["sizeBytes"])}` : ""}
+          </div>
         </div>
       </div>
     `;
+
     const open = ()=>openModal(app);
     el.addEventListener("click", open);
     el.addEventListener("keypress",(e)=>{ if(e.key==="Enter") open(); });
@@ -67,13 +60,13 @@ function escapeHTML(s){
 }
 
 function openModal(app){
-  document.getElementById("app-icon").src = app.iconUrl;
-  document.getElementById("app-title").textContent = app.name || "";
-  document.getElementById("app-bundle").textContent = app.bundleId || "";
+  document.getElementById("app-icon").src = app["iconUrl"];
+  document.getElementById("app-title").textContent = app["NAME"] || "";
+  document.getElementById("app-bundle").textContent = app["Bundle ID"] || "";
   document.getElementById("app-info").textContent =
-    `v${app.version||""}${app.minIOS?` · iOS ≥ ${app.minIOS}`:""}${app.sizeBytes?` · ${prettyBytes(app.sizeBytes)}`:""}`;
+    `v${app["Version"]||""}${app["minimal iOS"]?` · iOS ≥ ${app["minimal iOS"]}`:""}${app["sizeBytes"]?` · ${prettyBytes(app["sizeBytes"])}`:""}`;
 
-  const feats = app.features ? app.features.split(",").map(f=>f.trim()) : [];
+  const feats = app["features"] ? app["features"].split(",").map(f=>f.trim()) : [];
   document.getElementById("app-desc").innerHTML = feats.length
     ? `<div class="meta" style="margin-bottom:6px">Hack Features</div>
        <ul class="bullets">${feats.map(f=>`<li>${escapeHTML(f)}`).join("")}</ul>`
@@ -81,11 +74,13 @@ function openModal(app){
 
   const dl = document.getElementById("dl-buttons");
   dl.innerHTML = "";
-  if (app.downloadUrl){
+  if (app["DownloadUrl"]){
     const a = document.createElement("a");
     a.className = "btn";
-    a.href = app.downloadUrl; a.target = "_blank"; a.rel = "noopener";
-    a.textContent = (window.__t ? window.__t("download") : "Загрузить IPA");
+    a.href = app["DownloadUrl"]; 
+    a.target = "_blank"; 
+    a.rel = "noopener";
+    a.textContent = "Загрузить IPA";
     dl.appendChild(a);
   }
 
@@ -109,7 +104,7 @@ document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") closeModal(); })
 async function loadCatalog(){
   const snap = await getDocs(collection(db, "ursa_ipas"));
   const apps = [];
-  snap.forEach((docSnap)=> apps.push(normalizeApp(docSnap.data())));
+  snap.forEach((docSnap)=> apps.push(docSnap.data())); // без нормализации
   window.renderCatalog(apps);
 }
 
