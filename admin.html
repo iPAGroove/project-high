@@ -48,11 +48,11 @@
         <label>Фичи <textarea name="features" placeholder="Через запятую"></textarea></label>
 
         <!-- Категория -->
-        <fieldset>
-          <legend>Категория</legend>
-          <label><input type="radio" name="tag" value="games"> Игры</label>
-          <label><input type="radio" name="tag" value="apps"> Приложения</label>
-        </fieldset>
+        <div class="tag-select">
+          <span data-tag="games" class="tag-btn">🎮 Игры</span>
+          <span data-tag="apps" class="tag-btn">📱 Приложения</span>
+          <input type="hidden" name="tag">
+        </div>
 
         <div class="modal-actions">
           <button type="submit" class="btn blue">💾 Сохранить</button>
