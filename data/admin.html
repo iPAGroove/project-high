@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>URSA Admin Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: sans-serif; background:#0b0f14; color:#fff; margin:20px; }
+    h1 { color:#00b3ff; }
+    table { width:100%; border-collapse: collapse; margin-top:20px; background:#141a24; }
+    th, td { border:1px solid #1e2633; padding:8px; text-align:left; }
+    th { background:#121722; }
+    tr:nth-child(even) { background:#1a1f29; }
+    input, textarea { width:100%; background:#121722; border:1px solid #333; color:#fff; padding:4px; }
+    button { margin:5px; padding:6px 10px; border:0; border-radius:6px; cursor:pointer; }
+    .add-btn { background:#00b3ff; color:#000; font-weight:bold; }
+    .save-btn { background:#3ccf57; color:#000; font-weight:bold; }
+    .del-btn { background:#ff4757; color:#fff; }
+  </style>
+</head>
+<body>
+  <h1>URSA IPA Admin</h1>
+  <button class="add-btn" onclick="addRow()">➕ Добавить IPA</button>
+  <button class="save-btn" onclick="downloadJSON()">💾 Скачать JSON</button>
+
+  <table id="ipaTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>BundleId</th>
+        <th>Version</th>
+        <th>minIOS</th>
+        <th>Size</th>
+        <th>Icon URL</th>
+        <th>Tags</th>
+        <th>Features</th>
+        <th>Mirrors</th>
+        <th>❌</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script src="admin.js"></script>
+</body>
+</html>
