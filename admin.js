@@ -1,7 +1,9 @@
-// admin.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import { 
+  getFirestore, collection, getDocs, setDoc, updateDoc, deleteDoc, doc, getDoc 
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
+// ⚡️ Конфигурация Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDFj9gOYU49Df6ohUR5CnbRv3qdY2i_OmU",
   authDomain: "ipa-panel.firebaseapp.com",
@@ -14,13 +16,14 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// Элементы
 const cards = document.getElementById("cards");
 const modal = document.getElementById("modal");
 const form = document.getElementById("ipa-form");
 const modalTitle = document.getElementById("modal-title");
 let editId = null;
 
-// === Загрузка данных из Firestore ===
+// === Загрузка данных ===
 async function loadData() {
   cards.innerHTML = "<p style='color:#888'>Загрузка...</p>";
   const snap = await getDocs(collection(db, "ursa_ipas"));
@@ -39,7 +42,7 @@ function render(apps) {
         <div class="app-title">${app.name}</div>
         <div class="app-meta">ID: ${app.id}</div>
         <div class="app-meta">Bundle: ${app.bundleId}</div>
-        <div class="app-meta">Версия: ${app.version} · iOS ≥ ${app.minIOS}</div>
+        <div class="app-meta">Версия: ${app.version} · iOS ≥ ${app.minimalIOS}</div>
         <div class="app-meta">Размер: ${app.sizeBytes}</div>
       </div>
       <div class="app-actions">
@@ -77,22 +80,24 @@ form.addEventListener("submit", async e => {
   e.preventDefault();
   const values = Object.fromEntries(new FormData(form));
 
+  // 🔑 ID документа = bundleId_version
+  const docId = values.bundleId + "_" + values.version;
+
   const ipa = {
-    id: values.id,
     name: values.name,
     bundleId: values.bundleId,
     version: values.version,
-    minIOS: values.minIOS,
+    minimalIOS: values.minimalIOS,
     sizeBytes: Number(values.sizeBytes || 0),
     iconUrl: values.iconUrl,
-    downloadUrl: values.mirrorUrl,
+    downloadUrl: values.downloadUrl,
     features: values.features || ""
   };
 
   if (editId) {
     await updateDoc(doc(db, "ursa_ipas", editId), ipa);
   } else {
-    await addDoc(collection(db, "ursa_ipas"), ipa);
+    await setDoc(doc(db, "ursa_ipas", docId), ipa);
   }
   closeModal();
   loadData();
@@ -108,9 +113,10 @@ window.deleteItem = async id => {
 
 // === Редактирование ===
 window.editItem = async id => {
-  const snap = await getDocs(collection(db, "ursa_ipas"));
-  const app = snap.docs.find(d => d.id === id);
-  if (app) openModal("Редактировать IPA", { id: app.id, ...app.data() });
+  const appSnap = await getDoc(doc(db, "ursa_ipas", id));
+  if (appSnap.exists()) {
+    openModal("Редактировать IPA", { id, ...appSnap.data() });
+  }
 };
 
 // === Кнопки ===
@@ -130,5 +136,5 @@ document.getElementById("download-btn").addEventListener("click", async () => {
   URL.revokeObjectURL(url);
 });
 
-// === Загрузка при старте ===
+// === Старт ===
 loadData();
