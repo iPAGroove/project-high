@@ -8,7 +8,11 @@ body {
 
 /* iOS “glass” эффект для topbar только если поддерживается */
 @supports ((-webkit-backdrop-filter: blur(8px)) or (backdrop-filter: blur(8px))) {
-  .topbar { background: color-mix(in oklab, var(--bg) 70%, #000 30%); }
+  .topbar {
+    background: rgba(0,0,0,0.15); /* еле заметный тёмный фон */
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
+    backdrop-filter: blur(8px) saturate(120%);
+  }
 }
 
 /* Только WebKit: уменьшить “bounce” у прокрутки карточек внутри модалок (на будущее) */
