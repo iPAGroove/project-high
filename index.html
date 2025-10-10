@@ -10,7 +10,7 @@
   <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="manifest.webmanifest">
 
-  <!-- Шрифт для шапки -->
+  <!-- Шрифт -->
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="assets/css/base.css" />
@@ -30,7 +30,7 @@
   <!-- ПОИСК -->
   <section class="search-area">
     <div class="wrap search-wrap">
-      <input id="search" type="search" inputmode="search" placeholder="Поиск по названию, bundleId, тегам…" />
+      <input id="search" type="search" inputmode="search" placeholder="Поиск по названию, bundleId…" />
       <button id="theme-toggle" aria-label="Сменить тему">🎨</button>
     </div>
   </section>
@@ -86,7 +86,6 @@
         </div>
       </header>
       <section class="sheet-body">
-        <div id="app-tags" class="tags"></div>
         <div id="app-desc" class="section"></div>
       </section>
       <footer class="sheet-footer">
@@ -105,16 +104,38 @@
       </header>
       <div class="dialog-body" id="help-body">
         <p>Это каталог IPA. Нажимай на карточку — внутри описание и кнопка загрузки.</p>
-        <p>Чтобы добавить приложение, отредактируй <code>data/ipas.json</code> и сделай commit.</p>
-        <p>Фильтр «Игры» показывает записи с тегом <code>games</code>, «Приложения» — всё остальное.</p>
+        <p>Все данные подгружаются напрямую из <code>Firestore</code> (коллекция <code>ipas</code>).</p>
+        <p>Для добавления/редактирования используй админ-панель.</p>
       </div>
     </section>
   </div>
 
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFj9gOYU49Df6ohUR5CnbRv3qdY2i_OmU",
+      authDomain: "ipa-panel.firebaseapp.com",
+      projectId: "ipa-panel",
+      storageBucket: "ipa-panel.firebasestorage.app",
+      messagingSenderId: "239982196215",
+      appId: "1:239982196215:web:9de387c51952da428daaf2",
+      measurementId: "G-YP1XRFEDXM"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // прокидываем в глобал
+    window.db = db;
+  </script>
+
   <!-- JS -->
   <script src="assets/js/themes.js?v=7"></script>
   <script src="assets/js/ios.js?v=7"></script>
-  <script src="assets/js/render.js?v=7"></script>
-  <script src="assets/js/app.js?v=7"></script>
+  <script type="module" src="assets/js/render.js?v=7"></script>
+  <script type="module" src="assets/js/app.js?v=7"></script>
 </body>
 </html>
