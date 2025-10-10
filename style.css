@@ -6,8 +6,7 @@
   --text: #fff;
   --muted: #9aa7bd;
   --accent: #00b3ff;
-  --radius: 12px;
-  --gap: 14px;
+  --radius: 14px;
 }
 
 html, body {
@@ -17,27 +16,22 @@ html, body {
   color: var(--text);
   font: 15px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
 }
 
-/* ====== HEADER ====== */
+/* HEADER */
 .topbar {
   padding: 18px;
   text-align: center;
-  background: transparent;
   border-bottom: 1px solid var(--border);
 }
-
 .brand {
   font-family: 'Orbitron', sans-serif;
   font-size: 22px;
   font-weight: 700;
-  letter-spacing: 1px;
   color: var(--accent);
-  text-transform: uppercase;
 }
 
-/* ====== BUTTONS ====== */
+/* BUTTONS */
 .btn {
   border: none;
   border-radius: var(--radius);
@@ -45,17 +39,16 @@ html, body {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: 0.2s;
   box-shadow: 0 4px 10px rgba(0,0,0,.3);
 }
 .btn.blue { background: var(--accent); color: #001018; }
 .btn.green { background: #4caf50; color: #fff; }
 .btn.red { background: #e53935; color: #fff; }
-.btn.small { padding: 6px 10px; font-size: 12px; }
+.btn.small { padding: 6px 10px; font-size: 13px; }
+.btn:hover { opacity: 0.9; }
 
-.btn:hover { opacity: 0.9; transform: translateY(-1px); }
-.btn:active { transform: translateY(0); }
-
+/* ACTIONS */
 .admin-actions {
   margin: 20px 0;
   display: flex;
@@ -63,62 +56,30 @@ html, body {
   gap: 12px;
 }
 
-/* ====== TABLE ====== */
-.admin-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 12px;
+/* CARDS */
+.cards {
+  display: grid;
+  gap: 14px;
+}
+.app-card {
   background: var(--card);
   border-radius: var(--radius);
-  overflow: hidden;
+  border: 1px solid var(--border);
+  padding: 16px;
+  box-shadow: 0 6px 14px rgba(0,0,0,.35);
 }
-.admin-table th, .admin-table td {
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--border);
-  text-align: left;
-  font-size: 14px;
-}
-.admin-table th {
-  background: var(--bg-elev);
+.app-title {
   font-weight: 700;
-  color: var(--accent);
-  text-transform: uppercase;
-  font-size: 13px;
+  font-size: 16px;
+  margin-bottom: 6px;
 }
-.admin-table tr:last-child td { border-bottom: none; }
-.admin-table td { color: var(--text); }
-
-/* ====== MOBILE CARDS ====== */
-@media (max-width: 768px) {
-  .admin-table,
-  .admin-table thead,
-  .admin-table tbody,
-  .admin-table th,
-  .admin-table td,
-  .admin-table tr {
-    display: block;
-    width: 100%;
-  }
-  .admin-table thead { display: none; }
-  .admin-table tr {
-    margin-bottom: 14px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--card);
-    padding: 12px;
-    box-shadow: 0 4px 14px rgba(0,0,0,.4);
-  }
-  .admin-table td {
-    border: none;
-    padding: 6px 0;
-    display: flex;
-    justify-content: space-between;
-    font-size: 15px;
-  }
-  .admin-table td::before {
-    content: attr(data-label);
-    font-weight: 700;
-    color: var(--muted);
-    margin-right: 12px;
-  }
+.app-meta {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.app-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
 }
