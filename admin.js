@@ -1,9 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import { 
-  getFirestore, collection, getDocs, setDoc, updateDoc, deleteDoc, doc, getDoc 
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-// ⚡️ Конфигурация Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDFj9gOYU49Df6ohUR5CnbRv3qdY2i_OmU",
   authDomain: "ipa-panel.firebaseapp.com",
@@ -16,18 +13,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Элементы
 const cards = document.getElementById("cards");
 const modal = document.getElementById("modal");
 const form = document.getElementById("ipa-form");
 const modalTitle = document.getElementById("modal-title");
-let editId = null;
+let editDocId = null;
 
 // === Загрузка данных ===
 async function loadData() {
   cards.innerHTML = "<p style='color:#888'>Загрузка...</p>";
   const snap = await getDocs(collection(db, "ursa_ipas"));
-  const apps = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const apps = snap.docs.map(d => ({ __docId: d.id, ...d.data() })); // сохраним doc.id для update/delete
   render(apps);
 }
 
@@ -39,15 +35,15 @@ function render(apps) {
     card.className = "app-card";
     card.innerHTML = `
       <div class="app-info">
-        <div class="app-title">${app.name}</div>
-        <div class="app-meta">ID: ${app.id}</div>
-        <div class="app-meta">Bundle: ${app.bundleId}</div>
-        <div class="app-meta">Версия: ${app.version} · iOS ≥ ${app.minimalIOS}</div>
+        <div class="app-title">${app.NAME}</div>
+        <div class="app-meta">ID: ${app.ID}</div>
+        <div class="app-meta">Bundle: ${app["Bundle ID"]}</div>
+        <div class="app-meta">Версия: ${app.Version} · iOS ≥ ${app["minimal iOS"]}</div>
         <div class="app-meta">Размер: ${app.sizeBytes}</div>
       </div>
       <div class="app-actions">
-        <button class="btn small blue" onclick="editItem('${app.id}')">✏️ Ред.</button>
-        <button class="btn small red" onclick="deleteItem('${app.id}')">🗑 Удалить</button>
+        <button class="btn small blue" onclick="editItem('${app.__docId}')">✏️ Ред.</button>
+        <button class="btn small red" onclick="deleteItem('${app.__docId}')">🗑 Удалить</button>
       </div>
     `;
     cards.appendChild(card);
@@ -58,7 +54,7 @@ function render(apps) {
 function openModal(title, values = {}) {
   modalTitle.textContent = title;
   form.reset();
-  editId = values.id || null;
+  editDocId = values.__docId || null;
   Object.keys(values).forEach(k => { if (form[k]) form[k].value = values[k]; });
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
@@ -80,24 +76,22 @@ form.addEventListener("submit", async e => {
   e.preventDefault();
   const values = Object.fromEntries(new FormData(form));
 
-  // 🔑 ID документа = bundleId_version
-  const docId = values.bundleId + "_" + values.version;
-
   const ipa = {
-    name: values.name,
-    bundleId: values.bundleId,
-    version: values.version,
-    minimalIOS: values.minimalIOS,
+    ID: values.ID,
+    NAME: values.NAME,
+    "Bundle ID": values["Bundle ID"],
+    Version: values.Version,
+    "minimal iOS": values["minimal iOS"],
     sizeBytes: Number(values.sizeBytes || 0),
     iconUrl: values.iconUrl,
-    downloadUrl: values.downloadUrl,
+    DownloadUrl: values.DownloadUrl,
     features: values.features || ""
   };
 
-  if (editId) {
-    await updateDoc(doc(db, "ursa_ipas", editId), ipa);
+  if (editDocId) {
+    await updateDoc(doc(db, "ursa_ipas", editDocId), ipa);
   } else {
-    await setDoc(doc(db, "ursa_ipas", docId), ipa);
+    await addDoc(collection(db, "ursa_ipas"), ipa);
   }
   closeModal();
   loadData();
@@ -113,10 +107,9 @@ window.deleteItem = async id => {
 
 // === Редактирование ===
 window.editItem = async id => {
-  const appSnap = await getDoc(doc(db, "ursa_ipas", id));
-  if (appSnap.exists()) {
-    openModal("Редактировать IPA", { id, ...appSnap.data() });
-  }
+  const snap = await getDocs(collection(db, "ursa_ipas"));
+  const app = snap.docs.find(d => d.id === id);
+  if (app) openModal("Редактировать IPA", { __docId: app.id, ...app.data() });
 };
 
 // === Кнопки ===
@@ -126,7 +119,7 @@ document.getElementById("add-btn").addEventListener("click", () => {
 
 document.getElementById("download-btn").addEventListener("click", async () => {
   const snap = await getDocs(collection(db, "ursa_ipas"));
-  const apps = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const apps = snap.docs.map(d => ({ ...d.data() }));
   const blob = new Blob([JSON.stringify(apps, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -136,5 +129,5 @@ document.getElementById("download-btn").addEventListener("click", async () => {
   URL.revokeObjectURL(url);
 });
 
-// === Старт ===
+// === Загрузка при старте ===
 loadData();
