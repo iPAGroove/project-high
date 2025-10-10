@@ -227,27 +227,58 @@ h3 {
 }
 
 /* ──────────────── Модалка ──────────────── */
-.modal{ position:fixed; inset:0; z-index:50; display:none; }
-.modal.open{ display:block; }
+.modal { position:fixed; inset:0; z-index:50; display:none; }
+.modal.open { display:block; animation: fadeIn .3s ease; }
+@keyframes fadeIn {
+  from { background:rgba(0,0,0,0); }
+  to { background:rgba(0,0,0,.55); }
+}
 .modal .backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.55); }
-.sheet{
-  position:absolute; inset:auto 0 0 0; margin:0 auto; max-width:760px; min-height:52%;
-  background:var(--bg); border-top:1px solid var(--border);
-  border-radius:22px 22px 0 0; box-shadow:0 -12px 28px rgb(0 0 0 / .5);
+
+.sheet {
+  position:absolute; inset:auto 0 0 0; margin:0 auto;
+  max-width:760px; min-height:52%;
+  background:var(--bg);
+  border-top:1px solid var(--border);
+  border-radius:22px 22px 0 0;
+  box-shadow:0 -12px 28px rgba(0,0,0,.65);
   display:flex; flex-direction:column;
+  transform: translateY(100%);
+  animation: slideUp .35s cubic-bezier(.25,.8,.25,1) forwards;
+  overflow:hidden;
 }
-.close{
-  position:absolute; right:14px; top:14px; z-index:2;
-  appearance:none; border:1px solid var(--border);
-  background:var(--card); color:var(--text);
-  padding:8px 10px; border-radius:12px;
+@keyframes slideUp {
+  to { transform: translateY(0); }
 }
+
+/* Неоновая рамка модалки */
+.sheet:before {
+  content:""; position:absolute; inset:0;
+  border-radius:22px 22px 0 0;
+  padding:1px;
+  background:linear-gradient(120deg, var(--accent), transparent 60%, var(--accent));
+  background-size:200% 200%;
+  animation:borderflow 6s linear infinite;
+  -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+  pointer-events:none;
+}
+
 .sheet-header{ padding:18px 16px 10px; border-bottom:1px solid var(--border); }
 .app-head{ display:grid; grid-template-columns:76px 1fr; gap:12px; align-items:center; }
+#app-icon{ transition: transform .4s cubic-bezier(.2,1.4,.4,1); }
+.sheet.open #app-icon { transform: scale(1.05); }
+
 .sheet-body{
   padding:14px 16px 16px; display:grid; gap:16px;
   overflow:auto; max-height:58vh;
+  animation: fadeUp .4s ease both;
 }
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(20px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
 .section p{ margin:0; color:#cfe1ffbf; font-size:15px; }
 .bullets{ margin:8px 0 0; padding-left:22px; }
 .bullets li{ margin:6px 0; }
@@ -264,6 +295,12 @@ h3 {
   padding:12px 14px; border-radius:14px;
   background:var(--accent); color:#001018;
   font-weight:800; border:0; width:100%;
+  box-shadow:0 0 12px rgba(0,179,255,.45);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+.btn:hover{
+  transform:translateY(-2px) scale(1.03);
+  box-shadow:0 0 18px rgba(0,179,255,.65);
 }
 
 /* ──────────────── HELP-диалог ──────────────── */
