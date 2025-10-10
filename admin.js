@@ -18,16 +18,16 @@
 
   function render() {
     cards.innerHTML = "";
-    data.forEach((app, idx) => {
+    data.forEach((doc, idx) => {
       const card = document.createElement("div");
       card.className = "app-card";
       card.innerHTML = `
         <div class="app-info">
-          <div class="app-title">${app.name}</div>
-          <div class="app-meta">ID: ${app.id}</div>
-          <div class="app-meta">Bundle: ${app.bundleId}</div>
-          <div class="app-meta">Версия: ${app.version} · iOS ≥ ${app.minIOS}</div>
-          <div class="app-meta">Размер: ${app.sizeBytes}</div>
+          <div class="app-title">${doc["NAME"]}</div>
+          <div class="app-meta">ID: ${doc["ID"]}</div>
+          <div class="app-meta">Bundle: ${doc["Bundle ID"]}</div>
+          <div class="app-meta">Версия: ${doc["Version"]} · iOS ≥ ${doc["minimal iOS"]}</div>
+          <div class="app-meta">Размер: ${doc["sizeBytes"]}</div>
         </div>
         <div class="app-actions">
           <button class="btn small blue" onclick="editItem(${idx})">✏️ Ред.</button>
@@ -61,16 +61,19 @@
   form.addEventListener("submit", e => {
     e.preventDefault();
     const values = Object.fromEntries(new FormData(form));
+
     const ipa = {
-      id: values.id,
-      name: values.name,
-      bundleId: values.bundleId,
-      version: values.version,
-      minIOS: values.minIOS,
-      sizeBytes: Number(values.sizeBytes || 0),
-      iconUrl: values.iconUrl,
-      mirrors: values.mirrorUrl ? [{ label: "Direct", url: values.mirrorUrl }] : []
+      "ID": values["ID"],
+      "NAME": values["NAME"],
+      "Bundle ID": values["Bundle ID"],
+      "Version": values["Version"],
+      "minimal iOS": values["minimal iOS"],
+      "sizeBytes": values["sizeBytes"],
+      "iconUrl": values["iconUrl"],
+      "DownloadUrl": values["DownloadUrl"],
+      "features": values["features"]
     };
+
     if (editIndex !== null) {
       data[editIndex] = ipa;
     } else {
