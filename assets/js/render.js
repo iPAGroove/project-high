@@ -38,7 +38,8 @@ function normalize(doc) {
     sizeBytes: doc.sizeBytes || 0,
     iconUrl: doc.iconUrl || "",
     downloadUrl: doc.DownloadUrl || doc.downloadUrl || "",
-    features: doc.features || ""
+    features: doc.features || "",
+    tags: Array.isArray(doc.tags) ? doc.tags : (doc.tags ? String(doc.tags).split(",").map(s=>s.trim()) : [])
   };
 }
 
@@ -46,6 +47,11 @@ function normalize(doc) {
 function renderCatalog(apps) {
   const catalog = document.getElementById("catalog");
   catalog.innerHTML = "";
+  if (!apps.length) {
+    catalog.innerHTML = `<div style="opacity:.7;text-align:center;padding:40px 16px;">Пока нет приложений</div>`;
+    return;
+  }
+
   apps.forEach(app => {
     const el = document.createElement("article");
     el.className = "card";
@@ -118,23 +124,49 @@ modal.addEventListener("click",(e)=>{
 });
 document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") closeModal(); });
 
-// === ЗАГРУЗКА + ПОИСК ===
+// === ЗАГРУЗКА + ПОИСК + ФИЛЬТР ===
 async function loadCatalog() {
   const snap = await getDocs(collection(db, "ursa_ipas"));
-  const data = snap.docs.map(d => normalize(d.data()));
+  const all = snap.docs.map(d => normalize(d.data()));
 
-  renderCatalog(data);
+  let state = { all, q:"", tab:"games" };
 
+  function apply(){
+    const q = state.q.trim().toLowerCase();
+    const list = state.all.filter(app=>{
+      const byTab = state.tab==="games" ? app.tags.includes("games") : !app.tags.includes("games");
+      if (!byTab) return false;
+      if (!q) return true;
+      return (
+        (app.name||"").toLowerCase().includes(q) ||
+        (app.bundleId||"").toLowerCase().includes(q) ||
+        (app.features||"").toLowerCase().includes(q) ||
+        app.tags.some(t=>(t||"").toLowerCase().includes(q))
+      );
+    });
+    renderCatalog(list);
+  }
+
+  // поиск
   const search = document.getElementById("search");
   search.addEventListener("input", () => {
-    const q = search.value.toLowerCase();
-    const filtered = data.filter(app =>
-      (app.name || "").toLowerCase().includes(q) ||
-      (app.bundleId || "").toLowerCase().includes(q) ||
-      (app.features || "").toLowerCase().includes(q)
-    );
-    renderCatalog(filtered);
+    state.q = search.value;
+    apply();
   });
+
+  // таббар (Games/Apps)
+  const bar = document.getElementById("tabbar");
+  bar.addEventListener("click",(e)=>{
+    const pill = e.target.closest(".nav-btn[data-tab]");
+    if (pill){
+      state.tab = pill.dataset.tab;
+      bar.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+      pill.classList.add("active");
+      apply();
+    }
+  });
+
+  apply(); // первый рендер
 }
 
 document.addEventListener("DOMContentLoaded", loadCatalog);
