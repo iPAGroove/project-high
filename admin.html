@@ -19,7 +19,7 @@
   <main class="wrap">
     <div class="admin-actions">
       <button id="add-btn" class="btn blue">+ Добавить IPA</button>
-      <input id="search" type="search" placeholder="Поиск по имени, bundleId, тегам…" />
+      <input id="search" type="search" placeholder="Поиск по имени, bundleId…" />
     </div>
     <div id="cards" class="cards"></div>
   </main>
@@ -33,33 +33,25 @@
         <button class="close" data-close>✕</button>
       </header>
       <form id="ipa-form" class="modal-body">
+        <label>Название <input type="text" name="name" required></label>
+        <label>Bundle ID <input type="text" name="bundleId" required></label>
+        <label>Версия <input type="text" name="version" required></label>
+        <label>Minimal iOS <input type="text" name="minIOS"></label>
+        <label>Размер (MB) <input type="number" name="sizeBytes" placeholder="например 205"></label>
+        
+        <label>Иконка (URL)
+          <input type="url" name="iconUrl" id="iconUrl">
+          <img id="icon-preview" class="icon-preview" style="display:none;">
+        </label>
 
-        <!-- Основное -->
-        <fieldset>
-          <legend>Основное</legend>
-          <label>Название <input type="text" name="name" required placeholder="Например: Subway Surfers"></label>
-          <label>Bundle ID <input type="text" name="bundleId" required placeholder="com.company.app"></label>
-          <label>Версия <input type="text" name="version" required placeholder="3.33.0"></label>
-          <label>ID (генерируется) <input type="text" name="id" readonly></label>
-          <label>Minimal iOS <input type="text" name="minIOS" placeholder="Например: 13.0"></label>
-          <label>Размер (MB) <input type="number" name="sizeBytes" placeholder="205"></label>
-        </fieldset>
+        <label>Ссылка на IPA <input type="url" name="downloadUrl"></label>
+        <label>Фичи <textarea name="features" placeholder="Через запятую"></textarea></label>
 
-        <!-- Ссылки -->
+        <!-- Категория -->
         <fieldset>
-          <legend>Ссылки</legend>
-          <label>Иконка (URL)
-            <input type="url" name="iconUrl" id="iconUrl" placeholder="https://...jpg">
-            <img id="icon-preview" class="icon-preview" style="display:none;">
-          </label>
-          <label>Ссылка на IPA <input type="url" name="downloadUrl" placeholder="https://...ipa"></label>
-        </fieldset>
-
-        <!-- Дополнительно -->
-        <fieldset>
-          <legend>Дополнительно</legend>
-          <label>Фичи <textarea name="features" rows="2" placeholder="Unlimited Coins, God Mode"></textarea></label>
-          <label>Теги <textarea name="tags" rows="2" placeholder="games, premium, vip"></textarea></label>
+          <legend>Категория</legend>
+          <label><input type="radio" name="tag" value="games"> Игры</label>
+          <label><input type="radio" name="tag" value="apps"> Приложения</label>
         </fieldset>
 
         <div class="modal-actions">
