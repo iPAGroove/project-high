@@ -6,8 +6,24 @@
     return `${(num/Math.pow(1024,e)).toFixed(e?1:0)} ${u[e]}`;
   }
 
+  // преобразуем Firestore-док в наш фронтовый формат
+  function normalizeApp(doc){
+    return {
+      id: doc["ID"],
+      name: doc["NAME"],
+      bundleId: doc["Bundle ID"],
+      version: doc["Version"],
+      minIOS: doc["minimal iOS"],
+      sizeBytes: doc["sizeBytes"]?.toString(),
+      iconUrl: doc["iconUrl"],
+      downloadUrl: doc["DownloadUrl"],
+      features: doc["features"]
+    };
+  }
+
   // карточки
-  window.renderCatalog = function(apps){
+  window.renderCatalog = function(appsRaw){
+    const apps = appsRaw.map(normalizeApp);
     const root = document.getElementById("catalog");
     root.innerHTML = "";
     apps.forEach(app=>{
@@ -22,7 +38,6 @@
             <div class="meta">v${app.version||""}${app.minIOS?` · iOS ≥ ${app.minIOS}`:""}${app.sizeBytes?` · ${prettyBytes(app.sizeBytes)}`:""}</div>
           </div>
         </div>
-        <div class="tags">${(app.tags||[]).map(t=>`<span class="tag">#${t}</span>`).join("")}</div>
       `;
       const open = ()=>openModal(app);
       el.addEventListener("click", open);
@@ -45,23 +60,20 @@
     document.getElementById("app-info").textContent =
       `v${app.version||""}${app.minIOS?` · iOS ≥ ${app.minIOS}`:""}${app.sizeBytes?` · ${prettyBytes(app.sizeBytes)}`:""}`;
 
-    document.getElementById("app-tags").innerHTML =
-      (app.tags||[]).map(t=>`<span class="tag">#${t}</span>`).join("");
-
-    const feats = Array.isArray(app.features) ? app.features
-      : (app.description ? app.description.split(/\r?\n/).map(s=>s.replace(/^[\s•\-–—]+/,"").trim()).filter(Boolean) : []);
+    // features (строка через запятую)
+    const feats = (app.features||"").split(",").map(f=>f.trim()).filter(Boolean);
     document.getElementById("app-desc").innerHTML = feats.length
       ? `<div class="meta" style="margin-bottom:6px">Hack Features</div>
          <ul class="bullets">${feats.map(f=>`<li>${escapeHTML(f)}`).join("")}</ul>`
       : "";
 
+    // кнопка загрузки
     const dl = document.getElementById("dl-buttons");
     dl.innerHTML = "";
-    const url = app?.mirrors?.[0]?.url;
-    if (url){
+    if (app.downloadUrl){
       const a = document.createElement("a");
       a.className = "btn";
-      a.href = url; a.target = "_blank"; a.rel = "noopener";
+      a.href = app.downloadUrl; a.target = "_blank"; a.rel = "noopener";
       a.textContent = (window.__t ? window.__t("download") : "Загрузить IPA");
       dl.appendChild(a);
     }
