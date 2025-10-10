@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDFj9gOYU49Df6ohUR5CnbRv3qdY2i_OmU",
@@ -17,9 +17,11 @@ const cards = document.getElementById("cards");
 const modal = document.getElementById("modal");
 const form = document.getElementById("ipa-form");
 const modalTitle = document.getElementById("modal-title");
+const iconInput = document.getElementById("iconUrl");
+const iconPreview = document.getElementById("icon-preview");
 let editDocId = null;
 
-// ===== HELPER =====
+// ===== HELPERS =====
 function formatSize(bytes) {
   if (!bytes) return "-";
   const mb = bytes / 1000000;
@@ -27,22 +29,37 @@ function formatSize(bytes) {
 }
 
 // === Загрузка ===
-async function loadData() {
+async function loadData(query = "") {
   cards.innerHTML = "<p style='color:#888'>Загрузка...</p>";
   const snap = await getDocs(collection(db, "ursa_ipas"));
-  const apps = snap.docs.map(d => ({ __docId: d.id, ...d.data() }));
+  let apps = snap.docs.map(d => ({ __docId: d.id, ...d.data() }));
+
+  // фильтр
+  if (query) {
+    const q = query.toLowerCase();
+    apps = apps.filter(app =>
+      (app["NAME"] || "").toLowerCase().includes(q) ||
+      (app["Bundle ID"] || "").toLowerCase().includes(q) ||
+      (app["tags"] || []).some(t => (t||"").toLowerCase().includes(q))
+    );
+  }
+
   render(apps);
 }
 
 // === Рендер карточек ===
 function render(apps) {
   cards.innerHTML = "";
+  if (!apps.length) {
+    cards.innerHTML = "<p style='color:#888'>Нет приложений</p>";
+    return;
+  }
   apps.forEach(app => {
     const card = document.createElement("div");
     card.className = "app-card";
     card.innerHTML = `
       <div class="app-info">
-        <img src="${app.iconUrl || ""}" alt="" style="width:40px;height:40px;border-radius:8px;margin-bottom:8px;">
+        <img src="${app.iconUrl || ""}" alt="" style="width:50px;height:50px;border-radius:12px;margin-bottom:8px;">
         <div class="app-title">${app["NAME"] || "Без названия"}</div>
         <div class="app-meta">ID: ${app["ID"] || "-"}</div>
         <div class="app-meta">Bundle: ${app["Bundle ID"] || "-"}</div>
@@ -77,6 +94,14 @@ function openModal(title, values = {}) {
     }
   });
 
+  // превью иконки
+  if (values.iconUrl) {
+    iconPreview.src = values.iconUrl;
+    iconPreview.style.display = "block";
+  } else {
+    iconPreview.style.display = "none";
+  }
+
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
@@ -90,6 +115,16 @@ function closeModal() {
 
 modal.addEventListener("click", e => {
   if (e.target.hasAttribute("data-close") || e.target === modal) closeModal();
+});
+
+// === Превью иконки ===
+iconInput.addEventListener("input", () => {
+  if (iconInput.value) {
+    iconPreview.src = iconInput.value;
+    iconPreview.style.display = "block";
+  } else {
+    iconPreview.style.display = "none";
+  }
 });
 
 // === Добавление / обновление ===
@@ -107,8 +142,11 @@ form.addEventListener("submit", async e => {
     "iconUrl": values.iconUrl,
     "DownloadUrl": values.downloadUrl,
     "features": values.features || "",
-    "tags": values.tags ? values.tags.split(",").map(t => t.trim()) : []
+    "tags": values.tags ? values.tags.split(",").map(t => t.trim()) : [],
+    "updatedAt": new Date().toISOString(),
   };
+
+  if (!editDocId) ipa["createdAt"] = new Date().toISOString();
 
   if (editDocId) {
     await updateDoc(doc(db, "ursa_ipas", editDocId), ipa);
@@ -138,6 +176,14 @@ window.editItem = async id => {
 document.getElementById("add-btn").addEventListener("click", () => {
   openModal("Добавить IPA");
 });
+
+// === Поиск ===
+const searchBox = document.createElement("input");
+searchBox.type = "search";
+searchBox.placeholder = "Поиск по имени, bundleId, тегам…";
+searchBox.style = "width:100%;padding:10px;margin:10px 0;border-radius:8px;border:1px solid #333;background:#121722;color:#fff;";
+document.querySelector(".admin-actions").appendChild(searchBox);
+searchBox.addEventListener("input", () => loadData(searchBox.value));
 
 // === Загрузка при старте ===
 loadData();
