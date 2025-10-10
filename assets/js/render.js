@@ -1,3 +1,5 @@
+import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
 (function () {
   function prettyBytes(num){
     if(!num) return "0 B";
@@ -6,42 +8,25 @@
     return `${(num/Math.pow(1024,e)).toFixed(e?1:0)} ${u[e]}`;
   }
 
-  // преобразуем Firestore-док в наш фронтовый формат
-  function normalizeApp(doc){
-    return {
-      id: doc["ID"],
-      name: doc["NAME"],
-      bundleId: doc["Bundle ID"],
-      version: doc["Version"],
-      minIOS: doc["minimal iOS"],
-      sizeBytes: doc["sizeBytes"]?.toString(),
-      iconUrl: doc["iconUrl"],
-      downloadUrl: doc["DownloadUrl"],
-      features: doc["features"]
-    };
-  }
-
   // карточки
-  window.renderCatalog = function(appsRaw){
-    const apps = appsRaw.map(normalizeApp);
+  window.renderCatalog = function(apps){
     const root = document.getElementById("catalog");
     root.innerHTML = "";
     apps.forEach(app=>{
       const el = document.createElement("article");
-      el.className = "card"; el.setAttribute("role","listitem"); el.tabIndex = 0;
+      el.className = "card";
       el.innerHTML = `
         <div class="row">
-          <img class="icon" src="${app.iconUrl}" alt="" loading="lazy" referrerpolicy="no-referrer">
+          <img class="icon" src="${app.iconUrl}" alt="" loading="lazy">
           <div>
-            <h3>${app.name}</h3>
-            <div class="meta">${app.bundleId||""}</div>
-            <div class="meta">v${app.version||""}${app.minIOS?` · iOS ≥ ${app.minIOS}`:""}${app.sizeBytes?` · ${prettyBytes(app.sizeBytes)}`:""}</div>
+            <h3>${app.NAME}</h3>
+            <div class="meta">${app["Bundle ID"]||""}</div>
+            <div class="meta">v${app.Version||""}${app["minimal iOS"]?` · iOS ≥ ${app["minimal iOS"]}`:""}${app.sizeBytes?` · ${prettyBytes(app.sizeBytes)}`:""}</div>
           </div>
         </div>
       `;
       const open = ()=>openModal(app);
       el.addEventListener("click", open);
-      el.addEventListener("keypress",(e)=>{ if(e.key==="Enter") open(); });
       root.appendChild(el);
     });
   };
@@ -49,31 +34,24 @@
   // модалка
   const modal = document.getElementById("modal");
 
-  function escapeHTML(s){
-    return (s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[m]));
-  }
-
   function openModal(app){
     document.getElementById("app-icon").src = app.iconUrl;
-    document.getElementById("app-title").textContent = app.name || "";
-    document.getElementById("app-bundle").textContent = app.bundleId || "";
+    document.getElementById("app-title").textContent = app.NAME || "";
+    document.getElementById("app-bundle").textContent = app["Bundle ID"] || "";
     document.getElementById("app-info").textContent =
-      `v${app.version||""}${app.minIOS?` · iOS ≥ ${app.minIOS}`:""}${app.sizeBytes?` · ${prettyBytes(app.sizeBytes)}`:""}`;
+      `v${app.Version||""}${app["minimal iOS"]?` · iOS ≥ ${app["minimal iOS"]}`:""}${app.sizeBytes?` · ${prettyBytes(app.sizeBytes)}`:""}`;
 
-    // features (строка через запятую)
-    const feats = (app.features||"").split(",").map(f=>f.trim()).filter(Boolean);
-    document.getElementById("app-desc").innerHTML = feats.length
+    document.getElementById("app-desc").innerHTML = app.features
       ? `<div class="meta" style="margin-bottom:6px">Hack Features</div>
-         <ul class="bullets">${feats.map(f=>`<li>${escapeHTML(f)}`).join("")}</ul>`
+         <ul class="bullets">${app.features.split(",").map(f=>`<li>${f.trim()}</li>`).join("")}</ul>`
       : "";
 
-    // кнопка загрузки
     const dl = document.getElementById("dl-buttons");
     dl.innerHTML = "";
-    if (app.downloadUrl){
+    if (app.DownloadUrl){
       const a = document.createElement("a");
       a.className = "btn";
-      a.href = app.downloadUrl; a.target = "_blank"; a.rel = "noopener";
+      a.href = app.DownloadUrl; a.target = "_blank"; a.rel = "noopener";
       a.textContent = (window.__t ? window.__t("download") : "Загрузить IPA");
       dl.appendChild(a);
     }
@@ -92,5 +70,13 @@
   modal.addEventListener("click",(e)=>{
     if (e.target.hasAttribute("data-close") || e.target === modal) closeModal();
   });
+
   document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") closeModal(); });
+
+  // Загружаем данные из Firestore
+  document.addEventListener("DOMContentLoaded", async ()=>{
+    const snap = await getDocs(collection(window.db, "ipas"));
+    const list = snap.docs.map(d => d.data());
+    window.renderCatalog(list);
+  });
 })();
