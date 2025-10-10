@@ -64,7 +64,7 @@ function render(apps) {
           <div class="app-meta">Bundle: ${app["Bundle ID"] || "-"}</div>
           <div class="app-meta">Версия: ${app["Version"] || "-"} · iOS ≥ ${app["minimal iOS"] || "-"}</div>
           <div class="app-meta">Размер: ${formatSize(app["sizeBytes"])}</div>
-          <div class="app-meta">Теги: ${(app["tags"] || []).join(", ")}</div>
+          <div class="app-meta">Категория: ${(app["tags"] || []).join(", ")}</div>
         </div>
       </div>
       <div class="app-actions">
@@ -82,36 +82,22 @@ function openModal(title, values = {}) {
   form.reset();
   editDocId = values.__docId || null;
 
-  const map = {
-    "NAME": "name",
-    "Bundle ID": "bundleId",
-    "Version": "version",
-    "minimal iOS": "minIOS",
-    "sizeBytes": "sizeBytes",
-    "iconUrl": "iconUrl",
-    "DownloadUrl": "downloadUrl",
-    "features": "features",
-    "tags": "tags",
-    "ID": "id"
-  };
-
-  Object.entries(map).forEach(([fKey, formKey]) => {
-    if (form[formKey]) {
-      if (fKey === "sizeBytes") {
-        form[formKey].value = values[fKey] ? Math.round(values[fKey] / 1000000) : "";
-      } else if (fKey === "tags" && Array.isArray(values[fKey])) {
-        form[formKey].value = values[fKey].join(", ");
-      } else {
-        form[formKey].value = values[fKey] || "";
-      }
-    }
-  });
-
+  // заполнение формы
+  if (values["NAME"]) form.name.value = values["NAME"];
+  if (values["Bundle ID"]) form.bundleId.value = values["Bundle ID"];
+  if (values["Version"]) form.version.value = values["Version"];
+  if (values["minimal iOS"]) form.minIOS.value = values["minimal iOS"];
+  if (values["sizeBytes"]) form.sizeBytes.value = Math.round(values["sizeBytes"] / 1000000);
   if (values.iconUrl) {
+    form.iconUrl.value = values.iconUrl;
     iconPreview.src = values.iconUrl;
     iconPreview.style.display = "block";
-  } else {
-    iconPreview.style.display = "none";
+  }
+  if (values.DownloadUrl) form.downloadUrl.value = values.DownloadUrl;
+  if (values.features) form.features.value = values.features;
+  if (Array.isArray(values.tags)) {
+    if (values.tags.includes("games")) form.tag.value = "games";
+    if (values.tags.includes("apps")) form.tag.value = "apps";
   }
 
   modal.classList.add("open");
@@ -136,21 +122,13 @@ iconInput.addEventListener("input", () => {
   }
 });
 
-// === Автогенерация ID ===
-form.bundleId.addEventListener("input", () => {
-  if (form.version.value) form.id.value = `${form.bundleId.value}_${form.version.value}`;
-});
-form.version.addEventListener("input", () => {
-  if (form.bundleId.value) form.id.value = `${form.bundleId.value}_${form.version.value}`;
-});
-
 // === Добавление / обновление ===
 form.addEventListener("submit", async e => {
   e.preventDefault();
   const values = Object.fromEntries(new FormData(form));
 
   const ipa = {
-    "ID": values.bundleId && values.version ? `${values.bundleId}_${values.version}` : values.id,
+    "ID": values.bundleId && values.version ? `${values.bundleId}_${values.version}` : values.bundleId,
     "NAME": values.name,
     "Bundle ID": values.bundleId,
     "Version": values.version,
@@ -159,7 +137,7 @@ form.addEventListener("submit", async e => {
     "iconUrl": values.iconUrl,
     "DownloadUrl": values.downloadUrl,
     "features": values.features || "",
-    "tags": values.tags ? values.tags.split(",").map(t => t.trim()) : [],
+    "tags": values.tag ? [values.tag] : [],
     "updatedAt": new Date().toISOString(),
   };
 
