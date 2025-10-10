@@ -10,8 +10,8 @@
   <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="manifest.webmanifest">
 
-  <!-- Шрифт для шапки -->
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+  <!-- Шрифт -->
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="assets/css/base.css" />
   <link rel="stylesheet" href="assets/css/ios.css" />
@@ -21,7 +21,13 @@
   <!-- ШАПКА -->
   <header class="topbar">
     <div class="wrap">
-      <div class="brand">URSA IPA REPO</div>
+      <div class="brand">
+        <svg viewBox="0 0 600 100">
+          <text x="0" y="70" font-family="Pacifico" font-size="36" fill="none" stroke="var(--accent)">
+            URSA IPA REPO
+          </text>
+        </svg>
+      </div>
     </div>
   </header>
 
@@ -68,7 +74,7 @@
     </div>
   </nav>
 
-  <!-- МОДАЛКА ДЕТАЛЕЙ -->
+  <!-- МОДАЛКА -->
   <div id="modal" class="modal" aria-hidden="true">
     <div class="backdrop" data-close></div>
     <article class="sheet" role="dialog" aria-modal="true" aria-labelledby="app-title">
