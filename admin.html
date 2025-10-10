@@ -19,7 +19,6 @@
   <main class="wrap">
     <div class="admin-actions">
       <button id="add-btn" class="btn blue">+ Добавить IPA</button>
-      <button id="download-btn" class="btn green">💾 Скачать JSON</button>
     </div>
     <div id="cards" class="cards"></div>
   </main>
@@ -33,15 +32,15 @@
         <button class="close" data-close>✕</button>
       </header>
       <form id="ipa-form" class="modal-body">
-        <label>ID <input type="text" name="ID" required></label>
-        <label>NAME <input type="text" name="NAME" required></label>
-        <label>Bundle ID <input type="text" name="Bundle ID" required></label>
-        <label>Version <input type="text" name="Version" required></label>
-        <label>minimal iOS <input type="text" name="minimal iOS"></label>
-        <label>sizeBytes <input type="number" name="sizeBytes"></label>
-        <label>iconUrl <input type="url" name="iconUrl"></label>
-        <label>DownloadUrl <input type="url" name="DownloadUrl"></label>
-        <label>features <input type="text" name="features" placeholder="Через запятую"></label>
+        <label>ID <input type="text" name="id" required></label>
+        <label>Name <input type="text" name="name" required></label>
+        <label>BundleId <input type="text" name="bundleId" required></label>
+        <label>Version <input type="text" name="version" required></label>
+        <label>minimal iOS <input type="text" name="minIOS"></label>
+        <label>Size (bytes) <input type="number" name="sizeBytes"></label>
+        <label>Icon URL <input type="url" name="iconUrl"></label>
+        <label>Download URL <input type="url" name="downloadUrl"></label>
+        <label>Features <input type="text" name="features"></label>
         <div class="modal-actions">
           <button type="submit" class="btn blue">💾 Сохранить</button>
         </div>
@@ -49,6 +48,7 @@
     </div>
   </div>
 
-  <script src="admin.js"></script>
+  <!-- Firebase -->
+  <script type="module" src="admin.js"></script>
 </body>
 </html>
