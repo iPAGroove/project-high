@@ -20,8 +20,15 @@ function prettyBytes(num) {
   return `${(num/Math.pow(1024,e)).toFixed(e?1:0)} ${u[e]}`;
 }
 
+// === глобальное состояние ===
+const state = { all: [], tab: "games" };
+
+function isGame(app) {
+  return (app.tags || []).map(t => String(t).toLowerCase()).includes("games");
+}
+
 // === РЕНДЕРИНГ КАРТОЧЕК ===
-window.renderCatalog = function(apps) {
+function renderCatalog(apps) {
   const root = document.getElementById("catalog");
   root.innerHTML = "";
   apps.forEach(app => {
@@ -50,7 +57,7 @@ window.renderCatalog = function(apps) {
     el.addEventListener("keypress",(e)=>{ if(e.key==="Enter") open(); });
     root.appendChild(el);
   });
-};
+}
 
 // === МОДАЛКА ===
 const modal = document.getElementById("modal");
@@ -100,12 +107,32 @@ modal.addEventListener("click",(e)=>{
 });
 document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") closeModal(); });
 
+// === ПРИМЕНЕНИЕ ФИЛЬТРА ===
+function apply() {
+  const list = state.all.filter(app => state.tab === "games" ? isGame(app) : !isGame(app));
+  renderCatalog(list);
+}
+
 // === ЗАГРУЗКА С Firestore ===
 async function loadCatalog(){
   const snap = await getDocs(collection(db, "ursa_ipas"));
-  const apps = [];
-  snap.forEach((docSnap)=> apps.push(docSnap.data())); // без нормализации
-  window.renderCatalog(apps);
+  state.all = [];
+  snap.forEach((docSnap)=> state.all.push(docSnap.data())); 
+  apply();
 }
 
-document.addEventListener("DOMContentLoaded", loadCatalog);
+// === ТАББАР ===
+document.addEventListener("DOMContentLoaded", ()=>{
+  loadCatalog();
+
+  const bar = document.getElementById("tabbar");
+  bar.addEventListener("click",(e)=>{
+    const pill = e.target.closest(".nav-btn[data-tab]");
+    if (pill){
+      state.tab = pill.dataset.tab; // games | apps
+      bar.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+      pill.classList.add("active");
+      apply();
+    }
+  });
+});
