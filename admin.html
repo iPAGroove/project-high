@@ -11,7 +11,7 @@
   <!-- ШАПКА -->
   <header class="topbar">
     <div class="wrap">
-      <div class="brand"><span data-text="URSA IPA Admin">URSA IPA Admin</span></div>
+      <div class="brand"><span>URSA IPA Admin</span></div>
     </div>
   </header>
 
@@ -19,7 +19,7 @@
   <main class="wrap">
     <div class="admin-actions">
       <button id="add-btn" class="btn blue">+ Добавить IPA</button>
-      <input id="search" type="search" placeholder="Поиск по имени, bundleId…" />
+      <input id="search" type="search" placeholder="Поиск по имени, bundleId, тегам…" />
     </div>
     <div id="cards" class="cards"></div>
   </main>
@@ -32,27 +32,40 @@
         <strong id="modal-title">Добавить IPA</strong>
         <button class="close" data-close>✕</button>
       </header>
+
       <form id="ipa-form" class="modal-body">
-        <label>Название <input type="text" name="name" required></label>
-        <label>Bundle ID <input type="text" name="bundleId" required></label>
-        <label>Версия <input type="text" name="version" required></label>
-        <label>Minimal iOS <input type="text" name="minIOS"></label>
-        <label>Размер (MB) <input type="number" name="sizeBytes" placeholder="например 205"></label>
-        
-        <label>Иконка (URL)
-          <input type="url" name="iconUrl" id="iconUrl">
-          <img id="icon-preview" class="icon-preview" style="display:none;">
-        </label>
+        <fieldset>
+          <legend>Основное</legend>
+          <div class="field-grid">
+            <label>Name <input type="text" name="name" required></label>
+            <label>Bundle ID <input type="text" name="bundleId" required></label>
+            <label>Version <input type="text" name="version" required></label>
+            <label>Minimal iOS <input type="text" name="minIOS"></label>
+            <label>Size (MB) <input type="number" name="sizeBytes"></label>
+          </div>
+        </fieldset>
 
-        <label>Ссылка на IPA <input type="url" name="downloadUrl"></label>
-        <label>Фичи <textarea name="features" placeholder="Через запятую"></textarea></label>
+        <fieldset>
+          <legend>Медиа</legend>
+          <label>Icon URL
+            <input type="url" name="iconUrl" id="iconUrl">
+            <img id="icon-preview" class="icon-preview" style="display:none;">
+          </label>
+          <label>Download URL <input type="url" name="downloadUrl"></label>
+        </fieldset>
 
-        <!-- Категория -->
-        <div class="tag-select">
-          <span data-tag="games" class="tag-btn">🎮 Игры</span>
-          <span data-tag="apps" class="tag-btn">📱 Приложения</span>
-          <input type="hidden" name="tag">
-        </div>
+        <fieldset>
+          <legend>Дополнительно</legend>
+          <label>Features <textarea name="features" placeholder="через запятую"></textarea></label>
+          <div>
+            <span style="font-size:13px;color:var(--muted);">Категория:</span>
+            <div class="tag-buttons">
+              <button type="button" class="tag-btn" data-tag="games">Games</button>
+              <button type="button" class="tag-btn" data-tag="apps">Apps</button>
+            </div>
+            <input type="hidden" name="tag" />
+          </div>
+        </fieldset>
 
         <div class="modal-actions">
           <button type="submit" class="btn blue">💾 Сохранить</button>
