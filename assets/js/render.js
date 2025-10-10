@@ -16,7 +16,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ====== HELPERS ======
+// ===== HELPERS =====
 function prettyBytes(num) {
   if (!num) return "";
   const u = ["B","KB","MB","GB"];
@@ -27,7 +27,22 @@ function escapeHTML(s){
   return (s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[m]));
 }
 
-// ====== РЕНДЕР КАРТОЧЕК ======
+// === НОРМАЛИЗАЦИЯ Firestore-документа ===
+function normalize(doc) {
+  return {
+    id: doc.ID || doc.id || "",
+    name: doc.NAME || doc.name || "",
+    bundleId: doc["Bundle ID"] || doc.bundleId || "",
+    version: doc.Version || doc.version || "",
+    minIOS: doc["minimal iOS"] || doc.minIOS || "",
+    sizeBytes: doc.sizeBytes || 0,
+    iconUrl: doc.iconUrl || "",
+    downloadUrl: doc.DownloadUrl || doc.downloadUrl || "",
+    features: doc.features || ""
+  };
+}
+
+// === РЕНДЕР КАРТОЧЕК ===
 function renderCatalog(apps) {
   const catalog = document.getElementById("catalog");
   catalog.innerHTML = "";
@@ -41,11 +56,11 @@ function renderCatalog(apps) {
       <div class="row">
         <img class="icon" src="${app.iconUrl}" alt="">
         <div>
-          <h3>${app.NAME || app.name}</h3>
-          <div class="meta">${app["Bundle ID"] || app.bundleId || ""}</div>
+          <h3>${app.name}</h3>
+          <div class="meta">${app.bundleId || ""}</div>
           <div class="meta">
-            v${app.Version || app.version || ""}
-            ${app["minimal iOS"] || app.minIOS ? ` · iOS ≥ ${app["minimal iOS"] || app.minIOS}` : ""}
+            v${app.version}
+            ${app.minIOS ? ` · iOS ≥ ${app.minIOS}` : ""}
             ${app.sizeBytes ? ` · ${prettyBytes(app.sizeBytes)}` : ""}
           </div>
         </div>
@@ -59,16 +74,16 @@ function renderCatalog(apps) {
   });
 }
 
-// ====== МОДАЛКА ======
+// === МОДАЛКА ===
 const modal = document.getElementById("modal");
 
 function openModal(app){
   document.getElementById("app-icon").src = app.iconUrl;
-  document.getElementById("app-title").textContent = app.NAME || app.name || "";
-  document.getElementById("app-bundle").textContent = app["Bundle ID"] || app.bundleId || "";
+  document.getElementById("app-title").textContent = app.name || "";
+  document.getElementById("app-bundle").textContent = app.bundleId || "";
   document.getElementById("app-info").textContent =
-    `v${app.Version || app.version || ""}`
-    + (app["minimal iOS"] || app.minIOS ? ` · iOS ≥ ${app["minimal iOS"] || app.minIOS}` : "")
+    `v${app.version || ""}`
+    + (app.minIOS ? ` · iOS ≥ ${app.minIOS}` : "")
     + (app.sizeBytes ? ` · ${prettyBytes(app.sizeBytes)}` : "");
 
   const feats = app.features ? app.features.split(",").map(f=>f.trim()) : [];
@@ -79,10 +94,10 @@ function openModal(app){
 
   const dl = document.getElementById("dl-buttons");
   dl.innerHTML = "";
-  if (app.DownloadUrl || app.downloadUrl){
+  if (app.downloadUrl){
     const a = document.createElement("a");
     a.className = "btn";
-    a.href = app.DownloadUrl || app.downloadUrl;
+    a.href = app.downloadUrl;
     a.target = "_blank"; 
     a.rel = "noopener";
     a.textContent = "Загрузить IPA";
@@ -103,10 +118,10 @@ modal.addEventListener("click",(e)=>{
 });
 document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") closeModal(); });
 
-// ====== ЗАГРУЗКА + ПОИСК ======
+// === ЗАГРУЗКА + ПОИСК ===
 async function loadCatalog() {
   const snap = await getDocs(collection(db, "ursa_ipas"));
-  const data = snap.docs.map(d => d.data());
+  const data = snap.docs.map(d => normalize(d.data()));
 
   renderCatalog(data);
 
@@ -114,8 +129,8 @@ async function loadCatalog() {
   search.addEventListener("input", () => {
     const q = search.value.toLowerCase();
     const filtered = data.filter(app =>
-      (app.NAME || app.name || "").toLowerCase().includes(q) ||
-      (app["Bundle ID"] || app.bundleId || "").toLowerCase().includes(q) ||
+      (app.name || "").toLowerCase().includes(q) ||
+      (app.bundleId || "").toLowerCase().includes(q) ||
       (app.features || "").toLowerCase().includes(q)
     );
     renderCatalog(filtered);
