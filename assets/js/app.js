@@ -59,10 +59,17 @@ window.__t = (k)=> (I18N[lang] && I18N[lang][k]) || k;
 // ===== HELPERS =====
 function prettyBytes(num) {
   if (!num) return "";
-  return `${num.toLocaleString()} bytes`; // показываем реальный вес из Firestore
+  const mb = num / 1000000; // перевод в MB (десятичная система)
+  return `${mb.toFixed(0)} MB`; // округляем до целого
 }
 function escapeHTML(s){
-  return (s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;","&gt;":"&gt;","\"":"&quot;","'":"&#39;" }[m]));
+  return (s||"").replace(/[&<>"']/g, m=>({ 
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    "\"":"&quot;",
+    "'":"&#39;" 
+  }[m]));
 }
 
 // === НОРМАЛИЗАЦИЯ Firestore-документа ===
