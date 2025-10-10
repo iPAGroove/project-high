@@ -48,6 +48,7 @@ function render(apps) {
         <div class="app-meta">Bundle: ${app["Bundle ID"] || "-"}</div>
         <div class="app-meta">Версия: ${app["Version"] || "-"} · iOS ≥ ${app["minimal iOS"] || "-"}</div>
         <div class="app-meta">Размер: ${formatSize(app["sizeBytes"])}</div>
+        <div class="app-meta">Теги: ${(app["tags"] || []).join(", ")}</div>
       </div>
       <div class="app-actions">
         <button class="btn small blue" onclick="editItem('${app.__docId}')">✏️ Ред.</button>
@@ -63,15 +64,19 @@ function openModal(title, values = {}) {
   modalTitle.textContent = title;
   form.reset();
   editDocId = values.__docId || null;
+
   Object.keys(values).forEach(k => {
     if (form[k]) {
       if (k === "sizeBytes") {
         form[k].value = values[k] ? Math.round(values[k] / 1000000) : "";
+      } else if (k === "tags" && Array.isArray(values[k])) {
+        form[k].value = values[k].join(", ");
       } else {
         form[k].value = values[k];
       }
     }
   });
+
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
@@ -98,10 +103,11 @@ form.addEventListener("submit", async e => {
     "Bundle ID": values.bundleId,
     "Version": values.version,
     "minimal iOS": values.minIOS,
-    "sizeBytes": Number(values.sizeBytes || 0) * 1000000, // переводим MB → bytes
+    "sizeBytes": Number(values.sizeBytes || 0) * 1000000, // MB → bytes
     "iconUrl": values.iconUrl,
     "DownloadUrl": values.downloadUrl,
-    "features": values.features || ""
+    "features": values.features || "",
+    "tags": values.tags ? values.tags.split(",").map(t => t.trim()) : []
   };
 
   if (editDocId) {
