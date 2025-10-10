@@ -1,37 +1,39 @@
+import { 
+  collection, getDocs, addDoc, updateDoc, deleteDoc, doc 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
 (async function () {
   const cards = document.getElementById("cards");
   const modal = document.getElementById("modal");
   const form = document.getElementById("ipa-form");
   const modalTitle = document.getElementById("modal-title");
+
+  const colRef = collection(window.db, "ipas");
   let data = [];
-  let editIndex = null;
+  let editId = null;
 
   async function loadData() {
-    try {
-      const res = await fetch("data/ipas.json?ts=" + Date.now());
-      data = await res.json();
-      render();
-    } catch {
-      cards.innerHTML = `<div class="empty">Не удалось загрузить ipas.json</div>`;
-    }
+    const snap = await getDocs(colRef);
+    data = snap.docs.map(d => ({ ...d.data(), _id: d.id }));
+    render();
   }
 
   function render() {
     cards.innerHTML = "";
-    data.forEach((doc, idx) => {
+    data.forEach(app => {
       const card = document.createElement("div");
       card.className = "app-card";
       card.innerHTML = `
         <div class="app-info">
-          <div class="app-title">${doc["NAME"]}</div>
-          <div class="app-meta">ID: ${doc["ID"]}</div>
-          <div class="app-meta">Bundle: ${doc["Bundle ID"]}</div>
-          <div class="app-meta">Версия: ${doc["Version"]} · iOS ≥ ${doc["minimal iOS"]}</div>
-          <div class="app-meta">Размер: ${doc["sizeBytes"]}</div>
+          <div class="app-title">${app.NAME}</div>
+          <div class="app-meta">ID: ${app.ID}</div>
+          <div class="app-meta">Bundle: ${app["Bundle ID"]}</div>
+          <div class="app-meta">Версия: ${app.Version} · iOS ≥ ${app["minimal iOS"]}</div>
+          <div class="app-meta">Размер: ${app.sizeBytes}</div>
         </div>
         <div class="app-actions">
-          <button class="btn small blue" onclick="editItem(${idx})">✏️ Ред.</button>
-          <button class="btn small red" onclick="deleteItem(${idx})">🗑 Удалить</button>
+          <button class="btn small blue" onclick="editItem('${app._id}')">✏️ Ред.</button>
+          <button class="btn small red" onclick="deleteItem('${app._id}')">🗑 Удалить</button>
         </div>
       `;
       cards.appendChild(card);
@@ -41,7 +43,7 @@
   function openModal(title, values = {}) {
     modalTitle.textContent = title;
     form.reset();
-    editIndex = values._idx ?? null;
+    editId = values._id ?? null;
     Object.keys(values).forEach(k => { if (form[k]) form[k].value = values[k]; });
     modal.classList.add("open");
     modal.setAttribute("aria-hidden", "false");
@@ -58,54 +60,44 @@
     if (e.target.hasAttribute("data-close") || e.target === modal) closeModal();
   });
 
-  form.addEventListener("submit", e => {
+  form.addEventListener("submit", async e => {
     e.preventDefault();
     const values = Object.fromEntries(new FormData(form));
-
     const ipa = {
-      "ID": values["ID"],
-      "NAME": values["NAME"],
-      "Bundle ID": values["Bundle ID"],
-      "Version": values["Version"],
-      "minimal iOS": values["minimal iOS"],
-      "sizeBytes": values["sizeBytes"],
-      "iconUrl": values["iconUrl"],
-      "DownloadUrl": values["DownloadUrl"],
-      "features": values["features"]
+      ID: values.id,
+      NAME: values.name,
+      "Bundle ID": values.bundleId,
+      Version: values.version,
+      "minimal iOS": values.minIOS,
+      sizeBytes: Number(values.sizeBytes || 0),
+      iconUrl: values.iconUrl,
+      DownloadUrl: values.mirrorUrl,
+      features: values.features || ""
     };
 
-    if (editIndex !== null) {
-      data[editIndex] = ipa;
+    if (editId) {
+      await updateDoc(doc(window.db, "ipas", editId), ipa);
     } else {
-      data.push(ipa);
+      await addDoc(colRef, ipa);
     }
     closeModal();
-    render();
+    loadData();
   });
 
   document.getElementById("add-btn").addEventListener("click", () => {
     openModal("Добавить IPA");
   });
 
-  document.getElementById("download-btn").addEventListener("click", () => {
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "ipas.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-
-  window.deleteItem = idx => {
+  window.deleteItem = async (id) => {
     if (confirm("Удалить запись?")) {
-      data.splice(idx, 1);
-      render();
+      await deleteDoc(doc(window.db, "ipas", id));
+      loadData();
     }
   };
 
-  window.editItem = idx => {
-    openModal("Редактировать IPA", { ...data[idx], _idx: idx });
+  window.editItem = (id) => {
+    const app = data.find(x => x._id === id);
+    openModal("Редактировать IPA", app);
   };
 
   loadData();
