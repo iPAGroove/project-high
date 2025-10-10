@@ -23,7 +23,7 @@ let editDocId = null;
 async function loadData() {
   cards.innerHTML = "<p style='color:#888'>Загрузка...</p>";
   const snap = await getDocs(collection(db, "ursa_ipas"));
-  const apps = snap.docs.map(d => ({ __docId: d.id, ...d.data() })); // сохраним doc.id для update/delete
+  const apps = snap.docs.map(d => ({ __docId: d.id, ...d.data() }));
   render(apps);
 }
 
@@ -35,11 +35,11 @@ function render(apps) {
     card.className = "app-card";
     card.innerHTML = `
       <div class="app-info">
-        <div class="app-title">${app.NAME}</div>
-        <div class="app-meta">ID: ${app.ID}</div>
-        <div class="app-meta">Bundle: ${app["Bundle ID"]}</div>
-        <div class="app-meta">Версия: ${app.Version} · iOS ≥ ${app["minimal iOS"]}</div>
-        <div class="app-meta">Размер: ${app.sizeBytes}</div>
+        <div class="app-title">${app.name}</div>
+        <div class="app-meta">ID: ${app.id}</div>
+        <div class="app-meta">Bundle: ${app.bundleId}</div>
+        <div class="app-meta">Версия: ${app.version} · iOS ≥ ${app.minIOS || "-"}</div>
+        <div class="app-meta">Размер: ${app.sizeBytes || 0}</div>
       </div>
       <div class="app-actions">
         <button class="btn small blue" onclick="editItem('${app.__docId}')">✏️ Ред.</button>
@@ -55,7 +55,9 @@ function openModal(title, values = {}) {
   modalTitle.textContent = title;
   form.reset();
   editDocId = values.__docId || null;
-  Object.keys(values).forEach(k => { if (form[k]) form[k].value = values[k]; });
+  Object.keys(values).forEach(k => {
+    if (form[k]) form[k].value = values[k];
+  });
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
@@ -77,14 +79,14 @@ form.addEventListener("submit", async e => {
   const values = Object.fromEntries(new FormData(form));
 
   const ipa = {
-    ID: values.ID,
-    NAME: values.NAME,
-    "Bundle ID": values["Bundle ID"],
-    Version: values.Version,
-    "minimal iOS": values["minimal iOS"],
+    id: values.id,
+    name: values.name,
+    bundleId: values.bundleId,
+    version: values.version,
+    minIOS: values.minIOS,
     sizeBytes: Number(values.sizeBytes || 0),
     iconUrl: values.iconUrl,
-    DownloadUrl: values.DownloadUrl,
+    downloadUrl: values.downloadUrl,
     features: values.features || ""
   };
 
@@ -115,18 +117,6 @@ window.editItem = async id => {
 // === Кнопки ===
 document.getElementById("add-btn").addEventListener("click", () => {
   openModal("Добавить IPA");
-});
-
-document.getElementById("download-btn").addEventListener("click", async () => {
-  const snap = await getDocs(collection(db, "ursa_ipas"));
-  const apps = snap.docs.map(d => ({ ...d.data() }));
-  const blob = new Blob([JSON.stringify(apps, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "ursa_ipas.json";
-  a.click();
-  URL.revokeObjectURL(url);
 });
 
 // === Загрузка при старте ===
