@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDFj9gOYU49Df6ohUR5CnbRv3qdY2i_OmU",
@@ -19,13 +19,13 @@ const form = document.getElementById("ipa-form");
 const modalTitle = document.getElementById("modal-title");
 const iconInput = document.getElementById("iconUrl");
 const iconPreview = document.getElementById("icon-preview");
+const searchBox = document.getElementById("search");
 let editDocId = null;
 
 // ===== HELPERS =====
 function formatSize(bytes) {
   if (!bytes) return "-";
-  const mb = bytes / 1000000;
-  return `${mb.toFixed(0)} MB`;
+  return `${Math.round(bytes / 1000000)} MB`;
 }
 
 // === Загрузка ===
@@ -34,13 +34,12 @@ async function loadData(query = "") {
   const snap = await getDocs(collection(db, "ursa_ipas"));
   let apps = snap.docs.map(d => ({ __docId: d.id, ...d.data() }));
 
-  // фильтр
   if (query) {
     const q = query.toLowerCase();
     apps = apps.filter(app =>
       (app["NAME"] || "").toLowerCase().includes(q) ||
       (app["Bundle ID"] || "").toLowerCase().includes(q) ||
-      (app["tags"] || []).some(t => (t||"").toLowerCase().includes(q))
+      (app["tags"] || []).join(",").toLowerCase().includes(q)
     );
   }
 
@@ -59,17 +58,19 @@ function render(apps) {
     card.className = "app-card";
     card.innerHTML = `
       <div class="app-info">
-        <img src="${app.iconUrl || ""}" alt="" style="width:50px;height:50px;border-radius:12px;margin-bottom:8px;">
-        <div class="app-title">${app["NAME"] || "Без названия"}</div>
-        <div class="app-meta">ID: ${app["ID"] || "-"}</div>
-        <div class="app-meta">Bundle: ${app["Bundle ID"] || "-"}</div>
-        <div class="app-meta">Версия: ${app["Version"] || "-"} · iOS ≥ ${app["minimal iOS"] || "-"}</div>
-        <div class="app-meta">Размер: ${formatSize(app["sizeBytes"])}</div>
-        <div class="app-meta">Теги: ${(app["tags"] || []).join(", ")}</div>
+        <img src="${app.iconUrl || ""}" alt="" class="app-icon">
+        <div>
+          <div class="app-title">${app["NAME"] || "Без названия"}</div>
+          <div class="app-meta">ID: ${app["ID"] || "-"}</div>
+          <div class="app-meta">Bundle: ${app["Bundle ID"] || "-"}</div>
+          <div class="app-meta">Версия: ${app["Version"] || "-"} · iOS ≥ ${app["minimal iOS"] || "-"}</div>
+          <div class="app-meta">Размер: ${formatSize(app["sizeBytes"])}</div>
+          <div class="app-meta">Теги: ${(app["tags"] || []).join(", ")}</div>
+        </div>
       </div>
       <div class="app-actions">
-        <button class="btn small blue" onclick="editItem('${app.__docId}')">✏️ Ред.</button>
-        <button class="btn small red" onclick="deleteItem('${app.__docId}')">🗑 Удалить</button>
+        <button class="btn small blue" onclick="editItem('${app.__docId}')">✏️</button>
+        <button class="btn small red" onclick="deleteItem('${app.__docId}')">🗑</button>
       </div>
     `;
     cards.appendChild(card);
@@ -94,7 +95,6 @@ function openModal(title, values = {}) {
     }
   });
 
-  // превью иконки
   if (values.iconUrl) {
     iconPreview.src = values.iconUrl;
     iconPreview.style.display = "block";
@@ -103,16 +103,13 @@ function openModal(title, values = {}) {
   }
 
   modal.classList.add("open");
-  modal.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
 }
 
 function closeModal() {
   modal.classList.remove("open");
-  modal.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
 }
-
 modal.addEventListener("click", e => {
   if (e.target.hasAttribute("data-close") || e.target === modal) closeModal();
 });
@@ -138,7 +135,7 @@ form.addEventListener("submit", async e => {
     "Bundle ID": values.bundleId,
     "Version": values.version,
     "minimal iOS": values.minIOS,
-    "sizeBytes": Number(values.sizeBytes || 0) * 1000000, // MB → bytes
+    "sizeBytes": Number(values.sizeBytes || 0) * 1000000,
     "iconUrl": values.iconUrl,
     "DownloadUrl": values.downloadUrl,
     "features": values.features || "",
@@ -172,18 +169,11 @@ window.editItem = async id => {
   if (app) openModal("Редактировать IPA", { __docId: app.id, ...app.data() });
 };
 
-// === Кнопки ===
-document.getElementById("add-btn").addEventListener("click", () => {
-  openModal("Добавить IPA");
-});
-
 // === Поиск ===
-const searchBox = document.createElement("input");
-searchBox.type = "search";
-searchBox.placeholder = "Поиск по имени, bundleId, тегам…";
-searchBox.style = "width:100%;padding:10px;margin:10px 0;border-radius:8px;border:1px solid #333;background:#121722;color:#fff;";
-document.querySelector(".admin-actions").appendChild(searchBox);
 searchBox.addEventListener("input", () => loadData(searchBox.value));
+
+// === Кнопки ===
+document.getElementById("add-btn").addEventListener("click", () => openModal("Добавить IPA"));
 
 // === Загрузка при старте ===
 loadData();
