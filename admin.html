@@ -15,10 +15,11 @@
     </div>
   </header>
 
-  <!-- КНОПКИ -->
+  <!-- ОСНОВНОЙ КОНТЕНТ -->
   <main class="wrap">
     <div class="admin-actions">
       <button id="add-btn" class="btn blue">+ Добавить IPA</button>
+      <!-- поиск создается в admin.js -->
     </div>
     <div id="cards" class="cards"></div>
   </main>
@@ -32,15 +33,21 @@
         <button class="close" data-close>✕</button>
       </header>
       <form id="ipa-form" class="modal-body">
-        <label>ID <input type="text" name="id" required></label>
         <label>Name <input type="text" name="name" required></label>
         <label>Bundle ID <input type="text" name="bundleId" required></label>
         <label>Version <input type="text" name="version" required></label>
         <label>Minimal iOS <input type="text" name="minIOS"></label>
-        <label>Size (bytes) <input type="number" name="sizeBytes"></label>
-        <label>Icon URL <input type="url" name="iconUrl"></label>
+        <label>Size (MB) <input type="number" name="sizeBytes" placeholder="например 205"></label>
+        
+        <label>Icon URL 
+          <input type="url" name="iconUrl" id="iconUrl">
+          <img id="icon-preview" style="margin-top:6px;width:60px;height:60px;border-radius:12px;display:none;">
+        </label>
+        
         <label>Download URL <input type="url" name="downloadUrl"></label>
-        <label>Features <input type="text" name="features"></label>
+        <label>Features <input type="text" name="features" placeholder="через запятую"></label>
+        <label>Tags <input type="text" name="tags" placeholder="games, premium, vip"></label>
+
         <div class="modal-actions">
           <button type="submit" class="btn blue">💾 Сохранить</button>
         </div>
