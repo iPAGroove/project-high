@@ -59,13 +59,10 @@ window.__t = (k)=> (I18N[lang] && I18N[lang][k]) || k;
 // ===== HELPERS =====
 function prettyBytes(num) {
   if (!num) return "";
-  const u = ["B","KB","MB","GB"];
-  const e = Math.min(Math.floor(Math.log(num)/Math.log(1024)), u.length-1);
-  const val = num / Math.pow(1024, e);
-  return `${val.toFixed(1)} ${u[e]}`;  // всегда одна десятичная
+  return `${num.toLocaleString()} bytes`; // показываем реальный вес из Firestore
 }
 function escapeHTML(s){
-  return (s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[m]));
+  return (s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;","&gt;":"&gt;","\"":"&quot;","'":"&#39;" }[m]));
 }
 
 // === НОРМАЛИЗАЦИЯ Firestore-документа ===
