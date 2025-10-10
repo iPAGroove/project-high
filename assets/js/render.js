@@ -1,3 +1,5 @@
+Дай готовый 
+
 // assets/js/render.js
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
@@ -18,40 +20,32 @@ const db = getFirestore(app);
 
 // ===== HELPERS =====
 function prettyBytes(num) {
-  if (!num || isNaN(num)) return "";
+  if (!num) return "";
   const u = ["B","KB","MB","GB"];
   const e = Math.min(Math.floor(Math.log(num)/Math.log(1024)), u.length-1);
   return `${(num/Math.pow(1024,e)).toFixed(e?1:0)} ${u[e]}`;
 }
 function escapeHTML(s){
-  return (s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;","">":"&gt;","\"":"&quot;","'":"&#39;" }[m]));
+  return (s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[m]));
 }
 
 // === НОРМАЛИЗАЦИЯ Firestore-документа ===
 function normalize(doc) {
-  let size = 0;
-  if (doc.sizeBytes !== undefined && doc.sizeBytes !== null) {
-    size = Number(doc.sizeBytes);
-    if (isNaN(size)) size = 0;
-  }
-
   return {
     id: doc.ID || doc.id || "",
     name: doc.NAME || doc.name || "",
     bundleId: doc["Bundle ID"] || doc.bundleId || "",
     version: doc.Version || doc.version || "",
     minIOS: doc["minimal iOS"] || doc.minIOS || "",
-    sizeBytes: size,   // 👈 безопасно
+    sizeBytes: doc.sizeBytes || 0,
     iconUrl: doc.iconUrl || "",
     downloadUrl: doc.DownloadUrl || doc.downloadUrl || "",
     features: doc.features || "",
-    tags: Array.isArray(doc.tags)
-      ? doc.tags
-      : (doc.tags ? String(doc.tags).split(",").map(s=>s.trim()) : [])
+    tags: Array.isArray(doc.tags) ? doc.tags : (doc.tags ? String(doc.tags).split(",").map(s=>s.trim()) : [])
   };
 }
 
-// === РЕНДЕР КАТАЛОГА ===
+// === РЕНДЕР КАРТОЧЕК ===
 function renderCatalog(apps) {
   const catalog = document.getElementById("catalog");
   catalog.innerHTML = "";
