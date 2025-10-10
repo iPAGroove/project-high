@@ -1,8 +1,8 @@
 (async function () {
-  const tableBody = document.querySelector("#admin-table tbody");
+  const cards = document.getElementById("cards");
   let data = [];
 
-  // Загружаем JSON
+  // загрузка JSON
   async function loadData() {
     try {
       const res = await fetch("data/ipas.json?ts=" + Date.now());
@@ -10,32 +10,34 @@
       render();
     } catch (e) {
       console.error("Ошибка загрузки JSON", e);
-      tableBody.innerHTML = `<tr><td colspan="7">Не удалось загрузить ipas.json</td></tr>`;
+      cards.innerHTML = `<div class="empty">Не удалось загрузить ipas.json</div>`;
     }
   }
 
-  // Рендер таблицы
+  // отрисовка карточек
   function render() {
-    tableBody.innerHTML = "";
+    cards.innerHTML = "";
     data.forEach((app, idx) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td data-label="ID">${app.id}</td>
-        <td data-label="Name">${app.name}</td>
-        <td data-label="BundleId">${app.bundleId}</td>
-        <td data-label="Version">${app.version}</td>
-        <td data-label="minIOS">${app.minIOS}</td>
-        <td data-label="Size">${app.sizeBytes}</td>
-        <td data-label="Actions">
-          <button class="btn small blue" onclick="editItem(${idx})">✏️</button>
-          <button class="btn small red" onclick="deleteItem(${idx})">🗑</button>
-        </td>
+      const card = document.createElement("div");
+      card.className = "app-card";
+      card.innerHTML = `
+        <div class="app-info">
+          <div class="app-title">${app.name}</div>
+          <div class="app-meta">ID: ${app.id}</div>
+          <div class="app-meta">Bundle: ${app.bundleId}</div>
+          <div class="app-meta">Версия: ${app.version} · iOS ≥ ${app.minIOS}</div>
+          <div class="app-meta">Размер: ${app.sizeBytes}</div>
+        </div>
+        <div class="app-actions">
+          <button class="btn small blue" onclick="editItem(${idx})">✏️ Ред.</button>
+          <button class="btn small red" onclick="deleteItem(${idx})">🗑 Удалить</button>
+        </div>
       `;
-      tableBody.appendChild(tr);
+      cards.appendChild(card);
     });
   }
 
-  // Скачать JSON
+  // скачать JSON
   document.getElementById("download-btn").addEventListener("click", () => {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -46,7 +48,7 @@
     URL.revokeObjectURL(url);
   });
 
-  // Добавить новый IPA
+  // добавить IPA
   document.getElementById("add-btn").addEventListener("click", () => {
     const id = prompt("ID:");
     const name = prompt("Name:");
@@ -54,16 +56,15 @@
     const version = prompt("Version:");
     const minIOS = prompt("minIOS:");
     const sizeBytes = prompt("Size (байты):");
-
     if (id && name) {
       data.push({ id, name, bundleId, version, minIOS, sizeBytes });
       render();
     }
   });
 
-  // Глобальные функции для кнопок
+  // глобальные ф-и
   window.deleteItem = function (idx) {
-    if (confirm("Удалить эту запись?")) {
+    if (confirm("Удалить запись?")) {
       data.splice(idx, 1);
       render();
     }
