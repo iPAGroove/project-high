@@ -13,6 +13,7 @@
   <!-- Шрифт -->
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
 
+  <!-- CSS -->
   <link rel="stylesheet" href="assets/css/base.css" />
   <link rel="stylesheet" href="assets/css/ios.css" />
   <link id="theme-css" rel="stylesheet" href="assets/css/themes/neon.css" />
@@ -103,9 +104,9 @@
         <button class="close" data-close aria-label="Закрыть">✕</button>
       </header>
       <div class="dialog-body" id="help-body">
-        <p>Это каталог IPA. Нажимай на карточку — внутри описание и кнопка загрузки.</p>
-        <p>Все данные подгружаются напрямую из <code>Firestore</code> (коллекция <code>ursa_ipas</code>).</p>
-        <p>Для добавления/редактирования используй админ-панель.</p>
+        <p data-i18n="help_p1">Это каталог IPA. Нажимай на карточку — внутри описание и кнопка загрузки.</p>
+        <p data-i18n="help_p2">Все данные подгружаются напрямую из <code>Firestore</code> (коллекция <code>ursa_ipas</code>).</p>
+        <p data-i18n="help_p3">Для добавления/редактирования используй админ-панель.</p>
       </div>
     </section>
   </div>
@@ -113,6 +114,6 @@
   <!-- JS -->
   <script src="assets/js/themes.js?v=8"></script>
   <script src="assets/js/ios.js?v=8"></script>
-  <script src="assets/js/app.js?v=8"></script>
+  <script type="module" src="assets/js/app.js?v=8"></script>
 </body>
 </html>
