@@ -24,7 +24,7 @@ function prettyBytes(num) {
   return `${(num/Math.pow(1024,e)).toFixed(e?1:0)} ${u[e]}`;
 }
 function escapeHTML(s){
-  return (s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[m]));
+  return (s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;","">":"&gt;","\"":"&quot;","'":"&#39;" }[m]));
 }
 
 // === НОРМАЛИЗАЦИЯ Firestore-документа ===
@@ -35,7 +35,7 @@ function normalize(doc) {
     bundleId: doc["Bundle ID"] || doc.bundleId || "",
     version: doc.Version || doc.version || "",
     minIOS: doc["minimal iOS"] || doc.minIOS || "",
-    sizeBytes: doc.sizeBytes || 0,
+    sizeBytes: Number(doc.sizeBytes || 0),   // 👈 фикс: всегда число
     iconUrl: doc.iconUrl || "",
     downloadUrl: doc.DownloadUrl || doc.downloadUrl || "",
     features: doc.features || "",
