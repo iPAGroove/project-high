@@ -83,3 +83,39 @@ html, body {
   gap: 10px;
   margin-top: 10px;
 }
+
+/* MODAL */
+.modal { position: fixed; inset: 0; z-index: 100; display: none; }
+.modal.open { display: block; }
+.backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.55); }
+.modal-card {
+  position: absolute;
+  left: 0; right: 0; top: 50%;
+  transform: translateY(-50%);
+  margin: 0 auto;
+  max-width: 400px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0;
+  box-shadow: 0 10px 30px rgba(0,0,0,.6);
+}
+.modal-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 700;
+  color: var(--accent);
+}
+.modal-body { display: grid; gap: 12px; padding: 16px; }
+.modal-body label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+.modal-body input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  color: var(--text);
+}
+.modal-actions { margin-top: 8px; display: flex; justify-content: flex-end; }
+.close { border: none; background: transparent; color: var(--text); font-size: 18px; cursor: pointer; }
