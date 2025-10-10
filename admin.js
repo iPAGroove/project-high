@@ -1,70 +1,80 @@
-let data = [];
+(async function () {
+  const tableBody = document.querySelector("#admin-table tbody");
+  let data = [];
 
-async function loadData() {
-  try {
-    const res = await fetch("data/ipas.json?ts=" + Date.now());
-    data = await res.json();
-  } catch (e) {
-    data = [];
+  // Загружаем JSON
+  async function loadData() {
+    try {
+      const res = await fetch("data/ipas.json?ts=" + Date.now());
+      data = await res.json();
+      render();
+    } catch (e) {
+      console.error("Ошибка загрузки JSON", e);
+      tableBody.innerHTML = `<tr><td colspan="7">Не удалось загрузить ipas.json</td></tr>`;
+    }
   }
-  renderTable();
-}
 
-function renderTable() {
-  const tbody = document.querySelector("#ipaTable tbody");
-  tbody.innerHTML = "";
-  data.forEach((app, i) => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td><input value="${app.id||""}" onchange="updateField(${i},'id',this.value)"></td>
-      <td><input value="${app.name||""}" onchange="updateField(${i},'name',this.value)"></td>
-      <td><input value="${app.bundleId||""}" onchange="updateField(${i},'bundleId',this.value)"></td>
-      <td><input value="${app.version||""}" onchange="updateField(${i},'version',this.value)"></td>
-      <td><input value="${app.minIOS||""}" onchange="updateField(${i},'minIOS',this.value)"></td>
-      <td><input value="${app.sizeBytes||""}" onchange="updateField(${i},'sizeBytes',this.value)"></td>
-      <td><input value="${app.iconUrl||""}" onchange="updateField(${i},'iconUrl',this.value)"></td>
-      <td><input value="${(app.tags||[]).join(', ')}" onchange="updateArray(${i},'tags',this.value)"></td>
-      <td><textarea onchange="updateArray(${i},'features',this.value)">${(app.features||[]).join("\\n")}</textarea></td>
-      <td><textarea onchange="updateMirrors(${i},this.value)">${JSON.stringify(app.mirrors||[])}</textarea></td>
-      <td><button class="del-btn" onclick="deleteRow(${i})">🗑</button></td>
-    `;
-    tbody.appendChild(row);
-  });
-}
-
-function updateField(i, key, val) {
-  data[i][key] = val;
-}
-function updateArray(i, key, val) {
-  data[i][key] = val.split(/\s*[,\\n]\\s*/).filter(Boolean);
-}
-function updateMirrors(i, val) {
-  try { data[i].mirrors = JSON.parse(val); }
-  catch { alert("Ошибка в JSON mirrors"); }
-}
-
-function addRow() {
-  data.push({
-    id:"", name:"", bundleId:"", version:"",
-    minIOS:"", sizeBytes:"", iconUrl:"",
-    tags:[], features:[], mirrors:[]
-  });
-  renderTable();
-}
-
-function deleteRow(i) {
-  if (confirm("Удалить запись?")) {
-    data.splice(i,1);
-    renderTable();
+  // Рендер таблицы
+  function render() {
+    tableBody.innerHTML = "";
+    data.forEach((app, idx) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td data-label="ID">${app.id}</td>
+        <td data-label="Name">${app.name}</td>
+        <td data-label="BundleId">${app.bundleId}</td>
+        <td data-label="Version">${app.version}</td>
+        <td data-label="minIOS">${app.minIOS}</td>
+        <td data-label="Size">${app.sizeBytes}</td>
+        <td data-label="Actions">
+          <button class="btn small blue" onclick="editItem(${idx})">✏️</button>
+          <button class="btn small red" onclick="deleteItem(${idx})">🗑</button>
+        </td>
+      `;
+      tableBody.appendChild(tr);
+    });
   }
-}
 
-function downloadJSON() {
-  const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "ipas.json";
-  a.click();
-}
+  // Скачать JSON
+  document.getElementById("download-btn").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "ipas.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  });
 
-loadData();
+  // Добавить новый IPA
+  document.getElementById("add-btn").addEventListener("click", () => {
+    const id = prompt("ID:");
+    const name = prompt("Name:");
+    const bundleId = prompt("BundleId:");
+    const version = prompt("Version:");
+    const minIOS = prompt("minIOS:");
+    const sizeBytes = prompt("Size (байты):");
+
+    if (id && name) {
+      data.push({ id, name, bundleId, version, minIOS, sizeBytes });
+      render();
+    }
+  });
+
+  // Глобальные функции для кнопок
+  window.deleteItem = function (idx) {
+    if (confirm("Удалить эту запись?")) {
+      data.splice(idx, 1);
+      render();
+    }
+  };
+
+  window.editItem = function (idx) {
+    const app = data[idx];
+    app.name = prompt("Name:", app.name) || app.name;
+    app.version = prompt("Version:", app.version) || app.version;
+    render();
+  };
+
+  loadData();
+})();
