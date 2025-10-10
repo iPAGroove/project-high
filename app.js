@@ -1,43 +1,80 @@
-async function loadCatalog() {
-  const res = await fetch("ipas.json");
-  const data = await res.json();
+(async function () {
+  const tableBody = document.querySelector("#admin-table tbody");
+  let data = [];
 
-  const catalog = document.getElementById("catalog");
-  const search = document.getElementById("search");
+  // Загружаем JSON
+  async function loadData() {
+    try {
+      const res = await fetch("data/ipas.json?ts=" + Date.now());
+      data = await res.json();
+      render();
+    } catch (e) {
+      console.error("Ошибка загрузки JSON", e);
+      tableBody.innerHTML = `<tr><td colspan="7">Не удалось загрузить ipas.json</td></tr>`;
+    }
+  }
 
-  function render(list) {
-    catalog.innerHTML = "";
-    list.forEach(app => {
-      const card = document.createElement("div");
-      card.className = "card";
-      card.innerHTML = `
-        <div style="display:flex;gap:1rem;align-items:center;">
-          <img src="${app.iconUrl}" alt="">
-          <div>
-            <h3>${app.name}</h3>
-            <small>${app.bundleId}</small>
-            <p>v${app.version} · iOS ≥ ${app.minIOS}</p>
-          </div>
-        </div>
-        <div class="tags">${app.tags.map(t=>`<span>#${t}</span>`).join(" ")}</div>
-        <div style="margin-top:1rem;">
-          ${app.mirrors.map(m=>`<a href="${m.url}" target="_blank" style="display:inline-block;margin-right:6px;color:#0af;">Скачать ${m.label}</a>`).join("")}
-        </div>
+  // Рендер таблицы
+  function render() {
+    tableBody.innerHTML = "";
+    data.forEach((app, idx) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td data-label="ID">${app.id}</td>
+        <td data-label="Name">${app.name}</td>
+        <td data-label="BundleId">${app.bundleId}</td>
+        <td data-label="Version">${app.version}</td>
+        <td data-label="minIOS">${app.minIOS}</td>
+        <td data-label="Size">${app.sizeBytes}</td>
+        <td data-label="Actions">
+          <button class="btn small blue" onclick="editItem(${idx})">✏️</button>
+          <button class="btn small red" onclick="deleteItem(${idx})">🗑</button>
+        </td>
       `;
-      catalog.appendChild(card);
+      tableBody.appendChild(tr);
     });
   }
 
-  render(data);
-
-  search.addEventListener("input", () => {
-    const q = search.value.toLowerCase();
-    render(data.filter(app =>
-      app.name.toLowerCase().includes(q) ||
-      app.bundleId.toLowerCase().includes(q) ||
-      app.tags.some(t => t.toLowerCase().includes(q))
-    ));
+  // Скачать JSON
+  document.getElementById("download-btn").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "ipas.json";
+    a.click();
+    URL.revokeObjectURL(url);
   });
-}
 
-loadCatalog();
+  // Добавить новый IPA
+  document.getElementById("add-btn").addEventListener("click", () => {
+    const id = prompt("ID:");
+    const name = prompt("Name:");
+    const bundleId = prompt("BundleId:");
+    const version = prompt("Version:");
+    const minIOS = prompt("minIOS:");
+    const sizeBytes = prompt("Size (байты):");
+
+    if (id && name) {
+      data.push({ id, name, bundleId, version, minIOS, sizeBytes });
+      render();
+    }
+  });
+
+  // Глобальные функции для кнопок
+  window.deleteItem = function (idx) {
+    if (confirm("Удалить эту запись?")) {
+      data.splice(idx, 1);
+      render();
+    }
+  };
+
+  window.editItem = function (idx) {
+    const app = data[idx];
+    app.name = prompt("Name:", app.name) || app.name;
+    app.version = prompt("Version:", app.version) || app.version;
+    render();
+  };
+
+  loadData();
+})();
