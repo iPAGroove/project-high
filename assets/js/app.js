@@ -70,18 +70,20 @@ function prettyBytes(num) {
 function escapeHTML(s){
   return (s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[m]));
 }
+
+// === НОРМАЛИЗАЦИЯ Firestore-документа ===
 function normalize(doc) {
   return {
-    id: doc.id || "",
-    name: doc.name || "",
-    bundleId: doc.bundleId || "",
-    version: doc.version || "",
-    minIOS: doc.minIOS || "",
+    id: doc.ID || doc.id || "",
+    name: doc.NAME || doc.name || "",
+    bundleId: doc["Bundle ID"] || doc.bundleId || "",
+    version: doc.Version || doc.version || "",
+    minIOS: doc["minimal iOS"] || doc.minIOS || "",
     sizeBytes: doc.sizeBytes || 0,
     iconUrl: doc.iconUrl || "",
-    downloadUrl: doc.downloadUrl || "",
+    downloadUrl: doc.DownloadUrl || doc.downloadUrl || "",
     features: doc.features || "",
-    tags: Array.isArray(doc.tags) ? doc.tags : []
+    tags: Array.isArray(doc.tags) ? doc.tags : (doc.tags ? String(doc.tags).split(",").map(s=>s.trim()) : [])
   };
 }
 
@@ -224,7 +226,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   document.getElementById("lang-btn").addEventListener("click", ()=>{
     lang = (lang === "ru") ? "en" : "ru";
     localStorage.setItem("ursa_lang", lang);
-    location.reload(); // проще перезагрузить и подтянуть переводы
+    location.reload();
   });
 
   // help
