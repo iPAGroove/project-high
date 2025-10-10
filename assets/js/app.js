@@ -59,8 +59,8 @@ window.__t = (k)=> (I18N[lang] && I18N[lang][k]) || k;
 // ===== HELPERS =====
 function prettyBytes(num) {
   if (!num) return "";
-  const mb = num / 1000000; // перевод в MB (десятичная система)
-  return `${mb.toFixed(0)} MB`; // округляем до целого
+  const mb = num / 1000000;
+  return `${mb.toFixed(0)} MB`;
 }
 function escapeHTML(s){
   return (s||"").replace(/[&<>"']/g, m=>({ 
@@ -176,12 +176,10 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   document.getElementById("navHelpIcon").src = ICONS.help;
   document.getElementById("navLangIcon").src = ICONS.lang?.[lang] || ICONS.lang.ru;
 
-  // плейсхолдер поиска
   const search = document.getElementById("search");
   search.placeholder = __t("search_ph");
   document.getElementById("lang-code").textContent = lang.toUpperCase();
 
-  // загрузка данных из Firestore
   let state = { all:[], q:"", tab:"games" };
   try {
     const snap = await getDocs(collection(db, "ursa_ipas"));
@@ -192,26 +190,30 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
   function apply(){
     const q = state.q.trim().toLowerCase();
+
     const list = state.all.filter(app=>{
-      const byTab = state.tab==="games" ? app.tags.includes("games") : !app.tags.includes("games");
-      if (!byTab) return false;
-      if (!q) return true;
-      return (
-        (app.name||"").toLowerCase().includes(q) ||
-        (app.bundleId||"").toLowerCase().includes(q) ||
-        (app.features||"").toLowerCase().includes(q) ||
-        app.tags.some(t=>(t||"").toLowerCase().includes(q))
-      );
+      if (q) {
+        // 🔍 поиск по всем приложениям независимо от таба
+        return (
+          (app.name||"").toLowerCase().includes(q) ||
+          (app.bundleId||"").toLowerCase().includes(q) ||
+          (app.features||"").toLowerCase().includes(q) ||
+          app.tags.some(t=>(t||"").toLowerCase().includes(q))
+        );
+      } else {
+        // 📂 если поиска нет → фильтруем по табу
+        return state.tab==="games" ? app.tags.includes("games") : app.tags.includes("apps");
+      }
     });
+
     if (!list.length) {
-      document.getElementById("catalog").innerHTML = `<div style="opacity:.7;text-align:center;padding:40px 16px;">${__t("not_found")}</div>`;
+      document.getElementById("catalog").innerHTML =
+        `<div style="opacity:.7;text-align:center;padding:40px 16px;">${__t("not_found")}</div>`;
     } else renderCatalog(list);
   }
 
-  // поиск
   search.addEventListener("input", ()=>{ state.q = search.value; apply(); });
 
-  // таббар
   const bar = document.getElementById("tabbar");
   bar.addEventListener("click",(e)=>{
     const pill = e.target.closest(".nav-btn[data-tab]");
@@ -223,14 +225,12 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     }
   });
 
-  // язык
   document.getElementById("lang-btn").addEventListener("click", ()=>{
     lang = (lang === "ru") ? "en" : "ru";
     localStorage.setItem("ursa_lang", lang);
     location.reload();
   });
 
-  // help
   const help = document.getElementById("help-modal");
   document.getElementById("help-btn").addEventListener("click", ()=>{
     help.classList.add("open"); help.setAttribute("aria-hidden","false");
@@ -243,9 +243,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     }
   });
 
-  // кнопка темы
   document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
 
-  // первый рендер
   apply();
 });
