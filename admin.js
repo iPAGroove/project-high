@@ -19,27 +19,11 @@ const form = document.getElementById("ipa-form");
 const modalTitle = document.getElementById("modal-title");
 let editDocId = null;
 
-// === Нормализация старых данных ===
-function normalize(doc) {
-  return {
-    __docId: doc.__docId,
-    id: doc.id || doc.ID,
-    name: doc.name || doc.NAME,
-    bundleId: doc.bundleId || doc["Bundle ID"],
-    version: doc.version || doc.Version,
-    minIOS: doc.minIOS || doc["minimal iOS"],
-    sizeBytes: doc.sizeBytes || 0,
-    iconUrl: doc.iconUrl,
-    downloadUrl: doc.downloadUrl || doc.DownloadUrl,
-    features: doc.features || ""
-  };
-}
-
-// === Загрузка данных ===
+// === Загрузка ===
 async function loadData() {
   cards.innerHTML = "<p style='color:#888'>Загрузка...</p>";
   const snap = await getDocs(collection(db, "ursa_ipas"));
-  const apps = snap.docs.map(d => normalize({ __docId: d.id, ...d.data() }));
+  const apps = snap.docs.map(d => ({ __docId: d.id, ...d.data() }));
   render(apps);
 }
 
@@ -51,11 +35,11 @@ function render(apps) {
     card.className = "app-card";
     card.innerHTML = `
       <div class="app-info">
-        <div class="app-title">${app.name || "Без названия"}</div>
-        <div class="app-meta">ID: ${app.id || "-"}</div>
-        <div class="app-meta">Bundle: ${app.bundleId || "-"}</div>
-        <div class="app-meta">Версия: ${app.version || "-"} · iOS ≥ ${app.minIOS || "-"}</div>
-        <div class="app-meta">Размер: ${app.sizeBytes || 0}</div>
+        <div class="app-title">${app["NAME"] || "Без названия"}</div>
+        <div class="app-meta">ID: ${app["ID"] || "-"}</div>
+        <div class="app-meta">Bundle: ${app["Bundle ID"] || "-"}</div>
+        <div class="app-meta">Версия: ${app["Version"] || "-"} · iOS ≥ ${app["minimal iOS"] || "-"}</div>
+        <div class="app-meta">Размер: ${app["sizeBytes"] || 0}</div>
       </div>
       <div class="app-actions">
         <button class="btn small blue" onclick="editItem('${app.__docId}')">✏️ Ред.</button>
@@ -95,15 +79,15 @@ form.addEventListener("submit", async e => {
   const values = Object.fromEntries(new FormData(form));
 
   const ipa = {
-    id: values.id,
-    name: values.name,
-    bundleId: values.bundleId,
-    version: values.version,
-    minIOS: values.minIOS,
-    sizeBytes: Number(values.sizeBytes || 0),
-    iconUrl: values.iconUrl,
-    downloadUrl: values.downloadUrl,
-    features: values.features || ""
+    "ID": values.id,
+    "NAME": values.name,
+    "Bundle ID": values.bundleId,
+    "Version": values.version,
+    "minimal iOS": values.minIOS,
+    "sizeBytes": Number(values.sizeBytes || 0),
+    "iconUrl": values.iconUrl,
+    "DownloadUrl": values.downloadUrl,
+    "features": values.features || ""
   };
 
   if (editDocId) {
@@ -127,7 +111,7 @@ window.deleteItem = async id => {
 window.editItem = async id => {
   const snap = await getDocs(collection(db, "ursa_ipas"));
   const app = snap.docs.find(d => d.id === id);
-  if (app) openModal("Редактировать IPA", normalize({ __docId: app.id, ...app.data() }));
+  if (app) openModal("Редактировать IPA", { __docId: app.id, ...app.data() });
 };
 
 // === Кнопки ===
