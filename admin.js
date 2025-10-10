@@ -83,18 +83,32 @@ function openModal(title, values = {}) {
   form.reset();
   editDocId = values.__docId || null;
 
-  Object.keys(values).forEach(k => {
-    if (form[k]) {
-      if (k === "sizeBytes") {
-        form[k].value = values[k] ? Math.round(values[k] / 1000000) : "";
-      } else if (k === "tags" && Array.isArray(values[k])) {
-        form[k].value = values[k].join(", ");
+  // 🔑 Маппинг Firestore → форма
+  const map = {
+    "NAME": "name",
+    "Bundle ID": "bundleId",
+    "Version": "version",
+    "minimal iOS": "minIOS",
+    "sizeBytes": "sizeBytes",
+    "iconUrl": "iconUrl",
+    "DownloadUrl": "downloadUrl",
+    "features": "features",
+    "tags": "tags"
+  };
+
+  Object.entries(map).forEach(([fKey, formKey]) => {
+    if (form[formKey]) {
+      if (fKey === "sizeBytes") {
+        form[formKey].value = values[fKey] ? Math.round(values[fKey] / 1000000) : "";
+      } else if (fKey === "tags" && Array.isArray(values[fKey])) {
+        form[formKey].value = values[fKey].join(", ");
       } else {
-        form[k].value = values[k];
+        form[formKey].value = values[fKey] || "";
       }
     }
   });
 
+  // превью иконки
   if (values.iconUrl) {
     iconPreview.src = values.iconUrl;
     iconPreview.style.display = "block";
