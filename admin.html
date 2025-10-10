@@ -11,7 +11,7 @@
   <!-- ШАПКА -->
   <header class="topbar">
     <div class="wrap">
-      <div class="brand"><span data-text="URSA IPA Admin">URSA IPA Admin</span></div>
+      <div class="brand"><span>URSA IPA Admin</span></div>
     </div>
   </header>
 
@@ -19,7 +19,7 @@
   <main class="wrap">
     <div class="admin-actions">
       <button id="add-btn" class="btn blue">+ Добавить IPA</button>
-      <!-- поиск создается в admin.js -->
+      <input id="search" type="search" placeholder="Поиск по имени, bundleId, тегам…">
     </div>
     <div id="cards" class="cards"></div>
   </main>
@@ -33,20 +33,20 @@
         <button class="close" data-close>✕</button>
       </header>
       <form id="ipa-form" class="modal-body">
-        <label>Name <input type="text" name="name" required></label>
+        <label>Название <input type="text" name="name" required></label>
         <label>Bundle ID <input type="text" name="bundleId" required></label>
-        <label>Version <input type="text" name="version" required></label>
+        <label>Версия <input type="text" name="version" required></label>
         <label>Minimal iOS <input type="text" name="minIOS"></label>
-        <label>Size (MB) <input type="number" name="sizeBytes" placeholder="например 205"></label>
+        <label>Размер (MB) <input type="number" name="sizeBytes" placeholder="например 205"></label>
         
-        <label>Icon URL 
+        <label>Иконка (URL) 
           <input type="url" name="iconUrl" id="iconUrl">
-          <img id="icon-preview" style="margin-top:6px;width:60px;height:60px;border-radius:12px;display:none;">
+          <img id="icon-preview" class="icon-preview">
         </label>
         
-        <label>Download URL <input type="url" name="downloadUrl"></label>
-        <label>Features <input type="text" name="features" placeholder="через запятую"></label>
-        <label>Tags <input type="text" name="tags" placeholder="games, premium, vip"></label>
+        <label>Ссылка на IPA <input type="url" name="downloadUrl"></label>
+        <label>Фичи <input type="text" name="features" placeholder="через запятую"></label>
+        <label>Теги <input type="text" name="tags" placeholder="games, premium, vip"></label>
 
         <div class="modal-actions">
           <button type="submit" class="btn blue">💾 Сохранить</button>
