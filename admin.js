@@ -61,7 +61,6 @@ function render(apps) {
         <img src="${app.iconUrl || ""}" alt="" class="app-icon">
         <div>
           <div class="app-title">${app["NAME"] || "Без названия"}</div>
-          <div class="app-meta">ID: ${app["ID"] || "-"}</div>
           <div class="app-meta">Bundle: ${app["Bundle ID"] || "-"}</div>
           <div class="app-meta">Версия: ${app["Version"] || "-"} · iOS ≥ ${app["minimal iOS"] || "-"}</div>
           <div class="app-meta">Размер: ${formatSize(app["sizeBytes"])}</div>
@@ -83,7 +82,6 @@ function openModal(title, values = {}) {
   form.reset();
   editDocId = values.__docId || null;
 
-  // 🔑 Маппинг Firestore → форма
   const map = {
     "NAME": "name",
     "Bundle ID": "bundleId",
@@ -93,7 +91,8 @@ function openModal(title, values = {}) {
     "iconUrl": "iconUrl",
     "DownloadUrl": "downloadUrl",
     "features": "features",
-    "tags": "tags"
+    "tags": "tags",
+    "ID": "id"
   };
 
   Object.entries(map).forEach(([fKey, formKey]) => {
@@ -108,7 +107,6 @@ function openModal(title, values = {}) {
     }
   });
 
-  // превью иконки
   if (values.iconUrl) {
     iconPreview.src = values.iconUrl;
     iconPreview.style.display = "block";
@@ -136,6 +134,14 @@ iconInput.addEventListener("input", () => {
   } else {
     iconPreview.style.display = "none";
   }
+});
+
+// === Автогенерация ID ===
+form.bundleId.addEventListener("input", () => {
+  if (form.version.value) form.id.value = `${form.bundleId.value}_${form.version.value}`;
+});
+form.version.addEventListener("input", () => {
+  if (form.bundleId.value) form.id.value = `${form.bundleId.value}_${form.version.value}`;
 });
 
 // === Добавление / обновление ===
