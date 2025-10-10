@@ -19,6 +19,13 @@ const form = document.getElementById("ipa-form");
 const modalTitle = document.getElementById("modal-title");
 let editDocId = null;
 
+// ===== HELPER =====
+function formatSize(bytes) {
+  if (!bytes) return "-";
+  const mb = bytes / 1000000;
+  return `${mb.toFixed(0)} MB`;
+}
+
 // === Загрузка ===
 async function loadData() {
   cards.innerHTML = "<p style='color:#888'>Загрузка...</p>";
@@ -35,11 +42,12 @@ function render(apps) {
     card.className = "app-card";
     card.innerHTML = `
       <div class="app-info">
+        <img src="${app.iconUrl || ""}" alt="" style="width:40px;height:40px;border-radius:8px;margin-bottom:8px;">
         <div class="app-title">${app["NAME"] || "Без названия"}</div>
         <div class="app-meta">ID: ${app["ID"] || "-"}</div>
         <div class="app-meta">Bundle: ${app["Bundle ID"] || "-"}</div>
         <div class="app-meta">Версия: ${app["Version"] || "-"} · iOS ≥ ${app["minimal iOS"] || "-"}</div>
-        <div class="app-meta">Размер: ${app["sizeBytes"] || 0}</div>
+        <div class="app-meta">Размер: ${formatSize(app["sizeBytes"])}</div>
       </div>
       <div class="app-actions">
         <button class="btn small blue" onclick="editItem('${app.__docId}')">✏️ Ред.</button>
@@ -56,7 +64,13 @@ function openModal(title, values = {}) {
   form.reset();
   editDocId = values.__docId || null;
   Object.keys(values).forEach(k => {
-    if (form[k]) form[k].value = values[k];
+    if (form[k]) {
+      if (k === "sizeBytes") {
+        form[k].value = values[k] ? Math.round(values[k] / 1000000) : "";
+      } else {
+        form[k].value = values[k];
+      }
+    }
   });
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
@@ -79,12 +93,12 @@ form.addEventListener("submit", async e => {
   const values = Object.fromEntries(new FormData(form));
 
   const ipa = {
-    "ID": values.id,
+    "ID": values.bundleId && values.version ? `${values.bundleId}_${values.version}` : values.id,
     "NAME": values.name,
     "Bundle ID": values.bundleId,
     "Version": values.version,
     "minimal iOS": values.minIOS,
-    "sizeBytes": Number(values.sizeBytes || 0),
+    "sizeBytes": Number(values.sizeBytes || 0) * 1000000, // переводим MB → bytes
     "iconUrl": values.iconUrl,
     "DownloadUrl": values.downloadUrl,
     "features": values.features || ""
