@@ -26,7 +26,7 @@ let editDocId = null;
 // === ЗАГРУЗКА ДАННЫХ ===
 async function loadData() {
   cards.innerHTML = "<div class='loading'>Загрузка...</div>";
-  const snap = await getDocs(collection(db, "ipas"));
+  const snap = await getDocs(collection(db, "ursa_ipas"));
   cards.innerHTML = "";
   snap.forEach((docSnap) => {
     const app = docSnap.data();
