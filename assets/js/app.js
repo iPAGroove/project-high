@@ -17,12 +17,12 @@ const db = getFirestore(app);
 
 // ===== ICONS =====
 const ICONS = {
-  games: "https://store10.gofile.io/download/direct/3335936d-a58c-48bd-8686-21988ca6a23d/IMG_9617.png",
-  apps:  "https://store5.gofile.io/download/direct/5a4f1b52-2705-4fc5-8bf4-6ed9b70ffdf8/IMG_9616.png",
-  help:  "https://store5.gofile.io/download/direct/685a39aa-260d-4b30-a1a6-5e22f74f4983/IMG_9615.png",
+  games: "https://store5.gofile.io/download/direct/c9fd8cc7-5838-4ac9-869e-a12be2020d03/%D0%B3%D0%B5%D0%B9%D0%BC%D0%BF%D0%B0%D0%B4.png",
+  apps:  "https://store5.gofile.io/download/direct/9a5cf9e9-9b82-4ce4-9cc9-ce63b857dcaf/%D0%BA%D0%BE%D0%BF%D0%B8.png",
+  help:  "https://store-eu-par-3.gofile.io/download/direct/084828b1-4e8e-47d3-bcd0-48c12b99a49c/%D0%B2%D0%BE%D0%BF%D1%80%D0%BE%D1%81.png",
   lang: {
-    ru: "https://store5.gofile.io/download/direct/4dba02e0-4e51-4eb4-b99b-139946f857cb/IMG_9613.png",
-    en: "https://store5.gofile.io/download/direct/4dba02e0-4e51-4eb4-b99b-139946f857cb/IMG_9613.png"
+    ru: "https://store-eu-par-3.gofile.io/download/direct/886d9158-1492-44af-86fb-237aebb81090/%D0%BF%D0%B5%D1%80%D0%B5%D0%B2%D0%BE%D0%B4%D1%87%D0%B8%D0%BA.png",
+    en: "https://store-eu-par-3.gofile.io/download/direct/886d9158-1492-44af-86fb-237aebb81090/%D0%BF%D0%B5%D1%80%D0%B5%D0%B2%D0%BE%D0%B4%D1%87%D0%B8%D0%BA.png"
   }
 };
 
