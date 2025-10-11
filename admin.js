@@ -82,18 +82,28 @@ function openModal(title, values = {}) {
   form.reset();
   editDocId = values.__docId || null;
 
-  if (values["NAME"]) form.name.value = values["NAME"];
-  if (values["Bundle ID"]) form.bundleId.value = values["Bundle ID"];
-  if (values["Version"]) form.version.value = values["Version"];
-  if (values["minimal iOS"]) form.minIOS.value = values["minimal iOS"];
-  if (values["sizeBytes"]) form.sizeBytes.value = Math.round(values["sizeBytes"] / 1000000);
+  // Основные поля
+  form.name.value = values["NAME"] || "";
+  form.bundleId.value = values["Bundle ID"] || "";
+  form.version.value = values["Version"] || "";
+  form.minIOS.value = values["minimal iOS"] || "";
+  form.sizeBytes.value = values["sizeBytes"] ? Math.round(values["sizeBytes"] / 1000000) : "";
+  form.iconUrl.value = values.iconUrl || "";
+  form.downloadUrl.value = values.DownloadUrl || "";
+
+  // Медиа превью
   if (values.iconUrl) {
-    form.iconUrl.value = values.iconUrl;
     iconPreview.src = values.iconUrl;
     iconPreview.style.display = "block";
+  } else {
+    iconPreview.style.display = "none";
   }
-  if (values.DownloadUrl) form.downloadUrl.value = values.DownloadUrl;
-  if (values.features) form.features.value = values.features;
+
+  // 🇷🇺 / 🇬🇧 описания и фичи
+  form.description_ru.value = values.description_ru || "";
+  form.description_en.value = values.description_en || "";
+  form.features_ru.value = values.features_ru || "";
+  form.features_en.value = values.features_en || "";
 
   // категории
   document.querySelectorAll(".tag-btn").forEach(btn => btn.classList.remove("active"));
@@ -151,7 +161,10 @@ form.addEventListener("submit", async e => {
     "sizeBytes": Number(values.sizeBytes || 0) * 1000000,
     "iconUrl": values.iconUrl,
     "DownloadUrl": values.downloadUrl,
-    "features": values.features || "",
+    "description_ru": values.description_ru || "",
+    "description_en": values.description_en || "",
+    "features_ru": values.features_ru || "",
+    "features_en": values.features_en || "",
     "tags": values.tag ? [values.tag] : [],
     "updatedAt": new Date().toISOString(),
   };
@@ -185,8 +198,8 @@ window.editItem = async id => {
 // === Поиск ===
 searchBox.addEventListener("input", () => loadData(searchBox.value));
 
-// === Кнопки ===
+// === Кнопка добавить ===
 document.getElementById("add-btn").addEventListener("click", () => openModal("Добавить IPA"));
 
-// === Загрузка при старте ===
+// === Автозагрузка ===
 loadData();
