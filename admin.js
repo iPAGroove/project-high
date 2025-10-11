@@ -91,17 +91,7 @@ function openModal(title, values = {}) {
   form.iconUrl.value = values.iconUrl || "";
   form.downloadUrl.value = values.DownloadUrl || "";
 
-  // Медиа превью
-  if (values.iconUrl) {
-    iconPreview.src = values.iconUrl;
-    iconPreview.style.display = "block";
-  } else {
-    iconPreview.style.display = "none";
-  }
-
-  // 🇷🇺 / 🇬🇧 описания и фичи
-  form.description_ru.value = values.description_ru || "";
-  form.description_en.value = values.description_en || "";
+  // 🇷🇺 / 🇬🇧 фичи
   form.features_ru.value = values.features_ru || "";
   form.features_en.value = values.features_en || "";
 
@@ -161,8 +151,9 @@ form.addEventListener("submit", async e => {
     "sizeBytes": Number(values.sizeBytes || 0) * 1000000,
     "iconUrl": values.iconUrl,
     "DownloadUrl": values.downloadUrl,
-    "description_ru": values.description_ru || "",
-    "description_en": values.description_en || "",
+    // 🔹 Автоматические описания
+    "description_ru": "Функции мода",
+    "description_en": "Hack Features",
     "features_ru": values.features_ru || "",
     "features_en": values.features_en || "",
     "tags": values.tag ? [values.tag] : [],
