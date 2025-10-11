@@ -180,7 +180,8 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   search.placeholder = __t("search_ph");
   document.getElementById("lang-code").textContent = lang.toUpperCase();
 
-  let state = { all:[], q:"", tab:"games" };
+  // 🔹 Теперь вкладка "apps" активна по умолчанию
+  let state = { all:[], q:"", tab:"apps" };
   try {
     const snap = await getDocs(collection(db, "ursa_ipas"));
     state.all = snap.docs.map(d => normalize(d.data()));
@@ -201,7 +202,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
           app.tags.some(t=>(t||"").toLowerCase().includes(q))
         );
       } else {
-        // 📂 если поиска нет → фильтруем по табу
+        // 📂 фильтрация по активной вкладке
         return state.tab==="games" ? app.tags.includes("games") : app.tags.includes("apps");
       }
     });
