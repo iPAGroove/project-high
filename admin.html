@@ -55,10 +55,28 @@
         </fieldset>
 
         <fieldset>
-          <legend>Дополнительно</legend>
-          <label>Features <textarea name="features" placeholder="через запятую"></textarea></label>
+          <legend>Описание / Функции</legend>
+
+          <h4>🇷🇺 Русский</h4>
+          <label>Описание (RU)
+            <textarea name="description_ru" placeholder="Описание на русском"></textarea>
+          </label>
+          <label>Функции (RU)
+            <textarea name="features_ru" placeholder="через запятую"></textarea>
+          </label>
+
+          <h4>🇬🇧 English</h4>
+          <label>Description (EN)
+            <textarea name="description_en" placeholder="Description in English"></textarea>
+          </label>
+          <label>Features (EN)
+            <textarea name="features_en" placeholder="comma separated"></textarea>
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Категория</legend>
           <div>
-            <span style="font-size:13px;color:var(--muted);">Категория:</span>
             <div class="tag-buttons">
               <button type="button" class="tag-btn" data-tag="games">Games</button>
               <button type="button" class="tag-btn" data-tag="apps">Apps</button>
@@ -74,7 +92,6 @@
     </div>
   </div>
 
-  <!-- Firebase -->
   <script type="module" src="admin.js"></script>
 </body>
 </html>
