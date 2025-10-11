@@ -21,7 +21,7 @@ const ICONS = {
   apps:  "https://store5.gofile.io/download/direct/9a5cf9e9-9b82-4ce4-9cc9-ce63b857dcaf/%D0%BA%D0%BE%D0%BF%D0%B8.png",
   help:  "https://store-eu-par-3.gofile.io/download/direct/084828b1-4e8e-47d3-bcd0-48c12b99a49c/%D0%B2%D0%BE%D0%BF%D1%80%D0%BE%D1%81.png",
   lang: {
-    ru: "https://store-eu-par-3.gofile.io/download/direct/79e2512c-552c-4e1a-9b47-0cf1bcbfe556/IMG_9679.PNGg",
+    ru: "https://store-eu-par-3.gofile.io/download/direct/79e2512c-552c-4e1a-9b47-0cf1bcbfe556/IMG_9679.PNG",
     en: "https://store-eu-par-3.gofile.io/download/direct/79e2512c-552c-4e1a-9b47-0cf1bcbfe556/IMG_9679.PNG"
   }
 };
