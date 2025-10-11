@@ -81,7 +81,14 @@ a{color:var(--accent);text-decoration:none}
 }
 
 /* ──────────────── Каталог ──────────────── */
-.catalog{ margin-top:12px; display:grid; grid-template-columns:1fr; gap:var(--gap); }
+.catalog{
+  margin-top:12px;
+  display:grid;
+  grid-template-columns:1fr;
+  gap:var(--gap);
+  /* 👇 добавлен отступ, чтобы последняя карточка не пряталась под навбар */
+  padding-bottom: calc(var(--nav-btn-h) + env(safe-area-inset-bottom) + 32px);
+}
 
 /* ──────────────── Карточка ──────────────── */
 .card {
