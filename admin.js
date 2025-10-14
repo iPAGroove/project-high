@@ -1,4 +1,4 @@
-// URSA IPA Admin — v7.6.1 (Fixed VIP Save + Stable UI + Dual Tabs)
+// URSA IPA Admin — v7.8 Full Firestore Fields + VIP Toggle + Stable Dual Tabs
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
   getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc
@@ -16,7 +16,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-console.log("⚙️ URSA Admin v7.6.1 started");
+console.log("⚙️ URSA Admin v7.8 started");
 
 // === Elements ===
 const cards = document.getElementById("cards");
@@ -71,6 +71,8 @@ async function loadData(query = "") {
     );
   }
 
+  // Сортировка по дате (новые сверху)
+  apps.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""));
   render(apps);
 }
 
@@ -84,18 +86,20 @@ function render(apps) {
   apps.forEach(app => {
     const card = document.createElement("div");
     card.className = "app-card";
+    const vipMark = app.vipOnly ? "⭐" : "";
     card.innerHTML = `
       <div class="app-info">
         <img src="${app.iconUrl || ""}" alt="" class="app-icon">
         <div>
-          <div class="app-title">${app["NAME"] || "Без названия"}</div>
+          <div class="app-title">${vipMark} ${app["NAME"] || "Без названия"}</div>
           <div class="app-meta">Bundle: ${app["Bundle ID"] || "-"}</div>
-          <div class="app-meta">Версия: ${app["Version"] || "-"} · iOS ≥ ${app["minimal iOS"] || "-"}</div>
+          <div class="app-meta">v${app["Version"] || "-"} · iOS ≥ ${app["minimal iOS"] || "-"}</div>
           <div class="app-meta">Размер: ${formatSize(app["sizeBytes"])}</div>
           <div class="app-meta">Категория: ${(app["tags"] || []).join(", ")}</div>
         </div>
       </div>
       <div class="app-actions">
+        <button class="btn small ${app.vipOnly ? "red" : "blue"}" onclick="toggleVIP('${app.__docId}', ${app.vipOnly})">${app.vipOnly ? "⭐ VIP" : "☆ FREE"}</button>
         <button class="btn small blue" onclick="editItem('${app.__docId}')">✏️</button>
         <button class="btn small red" onclick="deleteItem('${app.__docId}')">🗑</button>
       </div>
@@ -156,6 +160,7 @@ document.querySelectorAll(".tag-btn").forEach(btn => {
   });
 });
 
+// === SAVE IPA ===
 form.addEventListener("submit", async e => {
   e.preventDefault();
   const values = Object.fromEntries(new FormData(form));
@@ -174,6 +179,7 @@ form.addEventListener("submit", async e => {
     features_ru: values.features_ru || "",
     features_en: values.features_en || "",
     tags: values.tag ? [values.tag] : [],
+    vipOnly: values.vipOnly === "true" || false,
     updatedAt: new Date().toISOString(),
   };
 
@@ -186,6 +192,7 @@ form.addEventListener("submit", async e => {
   loadData();
 });
 
+// === Delete / Edit / VIP Toggle ===
 window.deleteItem = async id => {
   if (confirm("Удалить запись?")) {
     await deleteDoc(doc(db, "ursa_ipas", id));
@@ -199,6 +206,14 @@ window.editItem = async id => {
   if (app) openModal("Редактировать IPA", { __docId: app.id, ...app.data() });
 };
 
+window.toggleVIP = async (id, current) => {
+  const newStatus = !current;
+  await updateDoc(doc(db, "ursa_ipas", id), { vipOnly: newStatus, updatedAt: new Date().toISOString() });
+  console.log(`⭐ ${id} → VIP=${newStatus}`);
+  loadData();
+};
+
+// === Search & Add ===
 searchBox.addEventListener("input", () => loadData(searchBox.value));
 document.getElementById("add-btn").addEventListener("click", () => openModal("Добавить IPA"));
 
@@ -207,11 +222,6 @@ async function loadUsers(query = "") {
   userTable.innerHTML = "<tr><td colspan='5' style='color:#888'>Загрузка...</td></tr>";
   const snap = await getDocs(collection(db, "ursa_users"));
   let users = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-  users = users.filter(u =>
-    (u.status && typeof u.status === "string") ||
-    (u.created_at && u.created_at.includes("202"))
-  );
 
   if (query) {
     const q = query.toLowerCase();
@@ -255,20 +265,16 @@ window.editUser = (id, email, name, status) => {
   document.body.style.overflow = "hidden";
 };
 
-// ✅ FIXED: Correct collection name for VIP save
 document.getElementById("save-user-status").onclick = async () => {
   const m = document.getElementById("user-modal");
   const id = m.dataset.id;
   const newStatus = document.getElementById("edit-user-status").value;
-
   try {
     await updateDoc(doc(db, "ursa_users", id), { status: newStatus });
-    console.log(`✅ User ${id} status changed to ${newStatus}`);
+    console.log(`✅ User ${id} → ${newStatus}`);
   } catch (err) {
-    console.error("❌ Ошибка при обновлении статуса:", err);
     alert("Не удалось сохранить статус: " + err.message);
   }
-
   m.classList.remove("open");
   document.body.style.overflow = "";
   loadUsers();
