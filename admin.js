@@ -338,3 +338,9 @@ document.getElementById("user-modal").addEventListener("click", e => {
 // === Search ===
 searchBox.addEventListener("input", () => loadData(searchBox.value));
 document.getElementById("user-search").addEventListener("input", e => loadUsers(e.target.value));
+// === EXPORT TO WINDOW ===
+window.safeWrite = safeWrite;
+window.toggleVIP = toggleVIP;
+window.editItem = editItem;
+window.deleteItem = deleteItem;
+window.editUser = editUser;
