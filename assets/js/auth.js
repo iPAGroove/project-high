@@ -1,5 +1,3 @@
-и этот дай готовый без этого окна 
-assets/js/auth.js
 // URSA Auth — v8.2 (Neon Restore UI + Token Type Check + Safe Popup)
 import { auth, db } from "./firebase.js";
 import {
