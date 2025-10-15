@@ -1,4 +1,4 @@
-// URSA IPA — v4.1 Firestore-based Signer Integration (i18n + Safe Auth Wait + Improved UX)
+// URSA IPA — v4.2 Firestore-based Signer Integration (PWA Safe + i18n + Smart Fallback)
 import { auth, db } from "./firebase.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
@@ -16,6 +16,7 @@ const T = {
     bad_format: "Неверный формат сертификата.",
     done: "✅ Подпись завершена! Установка начнётся…",
     error: "Ошибка при подписи IPA",
+    safari_fallback: "⚠️ Для подписи IPA откроется Safari (PWA ограничен)",
   },
   en: {
     signing: "🔄 Signing IPA via URSA Signer…",
@@ -24,13 +25,14 @@ const T = {
     bad_format: "Invalid certificate format.",
     done: "✅ Signing complete! Installation will begin…",
     error: "Signing error",
+    safari_fallback: "⚠️ Safari will open to sign the IPA (PWA restricted)",
   }
 }[LANG];
 
 // === Wait for Auth Helper ===
 const waitForAuth = () =>
   new Promise((resolve) => {
-    const unsub = firebase.auth().onAuthStateChanged((u) => {
+    const unsub = auth.onAuthStateChanged((u) => {
       if (u) { unsub(); resolve(u); }
     });
     setTimeout(() => resolve(auth.currentUser), 2000);
@@ -59,6 +61,16 @@ async function installIPA(app) {
     const { p12Url, provUrl, pass = "" } = data;
     if (!p12Url || !provUrl) throw new Error(T.bad_format);
 
+    // 🔹 Detect PWA (Safari standalone)
+    if (window.matchMedia("(display-mode: standalone)").matches) {
+      console.log("📱 PWA detected — using Safari fallback for signing");
+      alert(T.safari_fallback);
+      const url = `${SIGNER_API}?ipa_url=${encodeURIComponent(app.downloadUrl)}`;
+      window.open(url, "_blank");
+      dl.innerHTML = `<div style="opacity:.9;font-size:14px;">↪️ ${T.safari_fallback}</div>`;
+      return;
+    }
+
     // 🔹 Download certificate files (via proxy)
     const [p12Blob, provBlob] = await Promise.all([
       fetch(FILE_PROXY + encodeURIComponent(p12Url)).then(r => r.ok ? r.blob() : Promise.reject("p12 load error")),
@@ -80,6 +92,7 @@ async function installIPA(app) {
     document.getElementById("sign-progress").value = 100;
     dl.innerHTML = `<div style="opacity:.9;font-size:14px;">${T.done}</div>`;
     setTimeout(() => (location.href = json.install_link), 900);
+
   } catch (err) {
     console.error("Signer error:", err);
     dl.innerHTML = `<div style="opacity:.9;color:#ff6;">❌ ${
