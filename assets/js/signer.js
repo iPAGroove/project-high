@@ -1,6 +1,7 @@
-// URSA IPA — v4.1 Firestore-based Signer Integration (i18n + Safe Auth Wait + Improved UX)
+// URSA IPA — v4.2 Firestore-based Signer Integration (PWA Safe + Modular Auth)
 import { auth, db } from "./firebase.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 // === API endpoints ===
 const SIGNER_API = "https://ursa-signer-239982196215.europe-west1.run.app/sign_remote";
@@ -27,14 +28,11 @@ const T = {
   }
 }[LANG];
 
-// === Wait for Auth Helper ===
+// === Wait for Auth Helper (modular safe) ===
 const waitForAuth = () =>
   new Promise((resolve) => {
-    const unsub = firebase.auth().onAuthStateChanged((u) => {
-      if (u) {
-        unsub();
-        resolve(u);
-      }
+    const unsub = onAuthStateChanged(auth, (u) => {
+      if (u) { unsub(); resolve(u); }
     });
     setTimeout(() => resolve(auth.currentUser), 2000);
   });
@@ -90,7 +88,6 @@ async function installIPA(app) {
 
     document.getElementById("sign-progress").value = 100;
     dl.innerHTML = `<div style="opacity:.9;font-size:14px;">${T.done}</div>`;
-
     setTimeout(() => (location.href = json.install_link), 900);
   } catch (err) {
     console.error("Signer error:", err);
