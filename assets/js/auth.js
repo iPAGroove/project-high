@@ -1,4 +1,4 @@
-// URSA Auth — v8.3 (PWA Token Fix + IndexedDB Persistence + Safe Sync)
+// URSA Auth — v7.6 (ursa_users + i18n RU/EN + Safe Double Login + AutoCert + Live Profile Refresh)
 import { auth, db } from "./firebase.js";
 import {
   onAuthStateChanged,
@@ -6,122 +6,120 @@ import {
   signInWithRedirect,
   GoogleAuthProvider,
   signOut,
-  getRedirectResult,
-  signInWithCustomToken,
-  setPersistence,
-  indexedDBLocalPersistence
+  getRedirectResult
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-console.log("🔥 URSA Auth v8.3 initialized (PWA Token Fix + IndexedDB Persistence)");
-
-// === Apply PWA persistence ===
-setPersistence(auth, indexedDBLocalPersistence).catch(() => {});
+console.log("🔥 URSA Auth v7.6 initialized");
 
 // === Local i18n ===
 const AUTH_I18N = {
   ru: {
-    token_restore: "🔄 Восстанавливаем вход...\nПроверяем сессию Firebase...",
-    token_ok: "✅ Сессия успешно восстановлена!",
-    token_invalid: "❌ Ошибка восстановления: недействительный токен.",
-    step1_popup: "🔐 Проверка входа через Google...",
-    step2_ok: "✅ Успешный вход! Обновляем профиль...",
-    popup_fallback: "↪️ Откроется Safari для безопасного входа.",
+    step1_popup: "🔐 Пожалуйста, подождите: выполняется двойная проверка входа.\nШаг 1/2 — вход через всплывающее окно.",
+    step2_ok: "✅ Шаг 2/2 — проверка безопасности пройдена.",
+    popup_fallback: "↪️ Переключаемся на защищённый вход (Шаг 2/2). Продолжите в открывшейся вкладке.",
     redirect_ok: "✅ Redirect вход успешен",
     logout_ok: "🚪 Вышли из аккаунта",
+    auth_not_ready: "❌ Авторизация ещё не готова",
+    sync_err_user: "⚠️ Не удалось подтянуть профиль из Firestore",
+    sync_err_signer: "⚠️ Не удалось подтянуть signer",
+    no_google: "❌ Не удалось запустить Google вход",
   },
   en: {
-    token_restore: "🔄 Restoring sign-in...\nVerifying Firebase session...",
-    token_ok: "✅ Session restored successfully!",
-    token_invalid: "❌ Restore failed: invalid token.",
-    step1_popup: "🔐 Checking Google sign-in...",
-    step2_ok: "✅ Sign-in successful! Syncing profile...",
-    popup_fallback: "↪️ Safari will open for secure login.",
+    step1_popup: "🔐 Please wait: performing double-check sign-in.\nStep 1/2 — sign in via popup.",
+    step2_ok: "✅ Step 2/2 — security check passed.",
+    popup_fallback: "↪️ Falling back to secure sign-in (Step 2/2). Continue in the opened tab.",
     redirect_ok: "✅ Redirect sign-in succeeded",
     logout_ok: "🚪 Signed out",
+    auth_not_ready: "❌ Auth not ready yet",
+    sync_err_user: "⚠️ Failed to fetch user profile from Firestore",
+    sync_err_signer: "⚠️ Failed to fetch signer",
+    no_google: "❌ Could not start Google sign-in",
   }
 };
-const langCode = () => (localStorage.getItem("ursa_lang") || "ru").slice(0, 2).toLowerCase();
-const t = (k) => AUTH_I18N[langCode()]?.[k] || AUTH_I18N.ru[k];
+const langCode = () => {
+  const l = (localStorage.getItem("ursa_lang") || (navigator.language || "ru")).slice(0,2).toLowerCase();
+  return AUTH_I18N[l] ? l : "ru";
+};
+const t = (k) => AUTH_I18N[langCode()]?.[k] || AUTH_I18N.ru[k] || k;
 
 // === Helpers ===
 const setLocal = (k, v) => { try { localStorage.setItem(k, v ?? ""); } catch {} };
+const removeLocal = (k) => { try { localStorage.removeItem(k); } catch {} };
 const clearLocalAll = () => { try { localStorage.clear(); } catch {} };
 
 // === Wait for user ===
 const waitForAuth = () =>
   new Promise((resolve) => {
-    const unsub = onAuthStateChanged(auth, (u) => { if (u) { unsub(); resolve(u); } });
-    setTimeout(() => resolve(auth.currentUser), 3000);
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (user) { unsub(); resolve(user); }
+    });
+    setTimeout(() => resolve(auth.currentUser), 2500);
   });
 
-// === Firestore sync ===
+// === Sync Firestore user + signer ===
 async function syncUser(u) {
   if (!u) u = await waitForAuth();
-  if (!u) return;
+  if (!u) { console.error(t("auth_not_ready")); return; }
 
-  const ref = doc(db, "ursa_users", u.uid);
-  const snap = await getDoc(ref);
+  const userRef = doc(db, "ursa_users", u.uid);
+  const snap = await getDoc(userRef);
+
   const now = new Date().toISOString();
+  const lang = langCode();
 
   if (!snap.exists()) {
-    await setDoc(ref, {
-      uid: u.uid, email: u.email || "", name: u.displayName || "",
-      photo: u.photoURL || "", status: "free", created_at: now, last_active_at: now
+    await setDoc(userRef, {
+      uid: u.uid,
+      email: u.email || "",
+      name: u.displayName || "",
+      photo: u.photoURL || "",
+      status: "free",
+      language: lang,
+      created_at: now,
+      last_active_at: now,
     });
   } else {
-    await setDoc(ref, { last_active_at: now }, { merge: true });
+    await setDoc(userRef, { last_active_at: now, language: lang }, { merge: true });
   }
+
+  const data = snap.exists() ? snap.data() : { status: "free" };
 
   setLocal("ursa_uid", u.uid);
   setLocal("ursa_email", u.email || "");
   setLocal("ursa_photo", u.photoURL || "");
   setLocal("ursa_name", u.displayName || "");
-  setLocal("ursa_status", snap.exists() ? snap.data().status : "free");
+  setLocal("ursa_status", data.status || "free");
+
+  // === Load signer if exists ===
+  try {
+    const signerRef = doc(db, "ursa_signers", u.uid);
+    const signerSnap = await getDoc(signerRef);
+    if (signerSnap.exists()) {
+      const s = signerSnap.data();
+      setLocal("ursa_signer_id", u.uid);
+      setLocal("ursa_cert_account", s.account || "—");
+      setLocal("ursa_cert_exp", s.expires || "");
+      console.log("📜 Signer loaded.");
+    } else {
+      removeLocal("ursa_signer_id");
+      removeLocal("ursa_cert_account");
+      removeLocal("ursa_cert_exp");
+    }
+  } catch (e) {
+    console.warn(t("sync_err_signer") + ":", e);
+  }
 
   if (typeof window.openSettings === "function") window.openSettings();
 }
 
-// === Token restore (PWA-safe) ===
-const params = new URLSearchParams(window.location.search);
-if (params.has("token")) {
-  const token = params.get("token");
-  console.log("🪪 Token from Safari:", token);
-  const overlay = document.createElement("div");
-  overlay.style.cssText = `
-    position:fixed;inset:0;background:#000;color:#00eaff;
-    display:flex;align-items:center;justify-content:center;flex-direction:column;
-    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text";
-    font-size:17px;text-align:center;z-index:9999;text-shadow:0 0 14px #00eaff;
-  `;
-  overlay.innerHTML = `<div style="font-size:26px;margin-bottom:12px;">URSA iPA</div><div>${t("token_restore")}</div>`;
-  document.body.appendChild(overlay);
-
-  const isIdToken = token.split(".").length === 3;
-  (async () => {
-    try {
-      if (!isIdToken) await signInWithCustomToken(auth, token);
-      const u = await waitForAuth();
-      await syncUser(u);
-      overlay.innerHTML = `<div style="font-size:26px;margin-bottom:12px;">URSA iPA</div><div>${t("token_ok")}</div>`;
-      setTimeout(() => overlay.remove(), 1000);
-      const cleanUrl = window.location.origin + window.location.pathname;
-      window.history.replaceState({}, document.title, cleanUrl);
-    } catch (e) {
-      overlay.innerHTML = `<div>${t("token_invalid")}<br>${e.message}</div>`;
-      setTimeout(() => overlay.remove(), 4000);
-    }
-  })();
-}
-
 // === Login / Logout ===
 window.ursaAuthAction = async () => {
-  const u = auth.currentUser;
-  if (u) {
-    const keepLang = localStorage.getItem("ursa_lang");
+  const user = auth.currentUser;
+  if (user) {
     await signOut(auth);
+    console.log(t("logout_ok"));
     clearLocalAll();
-    if (keepLang) localStorage.setItem("ursa_lang", keepLang);
     if (typeof window.openSettings === "function") window.openSettings();
     return;
   }
@@ -129,30 +127,72 @@ window.ursaAuthAction = async () => {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
 
-  const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
   try {
-    if (isStandalone) {
-      alert(t("popup_fallback"));
-      window.location.href = "https://ursaipa.live/auth.html";
-      return;
-    }
     alert(t("step1_popup"));
     const res = await signInWithPopup(auth, provider);
     alert(t("step2_ok"));
     await syncUser(res.user);
-  } catch (e) {
+  } catch (err) {
+    console.warn("⚠️ Popup failed, fallback redirect…", err);
     alert(t("popup_fallback"));
-    await signInWithRedirect(auth, provider);
+    try {
+      await signInWithRedirect(auth, provider);
+    } catch (e) {
+      console.error(t("no_google"), e);
+    }
   }
 };
 
 // === Redirect handler ===
-getRedirectResult(auth).then(async (res) => {
-  if (res?.user) await syncUser(res.user);
-}).catch(console.error);
+getRedirectResult(auth)
+  .then(async (res) => {
+    if (res?.user) {
+      console.log(t("redirect_ok"));
+      await syncUser(res.user);
+    }
+  })
+  .catch((err) => console.error("Redirect error:", err));
 
-// === Live watcher ===
-onAuthStateChanged(auth, async (u) => {
-  if (u) await syncUser(u);
-  else clearLocalAll();
+// === Global watcher ===
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    try {
+      const ref = doc(db, "ursa_users", user.uid);
+      const snap = await getDoc(ref);
+      const status = snap.exists() ? (snap.data().status || "free") : "free";
+      setLocal("ursa_uid", user.uid);
+      setLocal("ursa_email", user.email || "");
+      setLocal("ursa_photo", user.photoURL || "");
+      setLocal("ursa_name", user.displayName || "");
+      setLocal("ursa_status", status);
+      console.log(`👤 Active: ${user.email} (${status})`);
+      await setDoc(ref, { last_active_at: new Date().toISOString() }, { merge: true });
+    } catch (e) {
+      console.warn(t("sync_err_user") + ":", e);
+    }
+
+    try {
+      const signerRef = doc(db, "ursa_signers", user.uid);
+      const signerSnap = await getDoc(signerRef);
+      if (signerSnap.exists()) {
+        const s = signerSnap.data();
+        setLocal("ursa_signer_id", user.uid);
+        setLocal("ursa_cert_account", s.account || "—");
+        setLocal("ursa_cert_exp", s.expires || "");
+      } else {
+        removeLocal("ursa_signer_id");
+        removeLocal("ursa_cert_account");
+        removeLocal("ursa_cert_exp");
+      }
+    } catch (e) {
+      console.warn(t("sync_err_signer") + ":", e);
+    }
+  } else {
+    clearLocalAll();
+    console.log("👋 Signed out");
+  }
+
+  if (document.getElementById("settings-modal")?.classList.contains("open")) {
+    if (typeof window.openSettings === "function") window.openSettings();
+  }
 });
