@@ -1,7 +1,7 @@
-// URSA Firebase Core (shared instance)
+// URSA Firebase Core — v3.5 (Safari/PWA Safe)
 import { getApps, getApp, initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-import { initializeFirestore } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDFj9gOYU49Df6ohUR5CnbRv3qdY2i_OmU",
@@ -15,12 +15,8 @@ const firebaseConfig = {
 // === Инициализация ===
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = initializeFirestore(app, {
-  experimentalForceLongPolling: true,
-  useFetchStreams: false,
-  ignoreUndefinedProperties: true
-});
+const db = getFirestore(app);
 
-console.log("🔥 URSA Firebase Core initialized (shared long-polling)");
+console.log("🔥 URSA Firebase Core initialized (Safari-safe, no long polling)");
 
 export { app, auth, db };
