@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>URSA — Авторизация</title>
+  <script type="module">
+    import { auth } from "./assets/js/firebase.js";
+    import { GoogleAuthProvider, signInWithRedirect } 
+      from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+
+    // запускаем вход и сразу возвращаем обратно
+    signInWithRedirect(auth, provider)
+      .then(() => console.log("✅ Redirect started"))
+      .catch(e => console.error("Auth redirect error:", e));
+  </script>
+</head>
+<body style="background:#000;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;">
+  🔑 Вход через Google...
+</body>
+</html>
