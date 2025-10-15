@@ -191,7 +191,7 @@ onAuthStateChanged(auth, async (user) => {
       const signerSnap = await getDoc(signerRef);
       if (signerSnap.exists()) {
         const s = signerSnap.data();
-        setLocal("ursa_signer_id", user.uid);
+        setLocal("ursa_signer_id", u.uid);
         setLocal("ursa_cert_account", s.account || "—");
         setLocal("ursa_cert_exp", s.expires || "");
       } else {
