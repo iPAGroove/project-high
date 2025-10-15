@@ -4,39 +4,56 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>URSA Auth Redirect</title>
+  <style>
+    body {
+      background:#000; color:#fff;
+      display:flex; align-items:center; justify-content:center;
+      font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text";
+      height:100vh; font-size:17px; text-align:center;
+    }
+  </style>
+</head>
+<body>
+  <div id="status">🔑 Вход через Google...</div>
+
   <script type="module">
-    import { auth } from "./firebase.js";
+    import { auth } from "./assets/js/firebase.js";
     import {
       GoogleAuthProvider,
       signInWithRedirect,
       getRedirectResult
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-    const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: "select_account" });
+    const text = (msg) => document.getElementById("status").innerText = msg;
 
-    if (!localStorage.getItem("ursa_auth_start")) {
-      localStorage.setItem("ursa_auth_start", "1");
-      console.log("🔁 Redirecting to Google Sign-In...");
-      signInWithRedirect(auth, provider);
-    } else {
-      getRedirectResult(auth).then(async (res) => {
+    try {
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
+
+      if (!localStorage.getItem("ursa_auth_start")) {
+        localStorage.setItem("ursa_auth_start", "1");
+        console.log("🔁 Redirecting to Google Sign-In...");
+        text("🌐 Перенаправление на Google...");
+        await signInWithRedirect(auth, provider);
+      } else {
+        const res = await getRedirectResult(auth);
         localStorage.removeItem("ursa_auth_start");
+
         if (res?.user) {
           const token = await res.user.getIdToken();
+          console.log("✅ Got token, redirecting to PWA");
           window.location.href = "https://ursaipa.live/?token=" + token;
         } else {
+          console.warn("❌ No user, returning to app");
           window.location.href = "https://ursaipa.live";
         }
-      }).catch(err => {
-        console.error("Redirect error:", err);
-        localStorage.removeItem("ursa_auth_start");
-        window.location.href = "https://ursaipa.live";
-      });
+      }
+    } catch (err) {
+      console.error("Auth redirect error:", err);
+      text("⚠️ Ошибка: " + err.message);
+      localStorage.removeItem("ursa_auth_start");
+      setTimeout(() => window.location.href = "https://ursaipa.live", 2500);
     }
   </script>
-</head>
-<body style="background:#000;color:#fff;text-align:center;font-family:-apple-system;padding-top:50vh;">
-  🔑 Вход через Google...
 </body>
 </html>
