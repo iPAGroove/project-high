@@ -55,7 +55,7 @@ const waitForAuth = () =>
     const unsub = onAuthStateChanged(auth, (user) => {
       if (user) { unsub(); resolve(user); }
     });
-    setTimeout(() => resolve(auth.currentUser), 2500);
+    setTimeout(() => resolve(auth.currentUser), 3000);
   });
 
 // === Firestore user sync ===
