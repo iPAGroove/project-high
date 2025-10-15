@@ -1,4 +1,4 @@
-// URSA Auth — v7.9 (Full PWA Safari Redirect + i18n + Firestore Sync + Live Profile)
+// URSA Auth — v8.0 (Safari Token Fix + PWA Sync + Firestore Live Profile)
 import { auth, db } from "./firebase.js";
 import {
   onAuthStateChanged,
@@ -6,11 +6,12 @@ import {
   signInWithRedirect,
   GoogleAuthProvider,
   signOut,
-  getRedirectResult
+  getRedirectResult,
+  signInWithCustomToken
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-console.log("🔥 URSA Auth v7.9 initialized (PWA → Safari redirect to ursaipa.live)");
+console.log("🔥 URSA Auth v8.0 initialized (Safari → token redirect → PWA restore)");
 
 // === Local i18n ===
 const AUTH_I18N = {
@@ -112,6 +113,21 @@ async function syncUser(u) {
   if (typeof window.openSettings === "function") window.openSettings();
 }
 
+// === Safari token restore ===
+const params = new URLSearchParams(window.location.search);
+if (params.has("token")) {
+  const token = params.get("token");
+  console.log("🪪 Received token from Safari redirect");
+  signInWithCustomToken(auth, token)
+    .then(async () => {
+      window.history.replaceState({}, document.title, "/");
+      console.log("✅ Firebase session restored from Safari token");
+      const u = await waitForAuth();
+      await syncUser(u);
+    })
+    .catch((e) => console.error("❌ Token auth failed:", e));
+}
+
 // === Login / Logout ===
 window.ursaAuthAction = async () => {
   const user = auth.currentUser;
@@ -132,12 +148,11 @@ window.ursaAuthAction = async () => {
     if (isStandalone) {
       console.log("📱 PWA detected — redirecting to Safari auth page");
       alert(t("popup_fallback"));
-      // ✅ Теперь Safari откроется снаружи PWA
       window.location.href = "https://ursaipa.live/auth.html";
       return;
     }
 
-    // Обычный popup вход (в браузере)
+    // Обычный popup вход
     alert(t("step1_popup"));
     const res = await signInWithPopup(auth, provider);
     alert(t("step2_ok"));
@@ -160,7 +175,6 @@ getRedirectResult(auth)
     if (res?.user) {
       console.log(t("redirect_ok"));
       await syncUser(res.user);
-      // 🚀 Возврат на URSA после входа
       if (window.location.hostname.includes("firebaseapp.com")) {
         window.location.href = "https://ursaipa.live";
       }
@@ -184,23 +198,6 @@ onAuthStateChanged(auth, async (user) => {
       await setDoc(ref, { last_active_at: new Date().toISOString() }, { merge: true });
     } catch (e) {
       console.warn(t("sync_err_user") + ":", e);
-    }
-
-    try {
-      const signerRef = doc(db, "ursa_signers", user.uid);
-      const signerSnap = await getDoc(signerRef);
-      if (signerSnap.exists()) {
-        const s = signerSnap.data();
-        setLocal("ursa_signer_id", u.uid);
-        setLocal("ursa_cert_account", s.account || "—");
-        setLocal("ursa_cert_exp", s.expires || "");
-      } else {
-        removeLocal("ursa_signer_id");
-        removeLocal("ursa_cert_account");
-        removeLocal("ursa_cert_exp");
-      }
-    } catch (e) {
-      console.warn(t("sync_err_signer") + ":", e);
     }
   } else {
     clearLocalAll();
