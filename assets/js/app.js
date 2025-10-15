@@ -1,4 +1,4 @@
-// URSA IPA — v8.0 LazyLoad + Dynamic i18n + VIP Lock Blur + Profile + AutoCert + Firestore
+// URSA IPA — v8.0 LazyLoad + Global Search + Dynamic i18n + VIP Lock Blur + Profile + AutoCert + Firestore
 import { db } from "./firebase.js";
 import {
   collection,
@@ -138,8 +138,8 @@ function normalize(doc) {
     iconUrl: doc.iconUrl || "",
     downloadUrl: doc.DownloadUrl || doc.downloadUrl || "",
     features: doc.features || "",
-    features_ru: doc.features_ru || "",
-    features_en: doc.features_en || "",
+    features_ru: doc.features_ru || doc.features_ru || "",
+    features_en: doc.features_en || doc.features_en || "",
     vipOnly: !!doc.vipOnly,
     tags: tags.map((t) => t.toLowerCase())
   };
@@ -362,7 +362,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderCatalog(list);
   };
 
-  search.addEventListener("input", (e) => (state.q = e.target.value, apply()));
+  // === Глобальный поиск по всей коллекции ===
+  search.addEventListener("input", async (e) => {
+    state.q = e.target.value.trim().toLowerCase();
+
+    // Если пользователь начал искать — загружаем всю коллекцию
+    if (state.q && !state.end) {
+      try {
+        const cRef = collection(db, "ursa_ipas");
+        const qRef = query(cRef, orderBy("NAME"));
+        const snap = await getDocs(qRef);
+        state.all = snap.docs.map((d) => normalize(d.data()));
+        state.end = true; // больше не подгружаем по батчам
+      } catch (err) {
+        console.error("Ошибка загрузки при поиске:", err);
+      }
+    }
+
+    apply();
+  });
 
   const bar = document.getElementById("tabbar");
   bar.addEventListener("click", (e) => {
