@@ -1,4 +1,4 @@
-// URSA Auth — v8.0 (Safari Token Fix + PWA Sync + Firestore Live Profile)
+// URSA Auth — v8.1 (Safari Token Restore UI + Safe Popup + Firestore Sync)
 import { auth, db } from "./firebase.js";
 import {
   onAuthStateChanged,
@@ -11,11 +11,12 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-console.log("🔥 URSA Auth v8.0 initialized (Safari → token redirect → PWA restore)");
+console.log("🔥 URSA Auth v8.1 initialized (Safari token restore + popup fallback)");
 
 // === Local i18n ===
 const AUTH_I18N = {
   ru: {
+    token_restore: "🔄 Авторизация через токен...\nПроверяем сессию Firebase...",
     step1_popup: "🔐 Пожалуйста, подождите: выполняется двойная проверка входа.\nШаг 1/2 — вход через всплывающее окно.",
     step2_ok: "✅ Шаг 2/2 — проверка безопасности пройдена.",
     popup_fallback: "↪️ Откроется Safari для безопасного входа.",
@@ -27,6 +28,7 @@ const AUTH_I18N = {
     no_google: "❌ Не удалось запустить Google вход",
   },
   en: {
+    token_restore: "🔄 Signing in via token...\nVerifying Firebase session...",
     step1_popup: "🔐 Please wait: performing double-check sign-in.\nStep 1/2 — sign in via popup.",
     step2_ok: "✅ Step 2/2 — security check passed.",
     popup_fallback: "↪️ Safari will open for secure login.",
@@ -118,14 +120,31 @@ const params = new URLSearchParams(window.location.search);
 if (params.has("token")) {
   const token = params.get("token");
   console.log("🪪 Received token from Safari redirect");
+
+  // Показ UI для плавного восстановления
+  const overlay = document.createElement("div");
+  overlay.style.cssText = `
+    position:fixed;inset:0;background:#000;color:#0ff;
+    display:flex;align-items:center;justify-content:center;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text";
+    font-size:17px;text-align:center;z-index:9999;
+  `;
+  overlay.innerText = t("token_restore");
+  document.body.appendChild(overlay);
+
   signInWithCustomToken(auth, token)
     .then(async () => {
       window.history.replaceState({}, document.title, "/");
       console.log("✅ Firebase session restored from Safari token");
       const u = await waitForAuth();
       await syncUser(u);
+      overlay.remove();
     })
-    .catch((e) => console.error("❌ Token auth failed:", e));
+    .catch((e) => {
+      overlay.innerText = "❌ Ошибка восстановления: " + e.message;
+      console.error("❌ Token auth failed:", e);
+      setTimeout(() => overlay.remove(), 4000);
+    });
 }
 
 // === Login / Logout ===
@@ -152,7 +171,6 @@ window.ursaAuthAction = async () => {
       return;
     }
 
-    // Обычный popup вход
     alert(t("step1_popup"));
     const res = await signInWithPopup(auth, provider);
     alert(t("step2_ok"));
