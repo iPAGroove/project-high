@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>URSA Auth Universal</title>
+  <title>URSA Auth Safe</title>
   <style>
     body {
       background:#000;
@@ -11,81 +11,73 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text";
-      height:100vh;
-      font-size:16px;
-      text-align:center;
       flex-direction:column;
+      height:100vh;
+      font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text";
+      text-align:center;
     }
-    #status { max-width:90%; white-space:pre-line; opacity:0.9; }
+    button {
+      background:#0ff;
+      color:#000;
+      border:none;
+      border-radius:12px;
+      padding:12px 26px;
+      font-size:17px;
+      font-weight:600;
+      margin-top:22px;
+      transition:opacity 0.25s;
+    }
+    button:active { opacity:0.7; }
+    #status { opacity:0.85; font-size:15px; max-width:90%; }
   </style>
 </head>
 <body>
-  <div id="status">🚀 Инициализация Firebase...</div>
+  <div id="status">🔐 Готово к авторизации</div>
+  <button id="go">Войти через Google</button>
 
   <script type="module">
     import { auth } from "./assets/js/firebase.js";
     import {
       GoogleAuthProvider,
       signInWithRedirect,
-      getRedirectResult,
-      signInWithPopup
+      signInWithPopup,
+      getRedirectResult
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-    const status = (msg) => {
-      console.log(msg);
-      document.getElementById("status").innerText = msg;
-    };
+    const status = (msg) => document.getElementById("status").innerText = msg;
+    const goBtn = document.getElementById("go");
 
-    async function loginFlow() {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+
+    // === Проверяем возврат после redirect ===
+    (async () => {
+      const res = await getRedirectResult(auth);
+      if (res?.user) {
+        const token = await res.user.getIdToken();
+        status("✅ Успешный вход через redirect! Открываем URSA...");
+        setTimeout(() => window.open("https://ursaipa.live/?token=" + encodeURIComponent(token), "_blank"), 700);
+      }
+    })();
+
+    // === Обработчик нажатия кнопки ===
+    goBtn.onclick = async () => {
       try {
-        const provider = new GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: "select_account" });
-
-        // Первый запуск — редирект в Google
-        if (!localStorage.getItem("ursa_auth_start")) {
-          localStorage.setItem("ursa_auth_start", "1");
-          status("🌐 Перенаправление на Google...");
-          await signInWithRedirect(auth, provider);
-          return;
-        }
-
-        // После возврата
-        await new Promise(r => setTimeout(r, 700));
-        const res = await getRedirectResult(auth);
-        localStorage.removeItem("ursa_auth_start");
-
+        status("🌐 Пытаемся открыть Google popup...");
+        // Попробуем popup — Safari разрешит, т.к. это по клику
+        const res = await signInWithPopup(auth, provider);
         if (res?.user) {
           const token = await res.user.getIdToken();
-          status("✅ Redirect-вход успешен! Возврат в URSA...");
-          setTimeout(() => {
-            window.location.href = "https://ursaipa.live/?token=" + encodeURIComponent(token);
-          }, 600);
+          status("✅ Popup-вход успешен! Открываем URSA...");
+          setTimeout(() => window.open("https://ursaipa.live/?token=" + encodeURIComponent(token), "_blank"), 700);
           return;
         }
-
-        // Fallback — cookie потеряны → popup
-        status("⚠️ Cookie Safari сброшены. Пробуем popup вход...");
-        const popupRes = await signInWithPopup(auth, provider);
-        if (popupRes?.user) {
-          const token = await popupRes.user.getIdToken();
-          status("✅ Popup вход успешен! Возврат...");
-          setTimeout(() => {
-            window.location.href = "https://ursaipa.live/?token=" + encodeURIComponent(token);
-          }, 600);
-        } else {
-          throw new Error("Popup вход не вернул user");
-        }
-
-      } catch (err) {
-        console.error(err);
-        status("❌ Ошибка входа:\n" + err.message + "\n\n↩️ Возврат в URSA...");
-        localStorage.removeItem("ursa_auth_start");
-        setTimeout(() => window.location.href = "https://ursaipa.live", 3000);
+      } catch (e) {
+        console.warn("⚠️ Popup не сработал, пробуем redirect:", e);
+        status("↪️ Popup заблокирован Safari. Перенаправляем...");
+        await signInWithRedirect(auth, provider);
       }
-    }
-
-    loginFlow();
+    };
   </script>
 </body>
 </html>
