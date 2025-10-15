@@ -132,8 +132,8 @@ window.ursaAuthAction = async () => {
     if (isStandalone) {
       console.log("📱 PWA detected — redirecting to Safari auth page");
       alert(t("popup_fallback"));
-      // 🔗 Правильный редирект в Safari с возвратом на URSA
-      window.open("https://ursaipa.live/auth.html", "_blank");
+      // ✅ Теперь Safari откроется снаружи PWA
+      window.location.href = "https://ursaipa.live/auth.html";
       return;
     }
 
@@ -160,7 +160,7 @@ getRedirectResult(auth)
     if (res?.user) {
       console.log(t("redirect_ok"));
       await syncUser(res.user);
-      // 🚀 Автоматически возвращаем на главную после входа
+      // 🚀 Возврат на URSA после входа
       if (window.location.hostname.includes("firebaseapp.com")) {
         window.location.href = "https://ursaipa.live";
       }
