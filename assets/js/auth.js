@@ -1,4 +1,6 @@
-// URSA Auth — v8.4 (Silent Restore + Clean UX + Safe Popup)
+и этот дай готовый без этого окна 
+assets/js/auth.js
+// URSA Auth — v8.2 (Neon Restore UI + Token Type Check + Safe Popup)
 import { auth, db } from "./firebase.js";
 import {
   onAuthStateChanged,
@@ -11,21 +13,27 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-console.log("🔥 URSA Auth v8.4 initialized (Silent Restore + Clean UX)");
+console.log("🔥 URSA Auth v8.2 initialized (Neon Restore + Type Check + Popup Fallback)");
 
 // === Local i18n ===
 const AUTH_I18N = {
   ru: {
+    token_restore: "🔄 Восстанавливаем вход...\nПроверяем сессию Firebase...",
+    token_ok: "✅ Сессия успешно восстановлена!",
+    token_invalid: "❌ Ошибка восстановления: недействительный токен.",
     step1_popup: "🔐 Проверка входа через Google...",
     step2_ok: "✅ Успешный вход! Обновляем профиль...",
     popup_fallback: "↪️ Откроется Safari для безопасного входа.",
     redirect_ok: "✅ Redirect вход успешен",
     logout_ok: "🚪 Вышли из аккаунта",
-    sync_err_user: "⚠️ Не удалось загрузить профиль",
+    sync_err_user: "⚠️ Не удалось загрузить профиль из Firestore",
     sync_err_signer: "⚠️ Не удалось загрузить сертификат",
     no_google: "❌ Ошибка запуска Google-входа",
   },
   en: {
+    token_restore: "🔄 Restoring sign-in...\nVerifying Firebase session...",
+    token_ok: "✅ Session restored successfully!",
+    token_invalid: "❌ Restore failed: invalid token.",
     step1_popup: "🔐 Checking Google sign-in...",
     step2_ok: "✅ Sign-in successful! Syncing profile...",
     popup_fallback: "↪️ Safari will open for secure login.",
@@ -66,14 +74,9 @@ async function syncUser(u) {
 
   if (!snap.exists()) {
     await setDoc(ref, {
-      uid: u.uid,
-      email: u.email || "",
-      name: u.displayName || "",
-      photo: u.photoURL || "",
-      status: "free",
-      language: lang,
-      created_at: now,
-      last_active_at: now,
+      uid: u.uid, email: u.email || "", name: u.displayName || "",
+      photo: u.photoURL || "", status: "free", language: lang,
+      created_at: now, last_active_at: now,
     });
   } else {
     await setDoc(ref, { last_active_at: now, language: lang }, { merge: true });
@@ -85,6 +88,7 @@ async function syncUser(u) {
   setLocal("ursa_name", u.displayName || "");
   setLocal("ursa_status", snap.exists() ? snap.data().status : "free");
 
+  // signer
   try {
     const sref = doc(db, "ursa_signers", u.uid);
     const ssnap = await getDoc(sref);
@@ -95,36 +99,53 @@ async function syncUser(u) {
     } else {
       removeLocal("ursa_cert_account"); removeLocal("ursa_cert_exp");
     }
-  } catch (e) {
-    console.warn(t("sync_err_signer"), e);
-  }
+  } catch (e) { console.warn("Signer sync:", e); }
 
   if (typeof window.openSettings === "function") window.openSettings();
 }
 
-// === Silent Safari Token Restore ===
+// === Safari token restore (UI + type check) ===
 const params = new URLSearchParams(window.location.search);
 if (params.has("token")) {
   const token = params.get("token");
-  console.log("🪪 Token received from Safari redirect");
+  console.log("🪪 Received token from Safari redirect");
 
-  // Если токен похож на ID-токен Firebase — просто чистим URL
+  // Neon overlay
+  const overlay = document.createElement("div");
+  overlay.style.cssText = `
+    position:fixed;inset:0;background:#000;color:#00eaff;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text";
+    font-size:17px;text-align:center;z-index:9999;
+    text-shadow:0 0 14px #00eaff,0 0 32px #00eaff;
+    transition:opacity 0.4s;
+  `;
+  overlay.innerHTML = `<div style="font-size:26px;font-weight:700;margin-bottom:12px;">URSA iPA</div><div>${t("token_restore")}</div>`;
+  document.body.appendChild(overlay);
+
+  // ID token check
   if (token.split(".").length === 3) {
-    console.log("✅ Firebase ID token detected — skipping restore");
-    window.history.replaceState({}, document.title, "/");
-    if (typeof window.openSettings === "function") window.openSettings();
+    console.log("✅ Firebase ID token detected");
+    overlay.innerHTML = `<div style="font-size:26px;font-weight:700;margin-bottom:12px;">URSA iPA</div><div>${t("token_ok")}</div>`;
+    setTimeout(() => {
+      overlay.style.opacity = "0";
+      setTimeout(() => overlay.remove(), 500);
+      window.history.replaceState({}, document.title, "/");
+      if (typeof window.openSettings === "function") window.openSettings();
+    }, 1300);
   } else {
-    // Пробуем выполнить вход, но без UI ошибок
+    // Real custom token
     signInWithCustomToken(auth, token)
       .then(async () => {
-        console.log("✅ Custom token sign-in successful");
+        console.log("✅ Custom token login complete");
+        overlay.innerHTML = `<div style="font-size:26px;font-weight:700;margin-bottom:12px;">URSA iPA</div><div>${t("token_ok")}</div>`;
         const u = await waitForAuth(); await syncUser(u);
+        setTimeout(() => overlay.remove(), 1200);
       })
-      .catch(() => {
-        console.log("⚠️ Invalid token, skipping restore");
-      })
-      .finally(() => {
-        window.history.replaceState({}, document.title, "/");
+      .catch((e) => {
+        console.error("❌ Token auth failed:", e);
+        overlay.innerHTML = `<div style="font-size:26px;font-weight:700;margin-bottom:12px;">URSA iPA</div><div>${t("token_invalid")}<br><small>${e.message}</small></div>`;
+        setTimeout(() => overlay.remove(), 4000);
       });
   }
 }
@@ -182,15 +203,9 @@ onAuthStateChanged(auth, async (u) => {
       setLocal("ursa_status", snap.exists() ? (snap.data().status || "free") : "free");
       await setDoc(ref, { last_active_at: new Date().toISOString() }, { merge: true });
       console.log(`👤 Active: ${u.email}`);
-    } catch (e) {
-      console.warn(t("sync_err_user"), e);
-    }
+    } catch (e) { console.warn("Sync user error:", e); }
   } else {
     clearLocalAll();
     console.log("👋 Signed out");
-  }
-
-  if (document.getElementById("settings-modal")?.classList.contains("open")) {
-    if (typeof window.openSettings === "function") window.openSettings();
   }
 });
