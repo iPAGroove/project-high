@@ -1,4 +1,4 @@
-// URSA Auth — v8.1 (Safari Token Restore UI + Safe Popup + Firestore Sync)
+// URSA Auth — v8.2 (Neon Restore UI + Token Type Check + Safe Popup)
 import { auth, db } from "./firebase.js";
 import {
   onAuthStateChanged,
@@ -11,40 +11,42 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-console.log("🔥 URSA Auth v8.1 initialized (Safari token restore + popup fallback)");
+console.log("🔥 URSA Auth v8.2 initialized (Neon Restore + Type Check + Popup Fallback)");
 
 // === Local i18n ===
 const AUTH_I18N = {
   ru: {
-    token_restore: "🔄 Авторизация через токен...\nПроверяем сессию Firebase...",
-    step1_popup: "🔐 Пожалуйста, подождите: выполняется двойная проверка входа.\nШаг 1/2 — вход через всплывающее окно.",
-    step2_ok: "✅ Шаг 2/2 — проверка безопасности пройдена.",
+    token_restore: "🔄 Восстанавливаем вход...\nПроверяем сессию Firebase...",
+    token_ok: "✅ Сессия успешно восстановлена!",
+    token_invalid: "❌ Ошибка восстановления: недействительный токен.",
+    step1_popup: "🔐 Проверка входа через Google...",
+    step2_ok: "✅ Успешный вход! Обновляем профиль...",
     popup_fallback: "↪️ Откроется Safari для безопасного входа.",
     redirect_ok: "✅ Redirect вход успешен",
     logout_ok: "🚪 Вышли из аккаунта",
-    auth_not_ready: "❌ Авторизация ещё не готова",
-    sync_err_user: "⚠️ Не удалось подтянуть профиль из Firestore",
-    sync_err_signer: "⚠️ Не удалось подтянуть signer",
-    no_google: "❌ Не удалось запустить Google вход",
+    sync_err_user: "⚠️ Не удалось загрузить профиль из Firestore",
+    sync_err_signer: "⚠️ Не удалось загрузить сертификат",
+    no_google: "❌ Ошибка запуска Google-входа",
   },
   en: {
-    token_restore: "🔄 Signing in via token...\nVerifying Firebase session...",
-    step1_popup: "🔐 Please wait: performing double-check sign-in.\nStep 1/2 — sign in via popup.",
-    step2_ok: "✅ Step 2/2 — security check passed.",
+    token_restore: "🔄 Restoring sign-in...\nVerifying Firebase session...",
+    token_ok: "✅ Session restored successfully!",
+    token_invalid: "❌ Restore failed: invalid token.",
+    step1_popup: "🔐 Checking Google sign-in...",
+    step2_ok: "✅ Sign-in successful! Syncing profile...",
     popup_fallback: "↪️ Safari will open for secure login.",
     redirect_ok: "✅ Redirect sign-in succeeded",
     logout_ok: "🚪 Signed out",
-    auth_not_ready: "❌ Auth not ready yet",
-    sync_err_user: "⚠️ Failed to fetch user profile from Firestore",
-    sync_err_signer: "⚠️ Failed to fetch signer",
+    sync_err_user: "⚠️ Failed to load user profile",
+    sync_err_signer: "⚠️ Failed to load signer",
     no_google: "❌ Could not start Google sign-in",
   }
 };
 const langCode = () => {
-  const l = (localStorage.getItem("ursa_lang") || (navigator.language || "ru")).slice(0, 2).toLowerCase();
+  const l = (localStorage.getItem("ursa_lang") || navigator.language || "ru").slice(0, 2).toLowerCase();
   return AUTH_I18N[l] ? l : "ru";
 };
-const t = (k) => AUTH_I18N[langCode()]?.[k] || AUTH_I18N.ru[k] || k;
+const t = (k) => AUTH_I18N[langCode()]?.[k] || AUTH_I18N.ru[k];
 
 // === Helpers ===
 const setLocal = (k, v) => { try { localStorage.setItem(k, v ?? ""); } catch {} };
@@ -54,103 +56,102 @@ const clearLocalAll = () => { try { localStorage.clear(); } catch {} };
 // === Wait for user ===
 const waitForAuth = () =>
   new Promise((resolve) => {
-    const unsub = onAuthStateChanged(auth, (user) => {
-      if (user) { unsub(); resolve(user); }
-    });
+    const unsub = onAuthStateChanged(auth, (u) => { if (u) { unsub(); resolve(u); } });
     setTimeout(() => resolve(auth.currentUser), 3000);
   });
 
 // === Firestore user sync ===
 async function syncUser(u) {
   if (!u) u = await waitForAuth();
-  if (!u) { console.error(t("auth_not_ready")); return; }
+  if (!u) return console.error("❌ Auth not ready");
 
-  const userRef = doc(db, "ursa_users", u.uid);
-  const snap = await getDoc(userRef);
+  const ref = doc(db, "ursa_users", u.uid);
+  const snap = await getDoc(ref);
   const now = new Date().toISOString();
   const lang = langCode();
 
   if (!snap.exists()) {
-    await setDoc(userRef, {
-      uid: u.uid,
-      email: u.email || "",
-      name: u.displayName || "",
-      photo: u.photoURL || "",
-      status: "free",
-      language: lang,
-      created_at: now,
-      last_active_at: now,
+    await setDoc(ref, {
+      uid: u.uid, email: u.email || "", name: u.displayName || "",
+      photo: u.photoURL || "", status: "free", language: lang,
+      created_at: now, last_active_at: now,
     });
   } else {
-    await setDoc(userRef, { last_active_at: now, language: lang }, { merge: true });
+    await setDoc(ref, { last_active_at: now, language: lang }, { merge: true });
   }
-
-  const data = snap.exists() ? snap.data() : { status: "free" };
 
   setLocal("ursa_uid", u.uid);
   setLocal("ursa_email", u.email || "");
   setLocal("ursa_photo", u.photoURL || "");
   setLocal("ursa_name", u.displayName || "");
-  setLocal("ursa_status", data.status || "free");
+  setLocal("ursa_status", snap.exists() ? snap.data().status : "free");
 
-  // === Load signer if exists ===
+  // signer
   try {
-    const signerRef = doc(db, "ursa_signers", u.uid);
-    const signerSnap = await getDoc(signerRef);
-    if (signerSnap.exists()) {
-      const s = signerSnap.data();
-      setLocal("ursa_signer_id", u.uid);
-      setLocal("ursa_cert_account", s.account || "—");
+    const sref = doc(db, "ursa_signers", u.uid);
+    const ssnap = await getDoc(sref);
+    if (ssnap.exists()) {
+      const s = ssnap.data();
+      setLocal("ursa_cert_account", s.account || "");
       setLocal("ursa_cert_exp", s.expires || "");
-      console.log("📜 Signer loaded.");
     } else {
-      removeLocal("ursa_signer_id");
-      removeLocal("ursa_cert_account");
-      removeLocal("ursa_cert_exp");
+      removeLocal("ursa_cert_account"); removeLocal("ursa_cert_exp");
     }
-  } catch (e) {
-    console.warn(t("sync_err_signer") + ":", e);
-  }
+  } catch (e) { console.warn("Signer sync:", e); }
 
   if (typeof window.openSettings === "function") window.openSettings();
 }
 
-// === Safari token restore ===
+// === Safari token restore (UI + type check) ===
 const params = new URLSearchParams(window.location.search);
 if (params.has("token")) {
   const token = params.get("token");
   console.log("🪪 Received token from Safari redirect");
 
-  // Показ UI для плавного восстановления
+  // Neon overlay
   const overlay = document.createElement("div");
   overlay.style.cssText = `
-    position:fixed;inset:0;background:#000;color:#0ff;
-    display:flex;align-items:center;justify-content:center;
+    position:fixed;inset:0;background:#000;color:#00eaff;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
     font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text";
     font-size:17px;text-align:center;z-index:9999;
+    text-shadow:0 0 14px #00eaff,0 0 32px #00eaff;
+    transition:opacity 0.4s;
   `;
-  overlay.innerText = t("token_restore");
+  overlay.innerHTML = `<div style="font-size:26px;font-weight:700;margin-bottom:12px;">URSA iPA</div><div>${t("token_restore")}</div>`;
   document.body.appendChild(overlay);
 
-  signInWithCustomToken(auth, token)
-    .then(async () => {
+  // ID token check
+  if (token.split(".").length === 3) {
+    console.log("✅ Firebase ID token detected");
+    overlay.innerHTML = `<div style="font-size:26px;font-weight:700;margin-bottom:12px;">URSA iPA</div><div>${t("token_ok")}</div>`;
+    setTimeout(() => {
+      overlay.style.opacity = "0";
+      setTimeout(() => overlay.remove(), 500);
       window.history.replaceState({}, document.title, "/");
-      console.log("✅ Firebase session restored from Safari token");
-      const u = await waitForAuth();
-      await syncUser(u);
-      overlay.remove();
-    })
-    .catch((e) => {
-      overlay.innerText = "❌ Ошибка восстановления: " + e.message;
-      console.error("❌ Token auth failed:", e);
-      setTimeout(() => overlay.remove(), 4000);
-    });
+      if (typeof window.openSettings === "function") window.openSettings();
+    }, 1300);
+  } else {
+    // Real custom token
+    signInWithCustomToken(auth, token)
+      .then(async () => {
+        console.log("✅ Custom token login complete");
+        overlay.innerHTML = `<div style="font-size:26px;font-weight:700;margin-bottom:12px;">URSA iPA</div><div>${t("token_ok")}</div>`;
+        const u = await waitForAuth(); await syncUser(u);
+        setTimeout(() => overlay.remove(), 1200);
+      })
+      .catch((e) => {
+        console.error("❌ Token auth failed:", e);
+        overlay.innerHTML = `<div style="font-size:26px;font-weight:700;margin-bottom:12px;">URSA iPA</div><div>${t("token_invalid")}<br><small>${e.message}</small></div>`;
+        setTimeout(() => overlay.remove(), 4000);
+      });
+  }
 }
 
 // === Login / Logout ===
 window.ursaAuthAction = async () => {
-  const user = auth.currentUser;
-  if (user) {
+  const u = auth.currentUser;
+  if (u) {
     await signOut(auth);
     console.log(t("logout_ok"));
     clearLocalAll();
@@ -162,28 +163,20 @@ window.ursaAuthAction = async () => {
   provider.setCustomParameters({ prompt: "select_account" });
 
   const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
-
   try {
     if (isStandalone) {
-      console.log("📱 PWA detected — redirecting to Safari auth page");
       alert(t("popup_fallback"));
       window.location.href = "https://ursaipa.live/auth.html";
       return;
     }
-
     alert(t("step1_popup"));
     const res = await signInWithPopup(auth, provider);
     alert(t("step2_ok"));
     await syncUser(res.user);
-
-  } catch (err) {
-    console.warn("⚠️ Popup failed, fallback redirect…", err);
+  } catch (e) {
+    console.warn("Popup failed → redirect", e);
     alert(t("popup_fallback"));
-    try {
-      await signInWithRedirect(auth, provider);
-    } catch (e) {
-      console.error(t("no_google"), e);
-    }
+    await signInWithRedirect(auth, provider);
   }
 };
 
@@ -193,36 +186,24 @@ getRedirectResult(auth)
     if (res?.user) {
       console.log(t("redirect_ok"));
       await syncUser(res.user);
-      if (window.location.hostname.includes("firebaseapp.com")) {
+      if (window.location.hostname.includes("firebaseapp.com"))
         window.location.href = "https://ursaipa.live";
-      }
     }
   })
-  .catch((err) => console.error("Redirect error:", err));
+  .catch((e) => console.error("Redirect error:", e));
 
-// === Global watcher ===
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
+// === Live watcher ===
+onAuthStateChanged(auth, async (u) => {
+  if (u) {
     try {
-      const ref = doc(db, "ursa_users", user.uid);
+      const ref = doc(db, "ursa_users", u.uid);
       const snap = await getDoc(ref);
-      const status = snap.exists() ? (snap.data().status || "free") : "free";
-      setLocal("ursa_uid", user.uid);
-      setLocal("ursa_email", user.email || "");
-      setLocal("ursa_photo", user.photoURL || "");
-      setLocal("ursa_name", user.displayName || "");
-      setLocal("ursa_status", status);
-      console.log(`👤 Active: ${user.email} (${status})`);
+      setLocal("ursa_status", snap.exists() ? (snap.data().status || "free") : "free");
       await setDoc(ref, { last_active_at: new Date().toISOString() }, { merge: true });
-    } catch (e) {
-      console.warn(t("sync_err_user") + ":", e);
-    }
+      console.log(`👤 Active: ${u.email}`);
+    } catch (e) { console.warn("Sync user error:", e); }
   } else {
     clearLocalAll();
     console.log("👋 Signed out");
-  }
-
-  if (document.getElementById("settings-modal")?.classList.contains("open")) {
-    if (typeof window.openSettings === "function") window.openSettings();
   }
 });
