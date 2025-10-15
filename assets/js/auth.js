@@ -1,4 +1,4 @@
-// URSA Auth — v7.7 (Full PWA Support + Auto Redirect + i18n + ursa_users + Live Profile)
+// URSA Auth — v7.8 (Full PWA Safari Login + i18n + Firestore Sync + Live Profile)
 import { auth, db } from "./firebase.js";
 import {
   onAuthStateChanged,
@@ -10,14 +10,14 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-console.log("🔥 URSA Auth v7.7 initialized (with PWA redirect support)");
+console.log("🔥 URSA Auth v7.8 initialized (Safari redirect fix)");
 
 // === Local i18n ===
 const AUTH_I18N = {
   ru: {
     step1_popup: "🔐 Пожалуйста, подождите: выполняется двойная проверка входа.\nШаг 1/2 — вход через всплывающее окно.",
     step2_ok: "✅ Шаг 2/2 — проверка безопасности пройдена.",
-    popup_fallback: "↪️ Используется защищённый вход (PWA режим). Продолжите в открывшейся вкладке.",
+    popup_fallback: "↪️ Откроется Safari для безопасного входа.",
     redirect_ok: "✅ Redirect вход успешен",
     logout_ok: "🚪 Вышли из аккаунта",
     auth_not_ready: "❌ Авторизация ещё не готова",
@@ -28,7 +28,7 @@ const AUTH_I18N = {
   en: {
     step1_popup: "🔐 Please wait: performing double-check sign-in.\nStep 1/2 — sign in via popup.",
     step2_ok: "✅ Step 2/2 — security check passed.",
-    popup_fallback: "↪️ Using secure redirect sign-in (PWA mode). Continue in the opened tab.",
+    popup_fallback: "↪️ Safari will open for secure login.",
     redirect_ok: "✅ Redirect sign-in succeeded",
     logout_ok: "🚪 Signed out",
     auth_not_ready: "❌ Auth not ready yet",
@@ -57,7 +57,7 @@ const waitForAuth = () =>
     setTimeout(() => resolve(auth.currentUser), 2500);
   });
 
-// === Sync Firestore user + signer ===
+// === Firestore user sync ===
 async function syncUser(u) {
   if (!u) u = await waitForAuth();
   if (!u) { console.error(t("auth_not_ready")); return; }
@@ -126,16 +126,18 @@ window.ursaAuthAction = async () => {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
 
-  try {
-    const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
 
+  try {
     if (isStandalone) {
-      console.log("📱 Detected PWA mode — using redirect login");
+      console.log("📱 PWA detected — opening Safari login");
       alert(t("popup_fallback"));
-      await signInWithRedirect(auth, provider);
+      // 🔗 Переход в Safari для входа
+      window.open("https://ipa-panel.firebaseapp.com", "_blank");
       return;
     }
 
+    // Обычный popup вход
     alert(t("step1_popup"));
     const res = await signInWithPopup(auth, provider);
     alert(t("step2_ok"));
