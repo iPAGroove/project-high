@@ -1,3 +1,4 @@
+// URSA Auth — v7.9 (Full PWA Safari Redirect + i18n + Firestore Sync + Live Profile)
 import { auth, db } from "./firebase.js";
 import {
   onAuthStateChanged,
@@ -9,16 +10,14 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-console.log("🔥 URSA Auth v7.6 initialized");
-console.log("🔥 URSA Auth v7.7 initialized (with PWA redirect support)");
+console.log("🔥 URSA Auth v7.9 initialized (PWA → Safari redirect to ursaipa.live)");
 
 // === Local i18n ===
 const AUTH_I18N = {
   ru: {
     step1_popup: "🔐 Пожалуйста, подождите: выполняется двойная проверка входа.\nШаг 1/2 — вход через всплывающее окно.",
     step2_ok: "✅ Шаг 2/2 — проверка безопасности пройдена.",
-    popup_fallback: "↪️ Переключаемся на защищённый вход (Шаг 2/2). Продолжите в открывшейся вкладке.",
-    popup_fallback: "↪️ Используется защищённый вход (PWA режим). Продолжите в открывшейся вкладке.",
+    popup_fallback: "↪️ Откроется Safari для безопасного входа.",
     redirect_ok: "✅ Redirect вход успешен",
     logout_ok: "🚪 Вышли из аккаунта",
     auth_not_ready: "❌ Авторизация ещё не готова",
@@ -29,8 +28,7 @@ const AUTH_I18N = {
   en: {
     step1_popup: "🔐 Please wait: performing double-check sign-in.\nStep 1/2 — sign in via popup.",
     step2_ok: "✅ Step 2/2 — security check passed.",
-    popup_fallback: "↪️ Falling back to secure sign-in (Step 2/2). Continue in the opened tab.",
-    popup_fallback: "↪️ Using secure redirect sign-in (PWA mode). Continue in the opened tab.",
+    popup_fallback: "↪️ Safari will open for secure login.",
     redirect_ok: "✅ Redirect sign-in succeeded",
     logout_ok: "🚪 Signed out",
     auth_not_ready: "❌ Auth not ready yet",
@@ -40,7 +38,6 @@ const AUTH_I18N = {
   }
 };
 const langCode = () => {
-  const l = (localStorage.getItem("ursa_lang") || (navigator.language || "ru")).slice(0,2).toLowerCase();
   const l = (localStorage.getItem("ursa_lang") || (navigator.language || "ru")).slice(0, 2).toLowerCase();
   return AUTH_I18N[l] ? l : "ru";
 };
@@ -60,14 +57,13 @@ const waitForAuth = () =>
     setTimeout(() => resolve(auth.currentUser), 2500);
   });
 
-// === Sync Firestore user + signer ===
+// === Firestore user sync ===
 async function syncUser(u) {
   if (!u) u = await waitForAuth();
   if (!u) { console.error(t("auth_not_ready")); return; }
 
   const userRef = doc(db, "ursa_users", u.uid);
   const snap = await getDoc(userRef);
-
   const now = new Date().toISOString();
   const lang = langCode();
 
@@ -130,16 +126,18 @@ window.ursaAuthAction = async () => {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
 
-  try {
-    const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
 
+  try {
     if (isStandalone) {
-      console.log("📱 Detected PWA mode — using redirect login");
+      console.log("📱 PWA detected — redirecting to Safari auth page");
       alert(t("popup_fallback"));
-      await signInWithRedirect(auth, provider);
+      // 🔗 Правильный редирект в Safari с возвратом на URSA
+      window.open("https://ursaipa.live/auth.html", "_blank");
       return;
     }
 
+    // Обычный popup вход (в браузере)
     alert(t("step1_popup"));
     const res = await signInWithPopup(auth, provider);
     alert(t("step2_ok"));
@@ -162,6 +160,10 @@ getRedirectResult(auth)
     if (res?.user) {
       console.log(t("redirect_ok"));
       await syncUser(res.user);
+      // 🚀 Автоматически возвращаем на главную после входа
+      if (window.location.hostname.includes("firebaseapp.com")) {
+        window.location.href = "https://ursaipa.live";
+      }
     }
   })
   .catch((err) => console.error("Redirect error:", err));
