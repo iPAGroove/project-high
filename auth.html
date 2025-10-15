@@ -6,11 +6,18 @@
   <title>URSA Auth Redirect</title>
   <style>
     body {
-      background:#000; color:#fff;
-      display:flex; align-items:center; justify-content:center;
-      font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text";
-      height:100vh; font-size:17px; text-align:center;
+      background:#000;
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-family:-apple-system, BlinkMacSystemFont,"SF Pro Text";
+      height:100vh;
+      font-size:17px;
+      text-align:center;
+      flex-direction:column;
     }
+    #status { opacity:0.9; }
   </style>
 </head>
 <body>
@@ -24,36 +31,48 @@
       getRedirectResult
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-    const text = (msg) => document.getElementById("status").innerText = msg;
+    const text = (msg) => (document.getElementById("status").innerText = msg);
 
-    try {
-      const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: "select_account" });
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
 
-      if (!localStorage.getItem("ursa_auth_start")) {
-        localStorage.setItem("ursa_auth_start", "1");
-        console.log("🔁 Redirecting to Google Sign-In...");
-        text("🌐 Перенаправление на Google...");
-        await signInWithRedirect(auth, provider);
-      } else {
+    async function main() {
+      try {
+        // === Этап 1: перенаправление на Google ===
+        if (!localStorage.getItem("ursa_auth_start")) {
+          localStorage.setItem("ursa_auth_start", "1");
+          console.log("🔁 Redirecting to Google Sign-In...");
+          text("🌐 Перенаправление на Google...");
+          await signInWithRedirect(auth, provider);
+          return;
+        }
+
+        // === Этап 2: после возврата с Google ===
         const res = await getRedirectResult(auth);
         localStorage.removeItem("ursa_auth_start");
 
         if (res?.user) {
           const token = await res.user.getIdToken();
-          console.log("✅ Got token, redirecting to PWA");
-          window.location.href = "https://ursaipa.live/?token=" + token;
+          console.log("✅ Got token, redirecting to PWA…");
+          text("✅ Авторизация успешна. Возврат в URSA...");
+          setTimeout(() => {
+            window.location.href = "https://ursaipa.live/?token=" + encodeURIComponent(token);
+          }, 800);
         } else {
-          console.warn("❌ No user, returning to app");
-          window.location.href = "https://ursaipa.live";
+          console.warn("⚠️ No user after redirect, returning to app");
+          text("⚠️ Не удалось войти. Возврат в URSA...");
+          setTimeout(() => window.location.href = "https://ursaipa.live", 1500);
         }
+      } catch (err) {
+        console.error("Auth redirect error:", err);
+        text("⚠️ Ошибка: " + err.message);
+        localStorage.removeItem("ursa_auth_start");
+        setTimeout(() => window.location.href = "https://ursaipa.live", 2000);
       }
-    } catch (err) {
-      console.error("Auth redirect error:", err);
-      text("⚠️ Ошибка: " + err.message);
-      localStorage.removeItem("ursa_auth_start");
-      setTimeout(() => window.location.href = "https://ursaipa.live", 2500);
     }
+
+    // ✅ Старт
+    main();
   </script>
 </body>
 </html>
