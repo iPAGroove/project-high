@@ -1,4 +1,4 @@
-// URSA IPA — v4.2 Firestore-based Signer Integration (PWA Safe + i18n + Smart Fallback)
+// URSA IPA — v4.1 Firestore-based Signer Integration (i18n + Safe Auth Wait + Improved UX)
 import { auth, db } from "./firebase.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
@@ -16,7 +16,6 @@ const T = {
     bad_format: "Неверный формат сертификата.",
     done: "✅ Подпись завершена! Установка начнётся…",
     error: "Ошибка при подписи IPA",
-    safari_fallback: "⚠️ Для подписи IPA откроется Safari (PWA ограничен)",
   },
   en: {
     signing: "🔄 Signing IPA via URSA Signer…",
@@ -25,15 +24,17 @@ const T = {
     bad_format: "Invalid certificate format.",
     done: "✅ Signing complete! Installation will begin…",
     error: "Signing error",
-    safari_fallback: "⚠️ Safari will open to sign the IPA (PWA restricted)",
   }
 }[LANG];
 
 // === Wait for Auth Helper ===
 const waitForAuth = () =>
   new Promise((resolve) => {
-    const unsub = auth.onAuthStateChanged((u) => {
-      if (u) { unsub(); resolve(u); }
+    const unsub = firebase.auth().onAuthStateChanged((u) => {
+      if (u) {
+        unsub();
+        resolve(u);
+      }
     });
     setTimeout(() => resolve(auth.currentUser), 2000);
   });
@@ -41,8 +42,10 @@ const waitForAuth = () =>
 // === Main Function ===
 async function installIPA(app) {
   const dl = document.getElementById("dl-buttons");
-  dl.innerHTML = `<div style="opacity:.8;font-size:14px;">${T.signing}</div>
-    <progress id="sign-progress" max="100" value="25" style="width:100%;height:8px;margin-top:6px;border-radius:8px;"></progress>`;
+  dl.innerHTML = `
+    <div style="opacity:.8;font-size:14px;">${T.signing}</div>
+    <progress id="sign-progress" max="100" value="25" style="width:100%;height:8px;margin-top:6px;border-radius:8px;"></progress>
+  `;
 
   try {
     // 🧩 Wait for Auth
@@ -61,21 +64,16 @@ async function installIPA(app) {
     const { p12Url, provUrl, pass = "" } = data;
     if (!p12Url || !provUrl) throw new Error(T.bad_format);
 
-    // 🔹 Detect PWA (Safari standalone)
-    if (window.matchMedia("(display-mode: standalone)").matches) {
-      console.log("📱 PWA detected — using Safari fallback for signing");
-      alert(T.safari_fallback);
-      const url = `${SIGNER_API}?ipa_url=${encodeURIComponent(app.downloadUrl)}`;
-      window.open(url, "_blank");
-      dl.innerHTML = `<div style="opacity:.9;font-size:14px;">↪️ ${T.safari_fallback}</div>`;
-      return;
-    }
-
     // 🔹 Download certificate files (via proxy)
     const [p12Blob, provBlob] = await Promise.all([
-      fetch(FILE_PROXY + encodeURIComponent(p12Url)).then(r => r.ok ? r.blob() : Promise.reject("p12 load error")),
-      fetch(FILE_PROXY + encodeURIComponent(provUrl)).then(r => r.ok ? r.blob() : Promise.reject("prov load error"))
+      fetch(FILE_PROXY + encodeURIComponent(p12Url)).then((r) =>
+        r.ok ? r.blob() : Promise.reject("p12 load error")
+      ),
+      fetch(FILE_PROXY + encodeURIComponent(provUrl)).then((r) =>
+        r.ok ? r.blob() : Promise.reject("prov load error")
+      ),
     ]);
+
     document.getElementById("sign-progress").value = 70;
 
     // 🔹 Send to signer API
@@ -87,12 +85,13 @@ async function installIPA(app) {
 
     const res = await fetch(SIGNER_API, { method: "POST", body: form });
     const json = await res.json();
+
     if (!res.ok) throw new Error(json.detail || json.error || T.error);
 
     document.getElementById("sign-progress").value = 100;
     dl.innerHTML = `<div style="opacity:.9;font-size:14px;">${T.done}</div>`;
-    setTimeout(() => (location.href = json.install_link), 900);
 
+    setTimeout(() => (location.href = json.install_link), 900);
   } catch (err) {
     console.error("Signer error:", err);
     dl.innerHTML = `<div style="opacity:.9;color:#ff6;">❌ ${
