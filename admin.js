@@ -37,11 +37,13 @@ const emailLabel = document.getElementById("admin-email");
 let editDocId = null;
 
 // === AUTH ===
+const ADMIN_EMAILS = ["vibemusic1712@gmail.com", "kotvlad400@gmail.com"];
+
 loginBtn.onclick = async () => {
   try {
     const res = await signInWithPopup(auth, provider);
     const user = res.user;
-    if (user.email !== "vibemusic1712@gmail.com") {
+    if (!ADMIN_EMAILS.includes(user.email)) {
       alert("⛔ Доступ запрещён: не администратор!");
       await signOut(auth);
       return;
@@ -58,7 +60,7 @@ logoutBtn.onclick = async () => {
 };
 
 onAuthStateChanged(auth, (user) => {
-  if (user && user.email === "vibemusic1712@gmail.com") setAdmin(user);
+  if (user && ADMIN_EMAILS.includes(user.email)) setAdmin(user);
   else unsetAdmin();
 });
 
