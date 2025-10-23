@@ -37,7 +37,7 @@ const emailLabel = document.getElementById("admin-email");
 let editDocId = null;
 
 // === AUTH ===
-const ADMIN_EMAILS = ["vibemusic1712@gmail.com", "kotvlad400@gmail.com"];
+const ADMIN_EMAILS = ["vibemusic1712@gmail.com", "kotvlad400@gmail.com", "pampered2817@mail.ru"];
 
 loginBtn.onclick = async () => {
   try {
