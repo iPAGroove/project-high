@@ -622,9 +622,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (actBtn && actBtn.dataset.tab) {
     state.tab = actBtn.dataset.tab;
   }
-
-  // === loadBatch (МОДИФИЦИРОВАНО) ===
-  // Теперь грузит по ТАБУ и использует МАЛЕНЬКИЙ лимит для первой загрузки
+  
+  // === loadBatch (МОДИФИЦИРОВАНО для поддержки поиска) ===
   async function loadBatch() {
     if (state.loading || state.end) return;
     state.loading = true;
@@ -632,8 +631,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const cRef = collection(db, "ursa_ipas");
     const tabTag = state.tab; // "apps" or "games"
 
-    // 6 для первой загрузки, 20 для скролла
-    const currentLimit = state.last ? 20 : 6;
+    // 6 для первой загрузки, 20 для скролла. В режиме поиска используем 50 для ускорения полной загрузки.
+    const currentLimit = state.last 
+      ? (state.q.length > 0 ? 50 : 20) 
+      : 6; 
+      
     let qRef;
 
     if (state.last) {
@@ -657,17 +659,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     try {
       const snap = await getDocs(qRef);
+      
       if (snap.empty) {
         state.end = true;
-        if (state.all.length === 0) { // Если вообще ничего нет
+        if (state.all.length === 0) { 
           catalogContainer.innerHTML = `<div style="opacity:.7;text-align:center;padding:40px;">${__t("empty")}</div>`;
         }
-        return;
+        return; // === ИЗМЕНЕНО: Не вызываем apply, т.к. ничего не изменилось ===
       }
+      
       const batch = snap.docs.map(normalize);
       state.all.push(...batch); // Добавляем в кэш
       state.last = snap.docs[snap.docs.length - 1]; // Сохраняем "курсор"
-      apply(); // Перерисовываем
+      
+      // === ИЗМЕНЕНО: apply() вызывается в Initial load, Scroll и Search. 
+      // === Удаляем apply() отсюда, чтобы не было лишних перерисовок.
     } catch (err) {
       console.error("Firestore error:", err);
       // Выводим ошибку индекса прямо на страницу
@@ -680,9 +686,29 @@ document.addEventListener("DOMContentLoaded", async () => {
       state.loading = false;
     }
   }
+  
+  // === loadAllIfSearching (НОВЫЙ ХЕЛПЕР для поиска) ===
+  async function loadAllIfSearching() {
+    if (state.end) return;
 
-  // === apply (МОДИФИЦИРОВАНО) ===
-  // Убрана фильтрация по табу (теперь это в loadBatch)
+    // Показываем индикатор загрузки
+    catalogContainer.innerHTML = `<div style="opacity:.7;text-align:center;padding:40px;">Загрузка для поиска...</div>`;
+    
+    // Рекурсивно загружаем все батчи, пока state.end не станет true
+    // Ограничение: если коллекция ОЧЕНЬ большая (1000+), это может занять время и много запросов.
+    while (!state.end) {
+        // Ждем завершения предыдущей загрузки
+        if (state.loading) {
+            await new Promise(resolve => setTimeout(resolve, 50));
+            continue;
+        }
+        await loadBatch();
+        apply(); // Перерисовываем коллекцию после каждого батча
+    }
+  }
+
+
+  // === apply (МОДИФИЦИРОВАНО: Логика фильтрации и вывода "не найдено") ===
   const apply = () => {
     const q = state.q.trim().toLowerCase();
 
@@ -692,26 +718,29 @@ document.addEventListener("DOMContentLoaded", async () => {
         ? (app.name || "").toLowerCase().includes(q) ||
         (app.bundleId || "").toLowerCase().includes(q) ||
         (app.features || "").toLowerCase().includes(q)
-        : true // Фильтр по табу больше не нужен!
+        : true 
     );
 
-    // Очищаем контейнер (только если это не скролл)
-    // В нашем случае `apply` всегда перерисовывает все, что есть в `state.all`
+    // Очищаем контейнер
     catalogContainer.innerHTML = "";
     allAppsCache = {};
 
-    if (!list.length && !state.loading && state.q) {
+    // Условие 1: Ничего не найдено в поиске
+    if (!list.length && q.length > 0) {
       catalogContainer.innerHTML = `<div style="opacity:.7;text-align:center;padding:40px;">${__t("not_found")}</div>`;
       return;
     }
-
-    // Если список пуст, но мы не искали, `loadBatch` сам покажет "empty"
-    if (!list.length) {
-      // Не показываем "не найдено", если идет загрузка
-      if (!state.loading) {
-        catalogContainer.innerHTML = `<div style="opacity:.7;text-align:center;padding:40px;">${__t("empty")}</div>`;
-      }
+    
+    // Условие 2: Коллекция пуста (только если нет активного поиска)
+    if (!list.length && !state.loading && q.length === 0) {
+      catalogContainer.innerHTML = `<div style="opacity:.7;text-align:center;padding:40px;">${__t("empty")}</div>`;
       return;
+    }
+    
+    // Если список пуст, но идет загрузка (например, полная загрузка для поиска) - ждем.
+    if (!list.length && state.loading) {
+         catalogContainer.innerHTML = `<div style="opacity:.7;text-align:center;padding:40px;">Загрузка...</div>`;
+         return;
     }
 
     // 2. Сортируем (как и раньше)
@@ -725,14 +754,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderCollectionRow(catalogContainer, "VIP", vipList);
   };
 
-  // === Search (без изменений) ===
-  search.addEventListener("input", (e) => {
+  // === Search (ИЗМЕНЕНИЕ: Добавлен вызов loadAllIfSearching) ===
+  search.addEventListener("input", async (e) => {
     state.q = e.target.value;
+    
+    // Если начат поиск, и вся коллекция еще не загружена, загружаем ее полностью
+    if (state.q.length > 0 && !state.end) {
+        await loadAllIfSearching();
+    }
+    
+    // Применяем фильтр к полному (или максимально загруженному) массиву
     apply();
-    // (Поиск работает только по уже загруженным карточкам)
   });
 
-  // === Tab Bar (МОДИФИЦИРОВАНО) ===
+  // === Tab Bar (без изменений) ===
   // Теперь сбрасывает кэш при смене таба
   const bar = document.getElementById("tabbar");
   bar.addEventListener("click", (e) => {
@@ -756,9 +791,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       catalogContainer.innerHTML = `<div style="opacity:.7;text-align:center;padding:40px;">Загрузка ${state.tab}...</div>`; // Лоадер
 
       // Запускаем загрузку для НОВОГО таба
-      loadBatch();
-      // apply() вызовется сам
-
+      loadBatch().then(apply); // === ИЗМЕНЕНО: Вызываем apply после загрузки
+      
     } else if (btn.id === "lang-btn") {
       // Смена языка (просто перерисовываем то, что есть)
       lang = lang === "ru" ? "en" : "ru";
@@ -772,23 +806,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // === Scroll (без изменений) ===
+  // === Scroll (ИЗМЕНЕНИЕ: Блокируем скролл во время поиска) ===
   window.addEventListener("scroll", () => {
-    // Не грузим при скролле, если идет поиск
-    if (state.q.length > 0) return;
+    // Не грузим при скролле, если идет поиск, или если уже загружаем, или если дошли до конца
+    if (state.q.length > 0 || state.loading || state.end) return; // <--- ДОБАВЛЕНО УСЛОВИЕ
 
     const scrollY = window.scrollY;
     const scrollH = document.body.scrollHeight;
     const innerH = window.innerHeight;
     if (scrollY + innerH >= scrollH - 300) {
-      loadBatch();
+      loadBatch().then(apply); // === ИЗМЕНЕНО: Вызываем apply после загрузки
     }
   });
 
   // === Initial load ===
   await loadBatch(); // Запускаем первую (быструю) загрузку
+  apply(); // Вызываем apply после первой загрузки
   applyI18n();
-  // apply() вызовется автоматически внутри loadBatch()
 
   // === VIP Modal (без изменений) ===
   const vipModal = document.getElementById("vip-modal");
