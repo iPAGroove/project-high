@@ -1,8 +1,15 @@
-// URSA IPA Admin — v7.6.1 (Fixed VIP Save + Stable UI + Dual Tabs)
+// URSA IPA Admin — v7.7 (Auth Added)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
   getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 // === Firebase Config ===
 const firebaseConfig = {
@@ -13,12 +20,30 @@ const firebaseConfig = {
   messagingSenderId: "239982196215",
   appId: "1:239982196215:web:9de387c51952da428daaf2"
 };
+
+// === СПИСОК АДМИНОВ ===
+const ADMIN_EMAILS = [
+  "vibemusic1712@gmail.com",
+  "kotvlad400@gmail.com",
+  "olesyazardina@gmail.com"
+];
+
+// === Init Firebase ===
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
-console.log("⚙️ URSA Admin v7.6.1 started");
+console.log("⚙️ URSA Admin v7.7 started");
 
-// === Elements ===
+// === Auth Elements ===
+const loginScreen = document.getElementById("login-screen");
+const adminWrapper = document.getElementById("admin-wrapper");
+const deniedScreen = document.getElementById("denied-screen");
+const loginBtn = document.getElementById("login-btn");
+const logoutBtnAdmin = document.getElementById("logout-btn-admin");
+const logoutBtnDenied = document.getElementById("logout-btn-denied");
+
+// === Admin Panel Elements ===
 const cards = document.getElementById("cards");
 const modal = document.getElementById("modal");
 const form = document.getElementById("ipa-form");
@@ -27,7 +52,6 @@ const iconInput = document.getElementById("iconUrl");
 const iconPreview = document.getElementById("icon-preview");
 const searchBox = document.getElementById("search");
 const userTable = document.getElementById("user-list");
-
 let editDocId = null;
 
 // === Tabs ===
@@ -36,6 +60,64 @@ const userTab = document.getElementById("tab-users");
 const ipaSection = document.getElementById("ipa-section");
 const userSection = document.getElementById("users-section");
 
+// ========== AUTHENTICATION LOGIC ==========
+
+function showLoginScreen() {
+  loginScreen.style.display = "flex";
+  adminWrapper.style.display = "none";
+  deniedScreen.style.display = "none";
+}
+
+function showAdminPanel() {
+  loginScreen.style.display = "none";
+  adminWrapper.style.display = "block";
+  deniedScreen.style.display = "none";
+  // Загружаем данные ТОЛЬКО после успешной проверки
+  loadData();
+}
+
+function showDeniedScreen() {
+  loginScreen.style.display = "none";
+  adminWrapper.style.display = "none";
+  deniedScreen.style.display = "flex";
+}
+
+// Проверяем состояние входа при загрузке
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // Пользователь вошел
+    if (ADMIN_EMAILS.includes(user.email)) {
+      // Это админ
+      console.log(`✅ Admin access granted for: ${user.email}`);
+      showAdminPanel();
+    } else {
+      // Это не админ
+      console.warn(`❌ Access denied for: ${user.email}`);
+      showDeniedScreen();
+    }
+  } else {
+    // Пользователь не вошел
+    console.log("🔒 No user logged in. Showing login screen.");
+    showLoginScreen();
+  }
+});
+
+// Кнопка "Войти"
+loginBtn.onclick = () => {
+  const provider = new GoogleAuthProvider();
+  signInWithPopup(auth, provider)
+    .catch((error) => {
+      console.error("Auth Error:", error);
+      alert("Ошибка входа: " + error.message);
+    });
+};
+
+// Кнопки "Выйти"
+logoutBtnAdmin.onclick = () => auth.signOut();
+logoutBtnDenied.onclick = () => auth.signOut();
+
+
+// ========== TABS ==========
 ipaTab.onclick = () => {
   ipaTab.classList.add("active");
   userTab.classList.remove("active");
@@ -51,7 +133,7 @@ userTab.onclick = () => {
   loadUsers();
 };
 
-// ========== IPA MANAGEMENT ==========
+// ========== IPA MANAGEMENT (Твой код без изменений) ==========
 function formatSize(bytes) {
   if (!bytes) return "-";
   return `${Math.round(bytes / 1000000)} MB`;
@@ -202,7 +284,7 @@ window.editItem = async id => {
 searchBox.addEventListener("input", () => loadData(searchBox.value));
 document.getElementById("add-btn").addEventListener("click", () => openModal("Добавить IPA"));
 
-// ========== USERS MANAGEMENT ==========
+// ========== USERS MANAGEMENT (Твой код без изменений) ==========
 async function loadUsers(query = "") {
   userTable.innerHTML = "<tr><td colspan='5' style='color:#888'>Загрузка...</td></tr>";
   const snap = await getDocs(collection(db, "ursa_users"));
@@ -255,7 +337,6 @@ window.editUser = (id, email, name, status) => {
   document.body.style.overflow = "hidden";
 };
 
-// ✅ FIXED: Correct collection name for VIP save
 document.getElementById("save-user-status").onclick = async () => {
   const m = document.getElementById("user-modal");
   const id = m.dataset.id;
@@ -284,4 +365,4 @@ document.getElementById("user-modal").addEventListener("click", e => {
 document.getElementById("user-search").addEventListener("input", e => loadUsers(e.target.value));
 
 // === Default load ===
-loadData();
+// ❗️❗️❗️ loadData() был здесь, но я его ПЕРЕНЕС в функцию showAdminPanel() ❗️❗️❗️
