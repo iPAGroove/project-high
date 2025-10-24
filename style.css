@@ -511,3 +511,47 @@ legend {
     text-align: left;
   }
 }
+/* =================================
+   СТИЛИ АВТОРИЗАЦИИ
+   ================================= */
+
+/* Добавляет flex-контейнер для "Brand" и "Выйти" */
+.header-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+/* На экранах входа и админки бренд будет слева */
+.brand {
+  text-align: left;
+}
+
+/* Стили для экранов входа и запрета доступа */
+.auth-screen {
+  display: flex; /* Управляется через JS, но по умолч. flex */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 90vh;
+  padding: 20px;
+}
+
+/* На экране входа бренд снова по центру */
+.auth-screen .brand {
+  text-align: center; 
+  margin-bottom: 16px;
+}
+
+.auth-screen h2 {
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.auth-screen p {
+  color: var(--muted);
+  margin: 0;
+  font-size: 16px;
+}
