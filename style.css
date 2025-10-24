@@ -1,6 +1,6 @@
 /* =================================
-   URSA IPA Admin CSS (Mobile-First)
-   ================================= */
+    URSA IPA Admin CSS (Mobile-First)
+    ================================= */
 
 :root {
   --bg: #0b0f14;
@@ -435,8 +435,8 @@ legend {
 }
 
 /* =================================
-   СТИЛИ ДЛЯ ПК (Desktop / Tablet)
-   ================================= */
+    СТИЛИ ДЛЯ ПК (Desktop / Tablet)
+    ================================= */
 @media (min-width: 600px) {
   .modal.open {
     align-items: center; /* На ПК - по центру */
@@ -507,6 +507,7 @@ legend {
     padding: 12px 14px;
     border-bottom: none;
     flex-wrap: nowrap;
+    vertical-align: middle; /* <-- ДОБАВЛЕНО для ПК */
   }
   .user-table td::before {
     display: none; /* Прячем CSS-метки */
@@ -526,8 +527,8 @@ legend {
   }
 }
 /* =================================
-   СТИЛИ АВТОРИЗАЦИИ
-   ================================= */
+    СТИЛИ АВТОРИЗАЦИИ
+    ================================= */
 
 /* Добавляет flex-контейнер для "Brand" и "Выйти" */
 .header-main {
@@ -568,4 +569,19 @@ legend {
   color: var(--muted);
   margin: 0;
   font-size: 16px;
+}
+
+/* === ⬇️ НОВЫЙ СТИЛЬ ДЛЯ ДАТЫ VIP ⬇️ === */
+.expiry-date {
+  display: block; /* С новой строки */
+  font-size: 11px;
+  color: var(--muted);
+}
+/* На ПК делаем в одну строку */
+@media (min-width: 768px) {
+  .expiry-date {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 12px;
+  }
 }
