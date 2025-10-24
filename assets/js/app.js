@@ -599,7 +599,7 @@ if (signerModal) {
 }
 
 
-// === Firestore LazyLoad (МОДИФИЦИРОВАНО v9.3) ===
+// === Firestore LazyLoad (МОДИФИЦИРОВАНО для поиска) ===
 document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("navAppsIcon").src = ICONS.apps;
   document.getElementById("navGamesIcon").src = ICONS.games;
@@ -625,7 +625,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   
   // === loadBatch (МОДИФИЦИРОВАНО для поддержки поиска) ===
   async function loadBatch() {
-    if (state.loading || state.end) return;
+    // === ИЗМЕНЕНИЕ: Добавлена проверка на state.end и state.loading
+    if (state.loading || state.end) return; 
     state.loading = true;
 
     const cRef = collection(db, "ursa_ipas");
@@ -665,15 +666,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (state.all.length === 0) { 
           catalogContainer.innerHTML = `<div style="opacity:.7;text-align:center;padding:40px;">${__t("empty")}</div>`;
         }
-        return; // === ИЗМЕНЕНО: Не вызываем apply, т.к. ничего не изменилось ===
+        return; 
       }
       
       const batch = snap.docs.map(normalize);
       state.all.push(...batch); // Добавляем в кэш
       state.last = snap.docs[snap.docs.length - 1]; // Сохраняем "курсор"
       
-      // === ИЗМЕНЕНО: apply() вызывается в Initial load, Scroll и Search. 
-      // === Удаляем apply() отсюда, чтобы не было лишних перерисовок.
     } catch (err) {
       console.error("Firestore error:", err);
       // Выводим ошибку индекса прямо на страницу
@@ -695,14 +694,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     catalogContainer.innerHTML = `<div style="opacity:.7;text-align:center;padding:40px;">Загрузка для поиска...</div>`;
     
     // Рекурсивно загружаем все батчи, пока state.end не станет true
-    // Ограничение: если коллекция ОЧЕНЬ большая (1000+), это может занять время и много запросов.
     while (!state.end) {
         // Ждем завершения предыдущей загрузки
         if (state.loading) {
             await new Promise(resolve => setTimeout(resolve, 50));
             continue;
         }
-        await loadBatch();
+        // Загружаем батч. Внутри loadBatch автоматически используется больший лимит, если q.length > 0
+        await loadBatch(); 
         apply(); // Перерисовываем коллекцию после каждого батча
     }
   }
@@ -739,7 +738,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     
     // Если список пуст, но идет загрузка (например, полная загрузка для поиска) - ждем.
     if (!list.length && state.loading) {
-         catalogContainer.innerHTML = `<div style="opacity:.7;text-align:center;padding:40px;">Загрузка...</div>`;
+         // === ИЗМЕНЕНИЕ: Показываем "Загрузка" только если нет уже загруженных данных
+         if (state.all.length === 0) {
+            catalogContainer.innerHTML = `<div style="opacity:.7;text-align:center;padding:40px;">Загрузка...</div>`;
+         }
          return;
     }
 
@@ -758,8 +760,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   search.addEventListener("input", async (e) => {
     state.q = e.target.value;
     
-    // Если начат поиск, и вся коллекция еще не загружена, загружаем ее полностью
+    // Если начат поиск, и вся коллекция текущего таба еще не загружена, загружаем ее полностью
     if (state.q.length > 0 && !state.end) {
+        // Логика LoadAllIfSearching гарантирует, что apply() будет вызван после каждого батча
         await loadAllIfSearching();
     }
     
@@ -767,7 +770,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     apply();
   });
 
-  // === Tab Bar (без изменений) ===
+  // === Tab Bar (ИЗМЕНЕНИЕ: Логика смены таба) ===
   // Теперь сбрасывает кэш при смене таба
   const bar = document.getElementById("tabbar");
   bar.addEventListener("click", (e) => {
@@ -791,7 +794,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       catalogContainer.innerHTML = `<div style="opacity:.7;text-align:center;padding:40px;">Загрузка ${state.tab}...</div>`; // Лоадер
 
       // Запускаем загрузку для НОВОГО таба
-      loadBatch().then(apply); // === ИЗМЕНЕНО: Вызываем apply после загрузки
+      loadBatch().then(apply); 
       
     } else if (btn.id === "lang-btn") {
       // Смена языка (просто перерисовываем то, что есть)
@@ -809,13 +812,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   // === Scroll (ИЗМЕНЕНИЕ: Блокируем скролл во время поиска) ===
   window.addEventListener("scroll", () => {
     // Не грузим при скролле, если идет поиск, или если уже загружаем, или если дошли до конца
-    if (state.q.length > 0 || state.loading || state.end) return; // <--- ДОБАВЛЕНО УСЛОВИЕ
+    if (state.q.length > 0 || state.loading || state.end) return; 
 
     const scrollY = window.scrollY;
     const scrollH = document.body.scrollHeight;
     const innerH = window.innerHeight;
     if (scrollY + innerH >= scrollH - 300) {
-      loadBatch().then(apply); // === ИЗМЕНЕНО: Вызываем apply после загрузки
+      loadBatch().then(apply); 
     }
   });
 
