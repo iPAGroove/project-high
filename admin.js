@@ -1,7 +1,8 @@
-// URSA IPA Admin — v7.8 (Minimal Cards)
+// URSA IPA Admin — v7.9 (VIP с истечением срока)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
-  getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc
+  getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc,
+  deleteField // === 1. ИЗМЕНЕНО: Добавлен deleteField ===
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 import {
   getAuth,
@@ -33,7 +34,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-console.log("⚙️ URSA Admin v7.8 started");
+console.log("⚙️ URSA Admin v7.9 started");
 
 // === Auth Elements ===
 const loginScreen = document.getElementById("login-screen");
@@ -319,6 +320,7 @@ async function loadUsers(query = "") {
   renderUsers(users);
 }
 
+// === 2. ИЗМЕНЕНО: renderUsers теперь показывает дату истечения ===
 function renderUsers(users) {
   userTable.innerHTML = "";
   if (!users.length) {
@@ -328,11 +330,29 @@ function renderUsers(users) {
 
   users.forEach(u => {
     const tr = document.createElement("tr");
+    
+    // Проверяем, есть ли дата и не истекла ли она (для отображения)
+    let expiryText = "";
+    if (u.status === "vip" && u.statusExpiry) {
+        const expiryDate = new Date(u.statusExpiry);
+        const isExpired = expiryDate < new Date();
+        const dateString = expiryDate.toLocaleDateString('ru-RU');
+        
+        if (isExpired) {
+            expiryText = `<span class="expiry-date" style="color:var(--red)">Истёк ${dateString}</span>`;
+        } else {
+            expiryText = `<span class="expiry-date">до ${dateString}</span>`;
+        }
+    }
+
     tr.innerHTML = `
       <td>${u.email || "—"}</td>
       <td>${u.name || "—"}</td>
       <td class="muted">${u.uid || u.id}</td>
-      <td><span class="badge ${u.status === "vip" ? "vip" : "free"}">${u.status || "free"}</span></td>
+      <td>
+        <span class="badge ${u.status === "vip" ? "vip" : "free"}">${u.status || "free"}</span>
+        ${expiryText}
+      </td>
       <td><button class="btn small" onclick="editUser('${u.id}', '${u.email}', '${u.name}', '${u.status || "free"}')">✏️</button></td>
     `;
     userTable.appendChild(tr);
@@ -349,23 +369,54 @@ window.editUser = (id, email, name, status) => {
   document.body.style.overflow = "hidden";
 };
 
+// === 3. ИЗМЕНЕНО: 'Сохранить' теперь удаляет дату истечения ===
 document.getElementById("save-user-status").onclick = async () => {
   const m = document.getElementById("user-modal");
   const id = m.dataset.id;
   const newStatus = document.getElementById("edit-user-status").value;
 
   try {
-    await updateDoc(doc(db, "ursa_users", id), { status: newStatus });
-    console.log(`✅ User ${id} status changed to ${newStatus}`);
+    // Эта кнопка ставит "вечный" статус (VIP или Free)
+    // и удаляет поле statusExpiry
+    await updateDoc(doc(db, "ursa_users", id), {
+      status: newStatus,
+      statusExpiry: deleteField() // Удаляем поле
+    });
+    console.log(`✅ User ${id} status changed to ${newStatus} (Permanent)`);
   } catch (err) {
     console.error("❌ Ошибка при обновлении статуса:", err);
-    // alert("Не удалось сохранить статус: " + err.message); // Не используем alert
   }
 
   m.classList.remove("open");
   document.body.style.overflow = "";
   loadUsers();
 };
+
+// === 4. ИЗМЕНЕНО: НОВЫЙ обработчик для кнопки "VIP на 31 день" ===
+document.getElementById("save-user-vip-31").onclick = async () => {
+  const m = document.getElementById("user-modal");
+  const id = m.dataset.id;
+  
+  // Рассчитываем дату истечения: сейчас + 31 день
+  const expiryDate = new Date();
+  expiryDate.setDate(expiryDate.getDate() + 31);
+  const expiryISO = expiryDate.toISOString();
+
+  try {
+    await updateDoc(doc(db, "ursa_users", id), {
+      status: "vip",
+      statusExpiry: expiryISO // Сохраняем дату в формате ISO
+    });
+    console.log(`✅ User ${id} status changed to VIP until ${expiryISO}`);
+  } catch (err) {
+    console.error("❌ Ошибка при обновлении статуса:", err);
+  }
+
+  m.classList.remove("open");
+  document.body.style.overflow = "";
+  loadUsers();
+};
+
 
 document.getElementById("user-modal").addEventListener("click", e => {
   if (e.target.hasAttribute("data-close") || e.target === e.currentTarget) {
