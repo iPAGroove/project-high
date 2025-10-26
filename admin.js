@@ -27,6 +27,7 @@ const ADMIN_EMAILS = [
   "vibemusic1712@gmail.com",
   "kotvlad400@gmail.com",
   "olesyazardina@gmail.com"
+  "damianberg479@gmail.com"
 ];
 
 // === Init Firebase ===
