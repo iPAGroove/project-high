@@ -23,7 +23,7 @@
 
 html {
   scroll-behavior: smooth;
-  overflow-x: hidden; /* <-- ИСПРАВЛЕНИЕ 1: Гарантирует отсутствие гориз. прокрутки */
+  overflow-x: hidden; /* <-- Гарантирует отсутствие гориз. прокрутки */
 }
 
 body {
@@ -33,7 +33,7 @@ body {
   color: var(--text);
   font: 15px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden; /* <-- ИСПРАВЛЕНИЕ 1 (дубль): Двойная гарантия */
+  overflow-x: hidden; 
 }
 
 /* === КОНТЕЙНЕР (.wrap) === */
@@ -148,14 +148,14 @@ main.wrap {
 /* === КАРТОЧКИ (IPA) === */
 .cards {
   display: grid;
-  gap: 12px; /* Было 14px */
+  gap: 12px; 
 }
 .app-card {
   background: var(--card);
   border-radius: var(--radius);
   border: 1px solid var(--border);
-  padding: 12px; /* Было 16px */
-  box-shadow: 0 4px 10px rgba(0,0,0,.3); /* Тень легче */
+  padding: 12px; 
+  box-shadow: 0 4px 10px rgba(0,0,0,.3); 
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -163,31 +163,31 @@ main.wrap {
 }
 .app-info {
   display: flex;
-  gap: 10px; /* Было 12px */
+  gap: 10px; 
   align-items: flex-start;
   min-width: 0; /* ВАЖНО: Позволяет тексту сжиматься */
 }
 .app-icon {
-  width: 44px; /* Было 50px */
-  height: 44px; /* Было 50px */
-  border-radius: 10px; /* Было 12px */
+  width: 44px; 
+  height: 44px; 
+  border-radius: 10px; 
   object-fit: cover;
   flex-shrink: 0; /* Иконка не сжимается */
 }
 .app-info > div { /* Контейнер с текстом */
   min-width: 0; /* Текст может сжиматься */
-  overflow: hidden; /* <-- ИСПРАВЛЕНИЕ 2: Заставляет "..." (ellipsis) работать */
+  overflow: hidden; 
 }
 .app-title {
-  font-weight: 600; /* Было 700 */
-  font-size: 15px; /* Было 16px */
+  font-weight: 600; 
+  font-size: 15px; 
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis; /* ... если не влезает */
   margin-bottom: 2px; /* Сближаем */
 }
 .app-meta {
-  font-size: 12px; /* Было 13px */
+  font-size: 12px; 
   color: var(--muted);
   white-space: nowrap;
   overflow: hidden;
@@ -204,7 +204,7 @@ main.wrap {
 }
 .app-actions {
   display: flex;
-  gap: 8px; /* Было 10px */
+  gap: 8px; 
   flex-shrink: 0;
 }
 
@@ -592,7 +592,7 @@ legend {
   font-size: 16px;
 }
 
-/* === ⬇️ НОВЫЙ СТИЛЬ ДЛЯ ДАТЫ VIP ⬇️ === */
+/* === СТИЛЬ ДЛЯ ДАТЫ VIP === */
 .expiry-date {
   display: block; /* С новой строки */
   font-size: 11px;
