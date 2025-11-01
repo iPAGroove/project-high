@@ -1,8 +1,8 @@
-// URSA IPA Admin — v7.9 (VIP с истечением срока)
+// URSA IPA Admin — v7.9 (VIP с истечением срока и VIP-IPA)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
   getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc,
-  deleteField // === 1. ИЗМЕНЕНО: Добавлен deleteField ===
+  deleteField 
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 import {
   getAuth,
@@ -159,7 +159,7 @@ async function loadData(query = "") {
   render(apps);
 }
 
-// === ИЗМЕНЕНО: render(apps) теперь отображает VIP-статус ===
+// === ОБНОВЛЕНО: render(apps) теперь отображает VIP-статус ===
 function render(apps) {
   cards.innerHTML = "";
   if (!apps.length) {
@@ -180,7 +180,8 @@ function render(apps) {
         <div>
           <div class="app-title">${app["NAME"] || "Без названия"}</div>
           <div class="app-meta">
-            ${vipTag}           </div>
+            ${vipTag} <!-- Отображаем VIP значок -->
+          </div>
         </div>
       </div>
       <div class="app-actions">
@@ -192,7 +193,7 @@ function render(apps) {
   });
 }
 
-// === ИЗМЕНЕНО: openModal теперь обрабатывает vipOnly ===
+// === ОБНОВЛЕНО: openModal теперь обрабатывает vipOnly ===
 function openModal(title, values = {}) {
   modalTitle.textContent = title;
   form.reset();
@@ -251,7 +252,7 @@ document.querySelectorAll(".tag-btn").forEach(btn => {
   });
 });
 
-// === ИЗМЕНЕНО: Обработчик формы теперь включает vipOnly ===
+// === ОБНОВЛЕНО: Обработчик формы теперь включает vipOnly ===
 form.addEventListener("submit", async e => {
   e.preventDefault();
   const values = Object.fromEntries(new FormData(form));
@@ -310,7 +311,7 @@ window.editItem = async (id) => {
 searchBox.addEventListener("input", () => loadData(searchBox.value));
 document.getElementById("add-btn").addEventListener("click", () => openModal("Добавить IPA"));
 
-// ========== USERS MANAGEMENT (Код для пользователей не менялся) ==========
+// ========== USERS MANAGEMENT (Код для пользователей) ==========
 async function loadUsers(query = "") {
   userTable.innerHTML = "<tr><td colspan='5' style='color:#888'>Загрузка...</td></tr>";
   const snap = await getDocs(collection(db, "ursa_users"));
@@ -439,6 +440,3 @@ document.getElementById("user-modal").addEventListener("click", e => {
 });
 
 document.getElementById("user-search").addEventListener("input", e => loadUsers(e.target.value));
-
-// === Default load ===
-// ❗️❗️❗️ loadData() был здесь, но я его ПЕРЕНЕС в функцию showAdminPanel() ❗️❗️❗️
