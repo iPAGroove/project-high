@@ -1,120 +1,120 @@
 /* =================================
-    URSA IPA Admin CSS (Mobile-First)
-    ================================= */
+    URSA IPA Admin CSS (Mobile-First)
+    ================================= */
 
 :root {
-  --bg: #0b0f14;
-  --bg-elev: #121722;
-  --card: #141a24;
-  --border: #1e2633;
-  --text: #fff;
-  --muted: #9aa7bd;
-  --accent: #00b3ff;
-  --red: #e53935;
-  --vip: #ffab00;
-  --radius: 14px;
-  --radius-small: 10px;
+  --bg: #0b0f14;
+  --bg-elev: #121722;
+  --card: #141a24;
+  --border: #1e2633;
+  --text: #fff;
+  --muted: #9aa7bd;
+  --accent: #00b3ff;
+  --red: #e53935;
+  --vip: #ffab00;
+  --radius: 14px;
+  --radius-small: 10px;
 }
 
 /* === ОБЩИЕ СТИЛИ === */
 *, *::before, *::after {
-  box-sizing: border-box; /* Важно для удобной верстки */
+  box-sizing: border-box; /* Важно для удобной верстки */
 }
 
 html {
-  scroll-behavior: smooth;
-  overflow-x: hidden; /* <-- ИСПРАВЛЕНИЕ 1: Гарантирует отсутствие гориз. прокрутки */
+  scroll-behavior: smooth;
+  overflow-x: hidden; /* <-- ИСПРАВЛЕНИЕ 1: Гарантирует отсутствие гориз. прокрутки */
 }
 
 body {
-  margin: 0;
-  padding: 0;
-  background: var(--bg);
-  color: var(--text);
-  font: 15px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden; /* <-- ИСПРАВЛЕНИЕ 1 (дубль): Двойная гарантия */
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden; /* <-- ИСПРАВЛЕНИЕ 1 (дубль): Двойная гарантия */
 }
 
 /* === КОНТЕЙНЕР (.wrap) === */
 .wrap {
-  width: 100%;
-  max-width: 960px; /* Ограничиваем ширину на ПК */
-  margin: 0 auto;
-  padding: 0 16px; /* Отступы по бокам на телефоне */
+  width: 100%;
+  max-width: 960px; /* Ограничиваем ширину на ПК */
+  margin: 0 auto;
+  padding: 0 16px; /* Отступы по бокам на телефоне */
 }
 
 main.wrap {
-  padding-top: 16px;
-  padding-bottom: 32px;
+  padding-top: 16px;
+  padding-bottom: 32px;
 }
 
 /* === HEADER (Шапка) === */
 .topbar {
-  padding: 16px 0;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg);
-  position: sticky; /* Прилипает при скролле */
-  top: 0;
-  z-index: 10;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  background: rgba(11, 15, 20, 0.8); /* Полупрозрачный фон для blur */
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  position: sticky; /* Прилипает при скролле */
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(11, 15, 20, 0.8); /* Полупрозрачный фон для blur */
 }
 
 .brand {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--accent);
-  text-align: center;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+  text-align: center;
 }
 
 /* === ТАБЫ (Переключатели) === */
 .admin-nav {
-  margin-top: 16px;
-  display: flex;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  background: var(--bg-elev);
+  margin-top: 16px;
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg-elev);
 }
 .admin-nav .tab {
-  flex: 1; /* Равной ширины */
-  padding: 8px 12px; /* Стало компактнее */
-  background: transparent;
-  border: none;
-  color: var(--muted);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  text-align: center;
+  flex: 1; /* Равной ширины */
+  padding: 8px 12px; /* Стало компактнее */
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  text-align: center;
 }
 .admin-nav .tab:first-child {
-  border-right: 1px solid var(--border);
+  border-right: 1px solid var(--border);
 }
 .admin-nav .tab.active {
-  background: var(--accent);
-  color: #001018;
-  box-shadow: 0 0 10px rgba(0, 179, 255, 0.4);
+  background: var(--accent);
+  color: #001018;
+  box-shadow: 0 0 10px rgba(0, 179, 255, 0.4);
 }
 
 /* === КНОПКИ === */
 .btn {
-  border: none;
-  border-radius: var(--radius);
-  padding: 10px 16px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
-  box-shadow: 0 4px 10px rgba(0,0,0,.3);
-  display: inline-flex; /* Для иконок */
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  text-decoration: none;
+  border: none;
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: 0 4px 10px rgba(0,0,0,.3);
+  display: inline-flex; /* Для иконок */
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-decoration: none;
 }
 .btn.blue { background: var(--accent); color: #001018; }
 .btn.red { background: var(--red); color: #fff; }
@@ -124,116 +124,121 @@ main.wrap {
 
 /* === ПАНЕЛЬ ДЕЙСТВИЙ (Поиск, Кнопка +) === */
 .admin-actions {
-  margin: 20px 0;
-  display: flex;
-  flex-direction: column; /* На телефоне - друг под другом */
-  gap: 12px;
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column; /* На телефоне - друг под другом */
+  gap: 12px;
 }
 /* Кнопка "Добавить" растягивается */
 .admin-actions .btn {
-  width: 100%;
-  padding-top: 12px;
-  padding-bottom: 12px;
+  width: 100%;
+  padding-top: 12px;
+  padding-bottom: 12px;
 }
 .admin-actions input[type="search"] {
-  width: 100%;
-  padding: 12px 14px; /* Стало удобнее */
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: var(--bg-elev);
-  color: var(--text);
-  font-size: 15px;
+  width: 100%;
+  padding: 12px 14px; /* Стало удобнее */
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  color: var(--text);
+  font-size: 15px;
 }
 
 /* === КАРТОЧКИ (IPA) === */
 .cards {
-  display: grid;
-  gap: 12px; /* Было 14px */
+  display: grid;
+  gap: 12px; /* Было 14px */
 }
 .app-card {
-  background: var(--card);
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  padding: 12px; /* Было 16px */
-  box-shadow: 0 4px 10px rgba(0,0,0,.3); /* Тень легче */
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 10px;
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 12px; /* Было 16px */
+  box-shadow: 0 4px 10px rgba(0,0,0,.3); /* Тень легче */
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
 }
 .app-info {
-  display: flex;
-  gap: 10px; /* Было 12px */
-  align-items: flex-start;
-  min-width: 0; /* ВАЖНО: Позволяет тексту сжиматься */
+  display: flex;
+  gap: 10px; /* Было 12px */
+  align-items: flex-start;
+  min-width: 0; /* ВАЖНО: Позволяет тексту сжиматься */
 }
 .app-icon {
-  width: 44px; /* Было 50px */
-  height: 44px; /* Было 50px */
-  border-radius: 10px; /* Было 12px */
-  object-fit: cover;
-  flex-shrink: 0; /* Иконка не сжимается */
+  width: 44px; /* Было 50px */
+  height: 44px; /* Было 50px */
+  border-radius: 10px; /* Было 12px */
+  object-fit: cover;
+  flex-shrink: 0; /* Иконка не сжимается */
 }
 .app-info > div { /* Контейнер с текстом */
-  min-width: 0; /* Текст может сжиматься */
-  overflow: hidden; /* <-- ИСПРАВЛЕНИЕ 2: Заставляет "..." (ellipsis) работать */
+  min-width: 0; /* Текст может сжиматься */
+  overflow: hidden; /* <-- ИСПРАВЛЕНИЕ 2: Заставляет "..." (ellipsis) работать */
 }
 .app-title {
-  font-weight: 600; /* Было 700 */
-  font-size: 15px; /* Было 16px */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis; /* ... если не влезает */
-  margin-bottom: 2px; /* Сближаем */
+  font-weight: 600; /* Было 700 */
+  font-size: 15px; /* Было 16px */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* ... если не влезает */
+  margin-bottom: 2px; /* Сближаем */
 }
 .app-meta {
-  font-size: 12px; /* Было 13px */
-  color: var(--muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.35; /* Сближаем строки */
+  font-size: 12px; /* Было 13px */
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.35; /* Сближаем строки */
+}
+/* === НОВОЕ: Улучшаем отображение значка VIP в карточке === */
+.app-meta .badge.vip {
+  margin-top: 4px; /* Отступ от названия */
+  display: inline-block;
 }
 .app-meta:last-child {
-  white-space: normal; /* Теги могут переноситься */
+  white-space: normal; /* Теги могут переноситься */
 }
 .app-actions {
-  display: flex;
-  gap: 8px; /* Было 10px */
-  flex-shrink: 0;
+  display: flex;
+  gap: 8px; /* Было 10px */
+  flex-shrink: 0;
 }
 
 /* === ТАБЛИЦА ПОЛЬЗОВАТЕЛЕЙ (Адаптивная) === */
 .user-table {
-  width: 100%;
-  border-collapse: collapse;
+  width: 100%;
+  border-collapse: collapse;
 }
 
 .user-table thead {
-  display: none; /* Скрываем заголовки на телефоне */
+  display: none; /* Скрываем заголовки на телефоне */
 }
 
 .user-table tbody {
-  display: grid; /* Делаем из tbody сетку карточек */
-  gap: 12px;
+  display: grid; /* Делаем из tbody сетку карточек */
+  gap: 12px;
 }
 
 .user-table tr {
-  display: block; /* Каждая <tr> - это карточка */
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px;
-  box-shadow: 0 4px 10px rgba(0,0,0,.3);
+  display: block; /* Каждая <tr> - это карточка */
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: 0 4px 10px rgba(0,0,0,.3);
 }
 
 .user-table td {
-  display: flex; /* Метка и значение в ряд */
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  font-size: 14px;
-  border-bottom: 1px solid var(--border);
+  display: flex; /* Метка и значение в ряд */
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 14px;
+  border-bottom: 1px solid var(--border);
 }
 .user-table tr:last-child { margin-bottom: 0; }
 .user-table td:last-child { border-bottom: none; padding-bottom: 0; }
@@ -241,9 +246,9 @@ main.wrap {
 
 /* Добавляем метки (Email:, Имя: ...) через CSS */
 .user-table td::before {
-  font-weight: 600;
-  color: var(--muted);
-  padding-right: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  padding-right: 10px;
 }
 .user-table td:nth-of-type(1)::before { content: 'Email:'; }
 .user-table td:nth-of-type(2)::before { content: 'Имя:'; }
@@ -252,336 +257,352 @@ main.wrap {
 .user-table td:nth-of-type(5)::before { content: 'Действие:'; }
 
 .user-table td .muted {
-  color: var(--muted);
-  font-size: 13px;
-  word-break: break-all; /* Переносим длинные UID */
-  text-align: right;
+  color: var(--muted);
+  font-size: 13px;
+  word-break: break-all; /* Переносим длинные UID */
+  text-align: right;
 }
 
 /* СТАТУС (VIP / Free) */
 .badge {
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 .badge.vip { background: var(--vip); color: #000; }
 .badge.free { background: var(--bg-elev); color: var(--muted); border: 1px solid var(--border); }
 
 
 /* === МОДАЛЬНОЕ ОКНО (Общее) === */
-.modal { 
-  position: fixed; 
-  inset: 0; 
-  z-index: 100; 
-  display: none;
-  padding: 16px;
+.modal { 
+  position: fixed; 
+  inset: 0; 
+  z-index: 100; 
+  display: none;
+  padding: 16px;
 }
-.modal.open { 
-  display: flex; 
-  align-items: flex-end; /* На телефоне - снизу */
-  justify-content: center; 
+.modal.open { 
+  display: flex; 
+  align-items: flex-end; /* На телефоне - снизу */
+  justify-content: center; 
 }
-.backdrop { 
-  position: absolute; 
-  inset: 0; 
-  background: rgba(0,0,0,.55); 
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+.backdrop { 
+  position: absolute; 
+  inset: 0; 
+  background: rgba(0,0,0,.55); 
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 .modal-card {
-  position: relative;
-  width: 100%;
-  max-width: 480px;
-  max-height: 90vh; /* Ограничиваем высоту */
-  overflow-y: auto; /* Позволяем форме скроллиться */
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  box-shadow: 0 12px 36px rgba(0,0,0,.65);
-  /* Анимация появления */
-  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh; /* Ограничиваем высоту */
+  overflow-y: auto; /* Позволяем форме скроллиться */
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: 0 12px 36px rgba(0,0,0,.65);
+  /* Анимация появления */
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .modal-card.small {
-  max-width: 380px;
-  max-height: 80vh;
+  max-width: 380px;
+  max-height: 80vh;
 }
 .modal-head {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--border);
-  font-weight: 700;
-  color: var(--accent);
-  font-size: 16px;
-  position: sticky; top: 0; background: var(--card); /* Липкая шапка */
-  border-radius: 18px 18px 0 0;
-  z-index: 2;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 16px;
+  position: sticky; top: 0; background: var(--card); /* Липкая шапка */
+  border-radius: 18px 18px 0 0;
+  z-index: 2;
 }
-.modal-body { 
-  display: grid; 
-  gap: 16px; 
-  padding: 16px; 
+.modal-body { 
+  display: grid; 
+  gap: 16px; 
+  padding: 16px; 
 }
 .modal-actions {
-  position: sticky;
-  bottom: 0;
-  background: var(--card);
-  padding: 12px 16px;
-  border-top: 1px solid var(--border);
-  display: flex; justify-content: flex-end;
-  border-radius: 0 0 18px 18px;
-  z-index: 2;
+  position: sticky;
+  bottom: 0;
+  background: var(--card);
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: flex-end;
+  border-radius: 0 0 18px 18px;
+  z-index: 2;
 }
-.close { 
-  border: none; 
-  background: transparent; 
-  color: var(--muted); 
-  font-size: 20px; 
-  cursor: pointer;
-  line-height: 1;
-  padding: 0;
+.close { 
+  border: none; 
+  background: transparent; 
+  color: var(--muted); 
+  font-size: 20px; 
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
 }
 .close:hover { color: var(--text); }
 
 @keyframes slideUp {
-  from { transform: translateY(50px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from { transform: translateY(50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 /* === ФОРМЫ В МОДАЛКЕ === */
 .modal-body p { margin: 0; }
 .modal-body p b { color: var(--muted); font-weight: 500; }
 
-.modal-body label { 
-  display: grid; 
-  gap: 6px; 
-  font-size: 13px; 
-  color: var(--muted); 
-  font-weight: 500;
+.modal-body label { 
+  display: grid; 
+  gap: 6px; 
+  font-size: 13px; 
+  color: var(--muted); 
+  font-weight: 500;
 }
 .modal-body input[type="text"],
 .modal-body input[type="url"],
 .modal-body input[type="number"],
 .modal-body textarea,
 .modal-body select {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: var(--radius-small);
-  border: 1px solid var(--border);
-  background: var(--bg-elev);
-  color: var(--text);
-  font-size: 14px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius-small);
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  color: var(--text);
+  font-size: 14px;
 }
 .modal-body select {
-  -webkit-appearance: none;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%239aa7bd' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708 .708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%239aa7bd' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708 .708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
 }
 textarea { resize: vertical; min-height: 70px; }
 
+/* === НОВОЕ: Стили для VIP чекбокса в модалке === */
+#vipOnly {
+  /* Убираем дефолтные стили, чтобы не выглядело как текстовое поле */
+  width: 20px !important;
+  height: 20px !important;
+  padding: 0 !important;
+  border-radius: 4px !important;
+  border: 1px solid var(--border) !important;
+  background: var(--bg-elev) !important;
+  cursor: pointer;
+  margin: 0;
+  -webkit-appearance: checkbox; /* Возвращаем стандартный вид чекбокса */
+  appearance: checkbox;
+}
+
+
 fieldset {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-small);
-  padding: 12px;
-  display: grid;
-  gap: 12px;
-  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  padding: 12px;
+  display: grid;
+  gap: 12px;
+  margin: 0;
 }
 legend {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--accent);
-  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  padding: 0 6px;
 }
 .field-grid {
-  display: grid;
-  gap: 12px;
+  display: grid;
+  gap: 12px;
 }
 .icon-preview {
-  margin-top: 6px;
-  width: 64px;
-  height: 64px;
-  border-radius: 12px;
-  object-fit: cover;
-  display: block;
-  box-shadow: 0 2px 8px rgba(0,0,0,.4);
-  border: 1px solid var(--border);
+  margin-top: 6px;
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  object-fit: cover;
+  display: block;
+  box-shadow: 0 2px 8px rgba(0,0,0,.4);
+  border: 1px solid var(--border);
 }
 .tag-buttons {
-  display: flex;
-  flex-wrap: wrap; /* Кнопки могут переноситься */
-  gap: 10px;
-  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap; /* Кнопки могут переноситься */
+  gap: 10px;
+  margin-top: 6px;
 }
 .tag-btn {
-  padding: 6px 12px;
-  border-radius: var(--radius-small);
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-  color: var(--muted);
-  font-size: 13px;
-  cursor: pointer;
-  transition: 0.2s;
-  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: var(--radius-small);
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.2s;
+  font-weight: 500;
 }
 .tag-btn.active {
-  background: var(--accent);
-  color: #001018;
-  border-color: var(--accent);
-  font-weight: 600;
+  background: var(--accent);
+  color: #001018;
+  border-color: var(--accent);
+  font-weight: 600;
 }
 
 /* =================================
-    СТИЛИ ДЛЯ ПК (Desktop / Tablet)
-    ================================= */
+    СТИЛИ ДЛЯ ПК (Desktop / Tablet)
+    ================================= */
 @media (min-width: 600px) {
-  .modal.open {
-    align-items: center; /* На ПК - по центру */
-  }
-  .modal-card {
-    animation: none; /* Убираем анимацию "всплытия" */
-  }
-  .field-grid {
-    grid-template-columns: 1fr 1fr; /* Сетка 2 колонки в форме */
-  }
-  .admin-actions {
-    flex-direction: row; /* На ПК - в одну строку */
-    justify-content: space-between;
-    align-items: center;
-  }
-  .admin-actions input[type="search"] {
-    width: auto;
-    flex-grow: 1; /* Поиск растягивается */
-    max-width: 400px;
-  }
-  .admin-actions .btn {
-    flex-shrink: 0; /* Кнопка не сжимается */
-    width: auto; /* Возвращаем авто-ширину */
-    padding-top: 10px; /* Возвращаем паддинг */
-    padding-bottom: 10px; /* Возвращаем паддинг */
-  }
+  .modal.open {
+    align-items: center; /* На ПК - по центру */
+  }
+  .modal-card {
+    animation: none; /* Убираем анимацию "всплытия" */
+  }
+  .field-grid {
+    grid-template-columns: 1fr 1fr; /* Сетка 2 колонки в форме */
+  }
+  .admin-actions {
+    flex-direction: row; /* На ПК - в одну строку */
+    justify-content: space-between;
+    align-items: center;
+  }
+  .admin-actions input[type="search"] {
+    width: auto;
+    flex-grow: 1; /* Поиск растягивается */
+    max-width: 400px;
+  }
+  .admin-actions .btn {
+    flex-shrink: 0; /* Кнопка не сжимается */
+    width: auto; /* Возвращаем авто-ширину */
+    padding-top: 10px; /* Возвращаем паддинг */
+    padding-bottom: 10px; /* Возвращаем паддинг */
+  }
 }
 
 /* Стили для таблицы на ПК */
 @media (min-width: 768px) {
-  .user-table {
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden; /* Для скругления углов */
-  }
-  .user-table thead {
-    display: table-header-group; /* Возвращаем заголовки */
-  }
-  .user-table th {
-    text-align: left;
-    padding: 12px 14px;
-    background: var(--bg-elev);
-    color: var(--muted);
-    font-size: 12px;
-    text-transform: uppercase;
-    font-weight: 600;
-  }
-  .user-table tbody {
-    display: table-row-group; /* Возвращаем обычный tbody */
-    gap: 0;
-  }
-  .user-table tr {
-    display: table-row; /* Возвращаем <tr> */
-    background: var(--card);
-    border: none;
-    border-bottom: 1px solid var(--border);
-    padding: 0;
-    margin-bottom: 0;
-    box-shadow: none;
-  }
-  .user-table tr:last-child {
-    border-bottom: none;
-  }
-  .user-table td {
-    display: table-cell; /* Возвращаем <td> */
-    justify-content: normal;
-    align-items: center;
-    padding: 12px 14px;
-    border-bottom: none;
-    flex-wrap: nowrap;
-    vertical-align: middle; /* <-- ДОБАВЛЕНО для ПК */
-  }
-  .user-table td::before {
-    display: none; /* Прячем CSS-метки */
-  }
-  .user-table td:first-child,
-  .user-table td:last-child {
-    padding-top: 12px; 
-    padding-bottom: 12px;
-  }
-  .user-table td .muted {
-    word-break: normal;
-    max-width: 150px; /* Ограничиваем UID на ПК */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    text-align: left;
-  }
+  .user-table {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden; /* Для скругления углов */
+  }
+  .user-table thead {
+    display: table-header-group; /* Возвращаем заголовки */
+  }
+  .user-table th {
+    text-align: left;
+    padding: 12px 14px;
+    background: var(--bg-elev);
+    color: var(--muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .user-table tbody {
+    display: table-row-group; /* Возвращаем обычный tbody */
+    gap: 0;
+  }
+  .user-table tr {
+    display: table-row; /* Возвращаем <tr> */
+    background: var(--card);
+    border: none;
+    border-bottom: 1px solid var(--border);
+    padding: 0;
+    margin-bottom: 0;
+    box-shadow: none;
+  }
+  .user-table tr:last-child {
+    border-bottom: none;
+  }
+  .user-table td {
+    display: table-cell; /* Возвращаем <td> */
+    justify-content: normal;
+    align-items: center;
+    padding: 12px 14px;
+    border-bottom: none;
+    flex-wrap: nowrap;
+    vertical-align: middle; /* <-- ДОБАВЛЕНО для ПК */
+  }
+  .user-table td::before {
+    display: none; /* Прячем CSS-метки */
+  }
+  .user-table td:first-child,
+  .user-table td:last-child {
+    padding-top: 12px; 
+    padding-bottom: 12px;
+  }
+  .user-table td .muted {
+    word-break: normal;
+    max-width: 150px; /* Ограничиваем UID на ПК */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: left;
+  }
 }
 /* =================================
-    СТИЛИ АВТОРИЗАЦИИ
-    ================================= */
+    СТИЛИ АВТОРИЗАЦИИ
+    ================================= */
 
 /* Добавляет flex-контейнер для "Brand" и "Выйти" */
 .header-main {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
 /* На экранах входа и админки бренд будет слева */
 .brand {
-  text-align: left;
+  text-align: left;
 }
 
 /* Стили для экранов входа и запрета доступа */
 .auth-screen {
-  display: flex; /* Управляется через JS, но по умолч. flex */
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  min-height: 90vh;
-  padding: 20px;
+  display: flex; /* Управляется через JS, но по умолч. flex */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 90vh;
+  padding: 20px;
 }
 
 /* На экране входа бренд снова по центру */
 .auth-screen .brand {
-  text-align: center; 
-  margin-bottom: 16px;
+  text-align: center; 
+  margin-bottom: 16px;
 }
 
 .auth-screen h2 {
-  color: var(--accent);
-  margin-bottom: 8px;
+  color: var(--accent);
+  margin-bottom: 8px;
 }
 
 .auth-screen p {
-  color: var(--muted);
-  margin: 0;
-  font-size: 16px;
+  color: var(--muted);
+  margin: 0;
+  font-size: 16px;
 }
 
 /* === ⬇️ НОВЫЙ СТИЛЬ ДЛЯ ДАТЫ VIP ⬇️ === */
 .expiry-date {
-  display: block; /* С новой строки */
-  font-size: 11px;
-  color: var(--muted);
+  display: block; /* С новой строки */
+  font-size: 11px;
+  color: var(--muted);
 }
 /* На ПК делаем в одну строку */
 @media (min-width: 768px) {
-  .expiry-date {
-    display: inline-block;
-    margin-left: 8px;
-    font-size: 12px;
-  }
+  .expiry-date {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 12px;
+  }
 }
