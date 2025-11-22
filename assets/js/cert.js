@@ -79,7 +79,7 @@ function initCertFlow() {
     gift_card: { name: "Binance Gift Card", show: "Отправьте код подарочной карты в чат.", noCopy: true },
     paypal: { name: "PayPal", show: "Email: swvts6@gmail.com", copy: "swvts6@gmail.com" },
     ua_card: { name: "UA Card (Privat / Monobank)", show: "Ссылка: https://www.privat24.ua/send/373a0", copy: "https://www.privat24.ua/send/373a0" },
-    ru_card: { name: "RU Card (Т-Банк / СПБ)", show: "Т-Банк: 2200702048905611\nСПБ: 89933303390\nКомментарий: @viibbee_17", copy: "2200702048905611" }
+    ru_card: { name: "RU Card (Т-Банк / СПБ)", show: "Т-Банк: Временно отсутсвует \nСПБ: Временно отсутсвует\nКомментарий: @viibbee_17", copy: "Временно отсутсвует" }
   };
 
   methods.forEach(btn => {
